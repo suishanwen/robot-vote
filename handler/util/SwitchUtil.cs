@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using controller.util;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
-namespace controller.util
+namespace handler.util
 {
     class SwitchUtil
     {
