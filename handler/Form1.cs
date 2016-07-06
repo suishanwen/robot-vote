@@ -55,8 +55,18 @@ namespace handler
         {
             while (true)
             {
-                IntPtr hwnd = HwndUtil.FindWindow(null, "PuTTY Configuration");
+                IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
                 Console.WriteLine(hwnd);
+                if (hwnd != IntPtr.Zero)
+                {
+                    IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd,IntPtr.Zero, "SysTabControl32", "");
+                    Console.WriteLine(hwndEx);
+                    hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "");
+                    Console.WriteLine(hwndEx);
+                    hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "开始投票");
+                    Console.WriteLine(hwndEx);
+                    HwndUtil.clickHwnd(hwndEx);
+                }
                 Thread.Sleep(2000);
             }
         }
