@@ -1,5 +1,6 @@
 ﻿using handler.util;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
@@ -8,30 +9,37 @@ namespace handler
 {
     public partial class form1 : Form
     {
-        private string pathShare;
-        private int no;
-        private int delay;
-        private int overTime;
-        private Thread main;
-        private string taskName;
-        private string taskPath;
-        private string taskChange;
-        private string cacheMemory;
-        private string workerId;
-        private string inputId;
-        private string tail;
+        private string pathShare;   //共享路径
+        private int no;     //编号
+        private int delay;  //拨号延时
+        private int overTime;   //超时
+        private Thread main;    //主线程
+        private string taskName;    //任务名
+        private string taskPath;    //任务路径
+        private string customPath;  //本地任务路径
+        private string taskChange;  //任务切换标识
+        private string cacheMemory; //项目缓存
+        private string workerId;    //工号
+        private string inputId;     //输入工号标识
+        private string tail;    //分号标识
 
+        private const string TASK_UPDATE = "Update";
+        private const string TASK_WAIT_ORDER = "待命";
+        private const string TASK_SHUTDOWN = "关机";
+        private const string TASK_RESTART = "重启";
+        private const string TASK_NET_TEST= "网络测试";
+        private const string TASK_MM2 = "mm2";
+        private const string TASK_YUKUAI = "yukuai";
 
-        
 
         public form1()
         {
             InitializeComponent(); 
         }
 
+        //启动程序，检查配置文件，启动主线程
         private void Form1_Load(object sender, EventArgs e)
         {
-            Net.isOnline();
             if (File.Exists(@".\handler.ini"))
             {
                 pathShare = IniReadWriter.ReadIniKeys("Command", "gongxiang", "./handler.ini");
@@ -45,7 +53,6 @@ namespace handler
                     delay = 0;
                 }
                 textBox1.Text = no.ToString();
-                overTime = int.Parse(IniReadWriter.ReadIniKeys("Command", "cishu", pathShare + "/CF.ini"));
                 button1_Click(null, null);
             }
             else
@@ -55,27 +62,90 @@ namespace handler
             }
         }
 
+        //改变编号
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             IniReadWriter.WriteIniKeys("Command", "bianhao", textBox1.Text, "./handler.ini");
         }
+        
+        //启动主线程
+        public void button1_Click(object sender, EventArgs e)
+        {
+            button1.Enabled = false;
+            button2.Enabled = true;
+            main = new Thread(_main);
+            main.Start();
+        }
+
+        //终止主线程
+        private void button2_Click(object sender, EventArgs e)
+        {
+            button2.Enabled = false;
+            button1.Enabled = true;
+            main.Abort();
+        }
+
+        //关闭程序，缓存项目
+        private void form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            cache();
+        }
+
+        //双击托盘
+        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.WindowState = FormWindowState.Normal;
+            }
+        }
+
+        //缓存
+        private void cache()
+        {
+            if (taskName.Equals(TASK_UPDATE) || taskName.Equals(TASK_WAIT_ORDER) || taskName.Equals(TASK_SHUTDOWN) || taskName.Equals(TASK_RESTART) || taskName.Equals(TASK_NET_TEST))
+            {
+                return;
+            }
+                string path = "";
+            if (customPath.Equals(taskPath))
+            {
+                path = taskPath;
+            }else
+            {
+                path = "Writein";
+            }
+            cacheMemory = "TaskName-" + taskName + "`TaskPath-" + path + "`Worker:" + workerId;
+            IniReadWriter.WriteIniKeys("Command", "CacheMemory"+no, cacheMemory, pathShare+"/CF.ini");
+        }
+
+
+        //切换任务流程
         private void taskChangeProcess()
         {
 
         }
+
+        //切换任务
         private void changeTask()
         {
 
         }
-        private bool processCheck()
-        {
-            return true;
-        }
-        private void netCheck() {
 
-        }
-        private void netMonitor()
+        //获取进程
+        private Process[] getProcess(string proName)
         {
+            if (StringUtil.isEmpty(proName))
+            {
+                proName = taskPath.Substring(taskPath.LastIndexOf("/") + 1);
+            }
+            return Process.GetProcessesByName(proName);
+        }
+
+        //网络检测
+        private void netCheck()
+        {
+            Net.isOnline();
             IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
             Console.WriteLine(hwnd);
             if (hwnd != IntPtr.Zero)
@@ -88,14 +158,30 @@ namespace handler
                 Console.WriteLine(hwndEx);
                 HwndUtil.clickHwnd(hwndEx);
             }
-            Thread.Sleep(2000);
-            netMonitor();
         }
+
+        //任务监控
+        private void taskMonitor()
+        {
+            overTime = int.Parse(IniReadWriter.ReadIniKeys("Command", "cishu", pathShare + "/CF.ini"));
+            if (taskName.Equals(TASK_MM2) || taskName.Equals(TASK_YUKUAI)) {
+                overTime -= 2;
+            }
+            if (overTime % 2 == 1)
+            {
+                overTime += 1;
+            }
+            overTime = overTime / 2 - 1;
+            Thread.Sleep(2000);
+            taskMonitor();
+        }
+
+        //主线程
         public void _main()
         {
             //进程初始化部分
             string now = DateTime.Now.ToLocalTime().ToString();
-            taskChange = IniReadWriter.ReadIniKeys("Command", "TaskChange"+no, pathShare + "/Task.ini");
+            taskChange = IniReadWriter.ReadIniKeys("Command", "TaskChange" + no, pathShare + "/Task.ini");
             if (taskChange.Equals("1"))
             {
                 taskChangeProcess();
@@ -106,72 +192,57 @@ namespace handler
                 if (!StringUtil.isEmpty(cacheMemory))
                 {
                     string[] arr = cacheMemory.Split('`');
-                    taskName = arr[0].Substring(9, arr[0].Length);
-                    taskPath = arr[1].Substring(9, arr[1].Length);
-                    workerId = arr[2].Substring(0, arr[2].Length);
+                    taskName = arr[0].Substring(9);
+                    taskPath = arr[1].Substring(9);
+                    workerId = arr[2].Substring(7);
                     if (!StringUtil.isEmpty(workerId))
                     {
                         inputId = "1";
                         tail = "1";
                     }
-                }
-                IniReadWriter.WriteIniKeys("Command", "CacheMemory" + no, "", pathShare + "/TaskPlus.ini");
-                if (processCheck())
-                {
-                    notifyIcon1.ShowBalloonTip(0, now, taskName + "运行中,进入维护状态", ToolTipIcon.Info);
-                }
-                else
-                {
                     if (taskPath.Equals("Writein"))
                     {
-                        notifyIcon1.ShowBalloonTip(0, now, "发现项目缓存,通过写入路径启动"+ taskName, ToolTipIcon.Info);
+                        if (taskName.Equals(TASK_MM2))
+                        {
+                            taskPath = IniReadWriter.ReadIniKeys("Command", "mm2", pathShare + "/CF.ini");
+                        }
+                        else if (taskName.Equals(TASK_YUKUAI))
+                        {
+                            taskPath = IniReadWriter.ReadIniKeys("Command", "yukuai", pathShare + "/CF.ini");
+                        }
                     }
                     else
                     {
-                        notifyIcon1.ShowBalloonTip(0, now, "发现项目缓存,通过自定义路径启动" + taskName, ToolTipIcon.Info);
+                        customPath = taskPath;
                     }
-                    changeTask();
+
+                    Process[] pros = getProcess(null);
+                    if (pros.Length > 0)
+                    {
+                        notifyIcon1.ShowBalloonTip(0, now, taskName + "运行中,进入维护状态", ToolTipIcon.Info);
+                    }
+                    else
+                    {
+                        if (taskPath.Equals("Writein"))
+                        {
+                            notifyIcon1.ShowBalloonTip(0, now, "发现项目缓存,通过写入路径启动" + taskName, ToolTipIcon.Info);
+                        }
+                        else
+                        {
+                            notifyIcon1.ShowBalloonTip(0, now, "发现项目缓存,通过自定义路径启动" + taskName, ToolTipIcon.Info);
+                        }
+                        changeTask();
+                    }
+                    IniReadWriter.WriteIniKeys("Command", "CacheMemory" + no, "", pathShare + "/TaskPlus.ini");
                 }
-
-            }
-            //无缓存待命
-            netCheck();
-            taskName = "待命";
-            notifyIcon1.ShowBalloonTip(0, now, "未发现项目缓存,待命中...\n请通过控制与监控端启动"+no+"号虚拟机", ToolTipIcon.Info);
-            netMonitor();
-            
-        }
-
-        public void button1_Click(object sender, EventArgs e)
-        {
-            button1.Enabled = false;
-            button2.Enabled = true;
-            main = new Thread(_main);
-            main.Start();
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            button2.Enabled = false;
-            button1.Enabled = true;
-            main.Abort();
-        }
-
-        private void cache()
-        {
-
-        }
-
-        private void form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            cache();
-        }
-
-        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (this.WindowState == FormWindowState.Minimized)
-            {
-                this.WindowState = FormWindowState.Normal;
+                else
+                {
+                    //无缓存待命
+                    netCheck();
+                    taskName = TASK_WAIT_ORDER;
+                    notifyIcon1.ShowBalloonTip(0, now, "未发现项目缓存,待命中...\n请通过控制与监控端启动" + no + "号虚拟机", ToolTipIcon.Info);
+                    taskMonitor();
+                }
             }
         }
     }
