@@ -18,6 +18,10 @@ namespace handler.util
                 return true;
             if (tempStr.Equals(("null")))
                 return true;
+            if (tempStr.Equals("0"))
+            {
+                return true;
+            }
             return false;
         }
     }

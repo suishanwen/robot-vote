@@ -57,6 +57,7 @@
     <Compile Include="util\HwndUtil.cs" />
     <Compile Include="util\IniReadWriter.cs" />
     <Compile Include="util\MouseKeyboard.cs" />
+    <Compile Include="util\Net.cs" />
     <Compile Include="util\StringUtil.cs" />
     <Compile Include="util\SwitchUtil.cs" />
     <EmbeddedResource Include="Form1.resx">
