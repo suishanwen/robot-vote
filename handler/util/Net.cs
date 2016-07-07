@@ -23,7 +23,7 @@ namespace handler.util
             }
             else if ((dwFlag & INTERNET_CONNECTION_MODEM) != 0)
             {
-                Console.WriteLine("采用调治解调器上网");
+                Console.WriteLine("采用调制解调器上网");
                 return true;
             }
             else
