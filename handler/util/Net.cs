@@ -13,7 +13,6 @@ namespace handler.util
         private static extern bool InternetGetConnectedState(
         ref int dwFlag,
         int dwReserved);
-        //调用的方法(Winform为例,放一个按钮,单击即可):
         public static bool isOnline()
         {
             System.Int32 dwFlag = new int();
