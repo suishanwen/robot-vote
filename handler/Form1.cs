@@ -22,6 +22,10 @@ namespace handler
         private string workerId;    //工号
         private string inputId;     //输入工号标识
         private string tail;    //分号标识
+        private RASDisplay ras = new RASDisplay(); //ADSL对象
+        private string adslName;    //拨号名称
+
+        private string workingPath = Environment.CurrentDirectory; //当前工作路径
 
         private const string TASK_SYS_UPDATE = "Update";
         private const string TASK_SYS_WAIT_ORDER = "待命";
@@ -38,6 +42,7 @@ namespace handler
         private const string TASK_VOTE_DM = "DM";
         private const string TASK_VOTE_JZ = "JZ";
         private const string TASK_VOTE_OUTDO = "Outdo";
+        private const string TASK_VOTE_PROJECT = "投票项目";
 
 
         public form1()
@@ -85,12 +90,19 @@ namespace handler
             main.Start();
         }
 
+
         //终止主线程
+
+        private void mainThreadClose()
+        {
+            main.Abort();
+        }
+
         private void button2_Click(object sender, EventArgs e)
         {
             button2.Enabled = false;
             button1.Enabled = true;
-            main.Abort();
+            mainThreadClose();
         }
 
         //关闭程序，缓存项目
@@ -108,10 +120,16 @@ namespace handler
             }
         }
 
-
+        //判断当前是否为系统任务
         private bool isSysTask()
         {
             return taskName.Equals(TASK_SYS_UPDATE) || taskName.Equals(TASK_SYS_WAIT_ORDER) || taskName.Equals(TASK_SYS_SHUTDOWN) || taskName.Equals(TASK_SYS_RESTART) || taskName.Equals(TASK_SYS_NET_TEST);
+        }
+
+        //判断当前是否为投票项目
+        private bool isVoteTask()
+        {
+            return taskName.Equals(TASK_VOTE_JIUTIAN) || taskName.Equals(TASK_VOTE_YUANQIU) || taskName.Equals(TASK_VOTE_MM) || taskName.Equals(TASK_VOTE_ML) || taskName.Equals(TASK_VOTE_JZ) || taskName.Equals(TASK_VOTE_JT) || taskName.Equals(TASK_VOTE_DM) || taskName.Equals(TASK_VOTE_OUTDO)||taskName.Equals(TASK_VOTE_PROJECT);
         }
 
         //缓存
@@ -134,20 +152,7 @@ namespace handler
             IniReadWriter.WriteIniKeys("Command", "CacheMemory" + no, cacheMemory, pathShare + "/CF.ini");
         }
 
-
-        //切换任务流程
-        private void taskChangeProcess()
-        {
-
-        }
-
-        //切换任务
-        private void changeTask()
-        {
-
-        }
-
-        //获取进程
+        //通过进程名获取进程
         private Process[] getProcess(string proName)
         {
             if (StringUtil.isEmpty(proName))
@@ -157,10 +162,198 @@ namespace handler
             return Process.GetProcessesByName(proName);
         }
 
-        //网络检测
-        private bool netCheck()
+        //获取项目进程
+        private Process[] processCheck()
         {
-            return Net.isOnline();
+            string process1 = "vote.exe";
+            string process2 = "register.exe";
+            Process[] process = getProcess(process1);
+            if (process.Length > 0)
+            {
+                return process;
+            }
+            process = getProcess(process2);
+            if (process.Length > 0)
+            {
+                return process;
+            }
+            return getProcess(null);
+        }
+
+        //关闭进程
+        private void killProcess()
+        {
+            Process[] process = processCheck();
+            if (process.Length > 0)
+            {
+                foreach(Process p in process)
+                {
+                    p.Kill();
+                }
+            }
+        }
+
+        //切换任务流程
+        private void taskChangeProcess()
+        {
+            killProcess();
+            taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/CF.ini");
+            changeTask();
+        }
+
+        //切换任务
+        private void changeTask()
+        {
+            if (taskChange.Equals("1"))
+            {
+                workerId = IniReadWriter.ReadIniKeys("Command", "worker", pathShare + "/CF.ini");
+                inputId = IniReadWriter.ReadIniKeys("Command", "printgonghao", pathShare + "/CF.ini");
+                tail = IniReadWriter.ReadIniKeys("Command", "tail", pathShare + "/CF.ini");
+                customPath = IniReadWriter.ReadIniKeys("Command", "customPath" + no, pathShare + "/TaskPlus.ini");
+            }
+            if (StringUtil.isEmpty(workerId))
+            {
+                workerId = IniReadWriter.ReadIniKeys("Command", "worker", pathShare + "/CF.ini");
+            }
+            if (taskName.Equals(TASK_SYS_WAIT_ORDER))//待命
+            {
+                ras.Disconnect();
+                taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/CF.ini");
+                if (taskName.Equals(TASK_SYS_WAIT_ORDER))
+                {
+                    IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/CF.ini");
+                }
+                taskMonitor();
+            }else if (taskName.Equals(TASK_SYS_NET_TEST))//网络TEST
+            {
+                ras.Disconnect();
+                Thread.Sleep(500);
+                if (!Net.isOnline())
+                {
+                    ras.Connect(adslName);
+                    Thread.Sleep(500);
+                }
+                if (Net.isOnline())
+                {
+                    ras.Disconnect();
+                    IniReadWriter.WriteIniKeys("Command", "TaskName" + no, TASK_SYS_WAIT_ORDER, pathShare + "/CF.ini");
+                    IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/CF.ini");
+                    IniReadWriter.WriteIniKeys("Command", "customPath" + no, "", pathShare + "/TaskPlus.ini");
+                }
+                else
+                {
+                    netError("error");
+                }
+            }else if (taskName.Equals(TASK_SYS_SHUTDOWN))//关机
+            {
+                IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/CF.ini");
+                IniReadWriter.WriteIniKeys("Command", "customPath" + no, "", pathShare + "/TaskPlus.ini");
+                Process.Start("cmd.exe", "shutdown -f -s -t 1");
+            }else if (taskName.Equals(TASK_SYS_RESTART))//重启
+            {
+                IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/CF.ini");
+                IniReadWriter.WriteIniKeys("Command", "customPath" + no, "", pathShare + "/TaskPlus.ini");
+                Process.Start("cmd.exe", "shutdown -f -r -t 1");
+            }else if (taskName.Equals(TASK_SYS_UPDATE))
+            {
+                IniReadWriter.WriteIniKeys("Command", "customPath" + no, "", pathShare + "/TaskPlus.ini");
+                updateSoft();
+            }else if (taskName.Equals(TASK_HANGUP_MM2))//MM2挂机
+            {
+                if (taskChange.Equals("1"))
+                {
+                    taskPath= IniReadWriter.ReadIniKeys("Command", "mm2", pathShare + "/CF.ini");
+                }
+                // start MM2 function
+            }else if (taskName.Equals(TASK_HANGUP_YUKUAI))//愉快挂机
+            {
+                if (taskChange.Equals("1"))
+                {
+                    taskPath = IniReadWriter.ReadIniKeys("Command", "yukuai", pathShare + "/CF.ini");
+                }
+                // start YUKUAI function
+            }else if (isVoteTask())//投票
+            {
+                netCheck();
+                if (customPath.Equals(""))
+                {
+                    IniReadWriter.WriteIniKeys("Command", "TaskName" + no, TASK_SYS_WAIT_ORDER, pathShare + "/CF.ini");
+                    IniReadWriter.WriteIniKeys("Command", "CacheMemory" + no, "", pathShare + "/TaskPlus.ini");
+                    taskChangeProcess();
+                    return;
+                }
+                if (taskChange.Equals("1"))
+                {
+
+                }
+            }
+
+        }
+   
+        //通过路径启动进程
+        private void startProcess(string pathName)
+        {
+            ProcessStartInfo info = new ProcessStartInfo();
+            info.FileName = pathName;
+            info.Arguments = "";
+            info.WindowStyle = ProcessWindowStyle.Minimized;
+            Process pro = Process.Start(info);
+            pro.WaitForExit();
+        }
+
+        //升级程序
+        private void updateSoft()
+        {
+            string path= IniReadWriter.ReadIniKeys("Command", "Path0", pathShare + "/CF.ini");
+            if (File.Exists(@"./自动升级.bat"))
+            {
+                File.Delete(@"./自动升级.bat");
+            }
+            FileStream fs = new FileStream(@"./自动升级.bat", FileMode.Create, FileAccess.Write);//创建写入文件 
+            StreamWriter sw = new StreamWriter(fs);
+            sw.WriteLine("Taskkill /F /IM " + path.Substring(path.LastIndexOf("/")) + "\r\n ping - n 3 127.0.0.1 > nul \r\n copy / y " + path + " " + workingPath + " \r\n ping - n 3 127.0.0.1 > nul \r\n start " + path.Substring(path.LastIndexOf("/")));//开始写入值
+            sw.Close();
+            fs.Close();
+            IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/CF.ini");
+            startProcess(@"./自动升级.bat");
+            mainThreadClose();
+        }
+
+        //显示通知
+        private void showNotification(string content, ToolTipIcon toolTipIcon)
+        {
+            notifyIcon1.ShowBalloonTip(0, content, DateTime.Now.ToLocalTime().ToString(), toolTipIcon);
+
+        }
+
+        //网络检测
+        private void netCheck()
+        {
+            showNotification("正在初始化网络...", ToolTipIcon.Info);
+            bool online= Net.isOnline();
+            if (!online) {
+                ras.Disconnect();
+                ras.Connect(adslName);
+                Thread.Sleep(1000);
+                online = Net.isOnline();
+                if (!online)
+                {
+                    ras.Disconnect();
+                    ras.Connect(adslName);
+                    Thread.Sleep(1000);
+                    online = Net.isOnline();
+                    if (!online)
+                    {
+                        cache();
+                        netError("error");
+                    }
+                }
+            }
+            string arrDrop= IniReadWriter.ReadIniKeys("Command", "ArrDrop", pathShare + "/CF.ini");
+            if (arrDrop.IndexOf(no.ToString()) != -1)
+            {
+                IniReadWriter.WriteIniKeys("Command", "ArrDrop", arrDrop.Replace(" " + no + " |", ""), pathShare + "/CF.ini");
+            }
             //IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
             //Console.WriteLine(hwnd);
             //if (hwnd != IntPtr.Zero)
@@ -174,6 +367,32 @@ namespace handler
             //    HwndUtil.clickHwnd(hwndEx);
             //}
         }
+
+        //网络异常处理
+        private void netError(string type)
+        {
+            String val = IniReadWriter.ReadIniKeys("Command", "Val", pathShare + "/CF.ini");
+            if (StringUtil.isEmpty(val))
+            {
+                if (type.Equals("exception"))
+                {
+                    IniReadWriter.WriteIniKeys("Command", "Val", no.ToString(), pathShare + "/CF.ini");//正数 异常
+                }
+                else
+                {
+                    IniReadWriter.WriteIniKeys("Command", "Val", (-no).ToString(), pathShare + "/CF.ini");//负数 掉线
+                }
+                mainThreadClose();
+            }
+            else
+            {
+                Thread.Sleep(2000);
+                netError(type);
+            }
+
+        }
+
+
 
         //任务监控
         private void taskMonitor()
@@ -193,15 +412,41 @@ namespace handler
             do
                 try
                 {
-                    isOnline = netCheck();
+                    isOnline = Net.isOnline();
                     taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange", pathShare + "/CF.ini");
                     if (taskChange.Equals("1"))
                     {
-                        //Goto 切换任务流程
+                        taskChangeProcess();
+                        return;
                     }
                     if(isSysTask())
                     {
                         p = 0;
+                    }
+                    if (taskName.Equals(TASK_VOTE_JIUTIAN))
+                    {
+                        //九天到票检测、被T检测
+                    }else if (taskName.Equals(TASK_VOTE_MM))
+                    {
+                        //MM到票检测
+                    }else if (taskName.Equals(TASK_VOTE_YUANQIU))
+                    {
+                        //圆球到票检测
+                    }else if (taskName.Equals(TASK_VOTE_JT))
+                    {
+                        //JT到票检测
+                    }else if (taskName.Equals(TASK_VOTE_ML))
+                    {
+                        //ML到票检测
+                    }else if (taskName.Equals(TASK_VOTE_DM))
+                    {
+                        //DM到票检测
+                    }else if (taskName.Equals(TASK_VOTE_JZ))
+                    {
+                        //JZ到票检测
+                    }else if (taskName.Equals(TASK_VOTE_OUTDO))
+                    {
+                        //OUTDO到票检测
                     }
                 }
                 catch (Exception)
@@ -222,6 +467,16 @@ namespace handler
                     Thread.Sleep(2000);
                 }
             while (p < overTime || p > -overTime);
+
+            if (p== overTime && taskName.Equals(TASK_VOTE_MM))
+            {
+                //MM2 check
+                ras.Disconnect();//断开连接
+                Thread.Sleep(500);
+                //启动拨号定时timer
+                ras.Connect(adslName);//重新拨号
+                Thread.Sleep(500);
+            }
             taskMonitor();
         }
 
