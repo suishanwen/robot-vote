@@ -95,6 +95,7 @@
             this.KeyPreview = true;
             this.MaximizeBox = false;
             this.Name = "form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "被控端";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
