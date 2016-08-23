@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -319,18 +320,23 @@ namespace handler
         private void updateSoft()
         {
             string path= IniReadWriter.ReadIniKeys("Command", "Path0", pathShare + "/CF.ini");
-            if (File.Exists(@"./自动升级.bat"))
+            string line1 = "Taskkill /F /IM " + path.Substring(path.LastIndexOf("\\")+1);
+            string line2 = "ping -n 3 127.0.0.1>nul";
+            string line3 = "copy / y " + path + @" """ + workingPath + @"""";
+            string line4 = "ping -n 3 127.0.0.1>nul";
+            string line5 = "start " + path.Substring(path.LastIndexOf("\\")+1);
+            string[] lines = {"@echo off", line1, line2, line3, line4, line5 };
+            try
             {
-                File.Delete(@"./自动升级.bat");
+                File.WriteAllLines(@"./自动升级.bat", lines, Encoding.GetEncoding("GBK"));
+                IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
+                startProcess(@"./自动升级.bat");
+                mainThreadClose();
             }
-            FileStream fs = new FileStream(@"./自动升级.bat", FileMode.Create, FileAccess.Write);//创建写入文件 
-            StreamWriter sw = new StreamWriter(fs);
-            sw.WriteLine("Taskkill /F /IM " + path.Substring(path.LastIndexOf("/")) + "\r\n ping - n 3 127.0.0.1 > nul \r\n copy / y " + path + " " + workingPath + " \r\n ping - n 3 127.0.0.1 > nul \r\n start " + path.Substring(path.LastIndexOf("/")));//开始写入值
-            sw.Close();
-            fs.Close();
-            IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
-            startProcess(@"./自动升级.bat");
-            mainThreadClose();
+            catch(Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
         }
 
         //显示通知
@@ -441,7 +447,7 @@ namespace handler
                 try
                 {
                     isOnline = Net.isOnline();
-                    taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange", pathShare + "/CF.ini");
+                    taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange"+no, pathShare + "/Task.ini");
                     if (taskChange.Equals("1"))
                     {
                         taskChangeProcess();
@@ -477,9 +483,9 @@ namespace handler
                         //OUTDO到票检测
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-
+                    MessageBox.Show(e.ToString());
                 }
                 finally
                 {
@@ -492,6 +498,7 @@ namespace handler
                         p = p > 0 ? -1 : p--;
 
                     }
+                    label2.Text = p.ToString();
                     Thread.Sleep(2000);
                 }
             while (p < overTime || p > -overTime);
@@ -575,7 +582,18 @@ namespace handler
                     Thread.Sleep(1000);
                     rasOperate("disconnect");
                     notifyIcon1.ShowBalloonTip(0, now, "未发现项目缓存,待命中...\n请通过控制与监控端启动" + no + "号虚拟机", ToolTipIcon.Info);
-                    taskMonitor();
+                    try
+                    {
+                        taskMonitor();
+                    }
+                    catch(ThreadAbortException)
+                    {
+
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.ToString());
+                    }
                 }
             }
         }
