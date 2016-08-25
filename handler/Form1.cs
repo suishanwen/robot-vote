@@ -97,10 +97,10 @@ namespace handler
 
         private void mainThreadClose()
         {
-            main.Abort();
             cache();
             button2.Enabled = false;
             button1.Enabled = true;
+            main.Abort();
         }
 
         private void button2_Click(object sender, EventArgs e)
