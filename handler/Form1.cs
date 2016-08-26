@@ -134,7 +134,7 @@ namespace handler
         //判断当前是否为投票项目
         private bool isVoteTask()
         {
-            return taskName.Equals(TASK_VOTE_JIUTIAN) || taskName.Equals(TASK_VOTE_YUANQIU) || taskName.Equals(TASK_VOTE_MM) || taskName.Equals(TASK_VOTE_ML) || taskName.Equals(TASK_VOTE_JZ) || taskName.Equals(TASK_VOTE_JT) || taskName.Equals(TASK_VOTE_DM) || taskName.Equals(TASK_VOTE_OUTDO)||taskName.Equals(TASK_VOTE_PROJECT);
+            return taskName.Equals(TASK_VOTE_JIUTIAN) || taskName.Equals(TASK_VOTE_YUANQIU) || taskName.Equals(TASK_VOTE_MM) || taskName.Equals(TASK_VOTE_ML) || taskName.Equals(TASK_VOTE_JZ) || taskName.Equals(TASK_VOTE_JT) || taskName.Equals(TASK_VOTE_DM) || taskName.Equals(TASK_VOTE_OUTDO) || taskName.Equals(TASK_VOTE_PROJECT);
         }
 
         //缓存
@@ -160,9 +160,9 @@ namespace handler
         //通过进程名获取进程
         private Process[] getProcess(string proName)
         {
-            if (StringUtil.isEmpty(proName)&&!StringUtil.isEmpty(taskPath))
+            if (StringUtil.isEmpty(proName) && !StringUtil.isEmpty(taskPath))
             {
-                proName = taskPath.Substring(taskPath.LastIndexOf("/") + 1);
+                proName = taskPath.Substring(taskPath.LastIndexOf("\\") + 1);
             }
             return Process.GetProcessesByName(proName);
         }
@@ -191,7 +191,7 @@ namespace handler
             Process[] process = processCheck();
             if (process.Length > 0)
             {
-                foreach(Process p in process)
+                foreach (Process p in process)
                 {
                     p.Kill();
                 }
@@ -228,7 +228,8 @@ namespace handler
                 {
                     IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
                 }
-            }else if (taskName.Equals(TASK_SYS_NET_TEST))//网络TEST
+            }
+            else if (taskName.Equals(TASK_SYS_NET_TEST))//网络TEST
             {
                 if (Net.isOnline())
                 {
@@ -253,7 +254,8 @@ namespace handler
                 {
                     netError("error");
                 }
-            }else if (taskName.Equals(TASK_SYS_SHUTDOWN))//关机
+            }
+            else if (taskName.Equals(TASK_SYS_SHUTDOWN))//关机
             {
                 IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
                 IniReadWriter.WriteIniKeys("Command", "customPath" + no, "", pathShare + "/TaskPlus.ini");
@@ -277,17 +279,19 @@ namespace handler
             {
                 if (taskChange.Equals("1"))
                 {
-                    taskPath= IniReadWriter.ReadIniKeys("Command", "mm2", pathShare + "/CF.ini");
+                    taskPath = IniReadWriter.ReadIniKeys("Command", "mm2", pathShare + "/CF.ini");
                 }
                 // start MM2 function
-            }else if (taskName.Equals(TASK_HANGUP_YUKUAI))//愉快挂机
+            }
+            else if (taskName.Equals(TASK_HANGUP_YUKUAI))//愉快挂机
             {
                 if (taskChange.Equals("1"))
                 {
                     taskPath = IniReadWriter.ReadIniKeys("Command", "yukuai", pathShare + "/CF.ini");
                 }
                 // start YUKUAI function
-            }else if (isVoteTask())//投票
+            }
+            else if (isVoteTask())//投票
             {
                 netCheck();
                 if (customPath.Equals(""))
@@ -299,12 +303,115 @@ namespace handler
                 }
                 if (taskChange.Equals("1"))
                 {
-
+                    if (customPath.Substring(customPath.LastIndexOf("\\") + 1) == "vote.exe")
+                    {
+                        String[] Lines = { "start vote.exe" };
+                        File.WriteAllLines(customPath.Substring(0, customPath.Length - 9) + @"/启动九天.bat", Lines, Encoding.GetEncoding("GBK"));
+                        startProcess(customPath.Substring(0, customPath.Length - 9) + @"/启动九天.bat");
+                        taskName = TASK_VOTE_JIUTIAN;
+                    }
+                    else
+                    {
+                        startProcess(customPath);
+                        taskName = TASK_VOTE_PROJECT;
+                        IntPtr hwnd0, hwnd1, hwnd2, hwnd3, hwnd4;
+                        do
+                            try
+                            {
+                                hwnd0 = HwndUtil.FindWindow("WTWindow", null);
+                                hwnd1 = HwndUtil.FindWindow("TForm1", null);
+                                hwnd2 = HwndUtil.FindWindow("ThunderRT6FormDC", null);
+                                hwnd3 = HwndUtil.FindWindow("obj_Form", null);
+                                hwnd4 = HwndUtil.FindWindow("TMainForm", null);
+                                if (hwnd0 != IntPtr.Zero)
+                                {
+                                    String title = "";
+                                    int i = HwndUtil.GetWindowText(hwnd0.ToInt32(), title, 512);
+                                    if (title.Substring(0, 6) == "自动投票工具")
+                                    {
+                                        taskName = TASK_VOTE_MM;
+                                    }
+                                    else if (title.Substring(0, 8) == "VOTE2016")
+                                    {
+                                        taskName = TASK_VOTE_ML;
+                                    }
+                                }
+                                else if (hwnd1 != IntPtr.Zero)
+                                {
+                                    taskName = TASK_VOTE_YUANQIU;
+                                }
+                                else if (hwnd2 != IntPtr.Zero)
+                                {
+                                    taskName = TASK_VOTE_JT;
+                                }
+                                else if (hwnd3 != IntPtr.Zero)
+                                {
+                                    taskName = TASK_VOTE_DM;
+                                }
+                                else if (hwnd4 != IntPtr.Zero)
+                                {
+                                    taskName = TASK_VOTE_JZ;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                MessageBox.Show(e.ToString());
+                                mainThreadClose();
+                            }
+                            finally
+                            {
+                                Thread.Sleep(500);
+                            }
+                        while (!taskName.Equals(TASK_VOTE_PROJECT));
+                        IniReadWriter.WriteIniKeys("Command", "TaskName" + no, taskName, pathShare + "/Task.ini");
+                        Thread.Sleep(3000);
+                    }
+                }
+                if (taskName.Equals(TASK_VOTE_JIUTIAN))
+                {
+                    if (!taskChange.Equals(1))
+                    {
+                        startProcess(customPath.Substring(0, customPath.Length - 9) + @"/启动九天.bat");
+                        Thread.Sleep(500);
+                    }
+                    //九天开始程序
+                }
+                else
+                {
+                    if (!taskChange.Equals(1))
+                    {
+                        startProcess(customPath);
+                        Thread.Sleep(500);
+                    }
+                    if (taskName.Equals(TASK_VOTE_MM))
+                    {
+                        //MM开始程序
+                    }
+                    else if (taskName.Equals(TASK_VOTE_ML))
+                    {
+                        //ML开始程序
+                    }
+                    else if (taskName.Equals(TASK_VOTE_YUANQIU))
+                    {
+                        //圆球开始程序
+                    }
+                    else if (taskName.Equals(TASK_VOTE_JT))
+                    {
+                        //JT开始程序
+                    }
+                    else if (taskName.Equals(TASK_VOTE_DM))
+                    {
+                        //DM开始程序
+                    }
+                    else if (taskName.Equals(TASK_VOTE_JZ))
+                    {
+                        //J开始程序
+                    }
                 }
             }
             taskMonitor();
         }
-   
+
         //通过路径启动进程
         private void startProcess(string pathName)
         {
@@ -319,13 +426,13 @@ namespace handler
         //升级程序
         private void updateSoft()
         {
-            string path= IniReadWriter.ReadIniKeys("Command", "Path0", pathShare + "/CF.ini");
-            string line1 = "Taskkill /F /IM " + path.Substring(path.LastIndexOf("\\")+1);
+            string path = IniReadWriter.ReadIniKeys("Command", "Path0", pathShare + "/CF.ini");
+            string line1 = "Taskkill /F /IM " + path.Substring(path.LastIndexOf("\\") + 1);
             string line2 = "ping -n 3 127.0.0.1>nul";
             string line3 = "copy / y " + path + @" """ + workingPath + @"""";
             string line4 = "ping -n 3 127.0.0.1>nul";
-            string line5 = "start " + path.Substring(path.LastIndexOf("\\")+1);
-            string[] lines = {"@echo off", line1, line2, line3, line4, line5 };
+            string line5 = "start " + path.Substring(path.LastIndexOf("\\") + 1);
+            string[] lines = { "@echo off", line1, line2, line3, line4, line5 };
             try
             {
                 File.WriteAllLines(@"./自动升级.bat", lines, Encoding.GetEncoding("GBK"));
@@ -333,7 +440,7 @@ namespace handler
                 startProcess(@"./自动升级.bat");
                 mainThreadClose();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
             }
@@ -348,7 +455,7 @@ namespace handler
 
         private void rasOperate(string type)
         {
-            ras = new  RASDisplay();
+            ras = new RASDisplay();
             if (type.Equals("connect"))
             {
                 ras.Connect(adslName);
@@ -363,8 +470,9 @@ namespace handler
         private void netCheck()
         {
             showNotification("正在初始化网络...", ToolTipIcon.Info);
-            bool online= Net.isOnline();
-            if (!online) {
+            bool online = Net.isOnline();
+            if (!online)
+            {
                 rasOperate("connect");
                 Thread.Sleep(1000);
                 online = Net.isOnline();
@@ -379,14 +487,14 @@ namespace handler
                     }
                 }
             }
-            string arrDrop= IniReadWriter.ReadIniKeys("Command", "ArrDrop", pathShare + "/CF.ini");
+            string arrDrop = IniReadWriter.ReadIniKeys("Command", "ArrDrop", pathShare + "/CF.ini");
             if (!StringUtil.isEmpty(arrDrop))
             {
                 arrDrop = " " + arrDrop;
             }
             if (arrDrop.IndexOf(" " + no + " |") != -1)
             {
-                IniReadWriter.WriteIniKeys("Command", "ArrDrop",arrDrop.Replace(" " + no + " |", ""), pathShare + "/CF.ini");
+                IniReadWriter.WriteIniKeys("Command", "ArrDrop", arrDrop.Replace(" " + no + " |", ""), pathShare + "/CF.ini");
             }
             //IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
             //Console.WriteLine(hwnd);
@@ -447,38 +555,45 @@ namespace handler
                 try
                 {
                     isOnline = Net.isOnline();
-                    taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange"+no, pathShare + "/Task.ini");
+                    taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange" + no, pathShare + "/Task.ini");
                     if (taskChange.Equals("1"))
                     {
                         taskChangeProcess();
                         return;
                     }
-                    if(isSysTask())
+                    if (isSysTask())
                     {
                         p = 0;
                     }
                     if (taskName.Equals(TASK_VOTE_JIUTIAN))
                     {
                         //九天到票检测、被T检测
-                    }else if (taskName.Equals(TASK_VOTE_MM))
+                    }
+                    else if (taskName.Equals(TASK_VOTE_MM))
                     {
                         //MM到票检测
-                    }else if (taskName.Equals(TASK_VOTE_YUANQIU))
+                    }
+                    else if (taskName.Equals(TASK_VOTE_YUANQIU))
                     {
                         //圆球到票检测
-                    }else if (taskName.Equals(TASK_VOTE_JT))
+                    }
+                    else if (taskName.Equals(TASK_VOTE_JT))
                     {
                         //JT到票检测
-                    }else if (taskName.Equals(TASK_VOTE_ML))
+                    }
+                    else if (taskName.Equals(TASK_VOTE_ML))
                     {
                         //ML到票检测
-                    }else if (taskName.Equals(TASK_VOTE_DM))
+                    }
+                    else if (taskName.Equals(TASK_VOTE_DM))
                     {
                         //DM到票检测
-                    }else if (taskName.Equals(TASK_VOTE_JZ))
+                    }
+                    else if (taskName.Equals(TASK_VOTE_JZ))
                     {
                         //JZ到票检测
-                    }else if (taskName.Equals(TASK_VOTE_OUTDO))
+                    }
+                    else if (taskName.Equals(TASK_VOTE_OUTDO))
                     {
                         //OUTDO到票检测
                     }
@@ -503,7 +618,7 @@ namespace handler
                 }
             while (p < overTime || p > -overTime);
 
-            if (p== overTime && taskName.Equals(TASK_VOTE_MM))
+            if (p == overTime && taskName.Equals(TASK_VOTE_MM))
             {
                 //MM2 check
                 ras.Disconnect();//断开连接
@@ -586,7 +701,7 @@ namespace handler
                     {
                         taskMonitor();
                     }
-                    catch(ThreadAbortException)
+                    catch (ThreadAbortException)
                     {
 
                     }
