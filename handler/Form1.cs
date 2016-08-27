@@ -16,6 +16,7 @@ namespace handler
         private int overTime;   //超时
         private Thread main;    //主线程
         private string taskName;    //任务名
+        private string projectName;     //用于核对taskName
         private string taskPath;    //任务路径
         private string customPath;  //本地任务路径
         private string taskChange;  //任务切换标识
@@ -305,9 +306,9 @@ namespace handler
                 {
                     if (customPath.Substring(customPath.LastIndexOf("\\") + 1) == "vote.exe")
                     {
-                        String[] Lines = { "start vote.exe" };
-                        File.WriteAllLines(customPath.Substring(0, customPath.Length - 9) + @"/启动九天.bat", Lines, Encoding.GetEncoding("GBK"));
-                        startProcess(customPath.Substring(0, customPath.Length - 9) + @"/启动九天.bat");
+                        String[] Lines = { @"start vote.exe" };
+                        File.WriteAllLines(pathShare + customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat", Lines, Encoding.GetEncoding("GBK"));
+                        startProcess(pathShare + customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat");
                         taskName = TASK_VOTE_JIUTIAN;
                     }
                     else
@@ -363,22 +364,22 @@ namespace handler
                                 Thread.Sleep(500);
                             }
                         while (!taskName.Equals(TASK_VOTE_PROJECT));
-                        IniReadWriter.WriteIniKeys("Command", "TaskName" + no, taskName, pathShare + "/Task.ini");
-                        Thread.Sleep(3000);
                     }
+                    IniReadWriter.WriteIniKeys("Command", "TaskName" + no, taskName, pathShare + "/Task.ini");
+                    Thread.Sleep(3000);
                 }
                 if (taskName.Equals(TASK_VOTE_JIUTIAN))
                 {
-                    if (!taskChange.Equals(1))
+                    if (!taskChange.Equals("1"))
                     {
                         startProcess(customPath.Substring(0, customPath.Length - 9) + @"/启动九天.bat");
                         Thread.Sleep(500);
                     }
-                    //九天开始程序
+                    jiutianStart();
                 }
                 else
                 {
-                    if (!taskChange.Equals(1))
+                    if (!taskChange.Equals("1"))
                     {
                         startProcess(customPath);
                         Thread.Sleep(500);
@@ -412,12 +413,85 @@ namespace handler
             taskMonitor();
         }
 
+        //NAME检测
+        private bool nameCheck()
+        {
+            taskChange = IniReadWriter.ReadIniKeys("Command", "TaskChange" + no, pathShare + "/Task.ini");
+            if (taskChange.Equals("1"))
+            {
+                taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
+                if (!taskName.Equals(projectName))
+                {
+                    MessageBox.Show(taskName + "-" + projectName);
+                    IniReadWriter.WriteIniKeys("Command", "Make" + no, "1", pathShare + "/Task.ini");
+                    taskChangeProcess();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        //结束启动
+        private void finishStart()
+        {
+            if (!nameCheck())
+            {
+                return;
+            }
+            IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
+        }
+
+        //九天启动
+        private void jiutianStart()
+        {
+            IntPtr hwnd = IntPtr.Zero;
+            projectName = TASK_VOTE_JIUTIAN;
+            do
+                try
+                {
+                    if (!nameCheck())
+                    {
+                        return;
+                    }
+                    hwnd = HwndUtil.FindWindow("WTWindow", null);
+                    Thread.Sleep(500);
+                }
+                catch (Exception) { }
+            while (hwnd == IntPtr.Zero);
+            Thread.Sleep(2000);
+            IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
+            //设置拨号延迟为0
+            IntPtr hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "拨号设置");
+            hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "SysTabControl32", "");
+            hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
+            HwndUtil.SendMessage(hwndEx, 0x0C, IntPtr.Zero, "0");
+            //设置工号
+            if (inputId.Equals("1"))
+            {
+                String id = workerId;
+                if (tail.Equals("1"))
+                {
+                    id = workerId + "-" + (no > 9 ? no.ToString() : "0" + no);
+                }
+                hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "请输入工号");
+                hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
+                HwndUtil.SendMessage(hwndEx, 0x0C, IntPtr.Zero, id);
+            }
+
+            //开始投票
+            hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "");
+            hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "开始投票");
+            HwndUtil.clickHwnd(hwndEx);
+            finishStart();
+        }
+
         //通过路径启动进程
         private void startProcess(string pathName)
         {
             ProcessStartInfo info = new ProcessStartInfo();
             info.FileName = pathName;
             info.Arguments = "";
+            info.WorkingDirectory = pathName.Substring(0, pathName.LastIndexOf(@"\"));
             info.WindowStyle = ProcessWindowStyle.Minimized;
             Process pro = Process.Start(info);
             pro.WaitForExit();
@@ -496,18 +570,6 @@ namespace handler
             {
                 IniReadWriter.WriteIniKeys("Command", "ArrDrop", arrDrop.Replace(" " + no + " |", ""), pathShare + "/CF.ini");
             }
-            //IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
-            //Console.WriteLine(hwnd);
-            //if (hwnd != IntPtr.Zero)
-            //{
-            //    IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
-            //    Console.WriteLine(hwndEx);
-            //    hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "");
-            //    Console.WriteLine(hwndEx);
-            //    hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "开始投票");
-            //    Console.WriteLine(hwndEx);
-            //    HwndUtil.clickHwnd(hwndEx);
-            //}
         }
 
         //网络异常处理
@@ -606,17 +668,17 @@ namespace handler
                 {
                     if (isOnline)
                     {
-                        p = p < 0 ? 1 : p++;
+                        p = p < 0 ? 1 : ++p;
                     }
                     else
                     {
-                        p = p > 0 ? -1 : p--;
+                        p = p > 0 ? -1 : --p;
 
                     }
                     label2.Text = p.ToString();
                     Thread.Sleep(2000);
                 }
-            while (p < overTime || p > -overTime);
+            while (p == 0 || (p > 0 && p < overTime) || (p < 0 && p > -overTime));
 
             if (p == overTime && taskName.Equals(TASK_VOTE_MM))
             {
