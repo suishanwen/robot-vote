@@ -603,6 +603,19 @@ namespace handler
         }
 
 
+        private bool jiutianOverCheck(ref int s)
+        {
+            IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
+            if (hwnd == IntPtr.Zero)
+            {
+                s++;
+            }
+            else
+            {
+                s = 0;
+            }
+            return s > 15;
+        }
 
         //任务监控
         private void taskMonitor()
@@ -618,6 +631,7 @@ namespace handler
             }
             overTime = overTime / 2 - 1;
             int p = 0;
+            int s = 0;
             bool isOnline = false;
             do
                 try
@@ -633,9 +647,15 @@ namespace handler
                     {
                         p = 0;
                     }
-                    if (taskName.Equals(TASK_VOTE_JIUTIAN))
+                    if (taskName.Equals(TASK_VOTE_JIUTIAN) && p > 0)
                     {
-                        //九天到票检测、被T检测
+                        if (jiutianOverCheck(ref s))
+                        {
+                            IniReadWriter.WriteIniKeys("Command", "CustomPath" + no, "", pathShare + @"\TaskPlus.ini");
+                            IniReadWriter.WriteIniKeys("Command", "OVER", "1", pathShare + @"\CF.ini");
+                            IniReadWriter.WriteIniKeys("Command", "TaskName" + no, TASK_SYS_WAIT_ORDER, pathShare + @"\Task.ini");
+                            IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "1", pathShare + @"\Task.ini");
+                        }
                     }
                     else if (taskName.Equals(TASK_VOTE_MM))
                     {
@@ -692,12 +712,13 @@ namespace handler
                 //启动拨号定时timer
                 ras.Connect(adslName);//重新拨号
                 Thread.Sleep(500);
-            }else
+            }
+            else
             {
                 taskChangeProcess();
                 return;
             }
-            
+
 
             taskMonitor();
         }
