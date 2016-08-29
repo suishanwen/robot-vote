@@ -89,6 +89,7 @@ namespace handler
         {
             button1.Enabled = false;
             button2.Enabled = true;
+            writeLogs(workingPath + "/log.txt", "");//清空日志
             main = new Thread(_main);
             main.Start();
         }
@@ -127,6 +128,24 @@ namespace handler
             }
         }
 
+        //写txt
+        private void writeLogs(string pathName,string content)
+        {
+            if (content.Equals(""))
+            {
+                StreamWriter sw = new StreamWriter(pathName);
+                sw.Write("");
+                sw.Close();
+            }
+            else
+            {
+                StreamWriter sw = File.AppendText(pathName);
+                sw.WriteLine(content);
+                sw.Close();
+            }
+        }
+       
+
         //判断当前是否为系统任务
         private bool isSysTask()
         {
@@ -162,6 +181,7 @@ namespace handler
         //通过进程名获取进程
         private Process[] getProcess(string proName)
         {
+            writeLogs(workingPath + "/log.txt", "getProcess:" + proName);
             if (StringUtil.isEmpty(proName) && !StringUtil.isEmpty(taskPath))
             {
                 proName = taskPath.Substring(taskPath.LastIndexOf("\\") + 1);
@@ -185,13 +205,36 @@ namespace handler
             {
                 return process;
             }
-            return getProcess(null);
+            return getProcess("");
         }
 
         //关闭进程
         private void killProcess()
         {
+            writeLogs(workingPath + "/log.txt", "killProcess");
+            if (!StringUtil.isEmpty(taskName) && taskName.Equals(TASK_VOTE_JIUTIAN))
+            {
+                IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
+                if (hwnd != IntPtr.Zero)
+                {
+                    hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
+                    hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "");
+                    hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "结束投票");
+                    writeLogs(workingPath + "/log.txt", "九天结束 句柄为"+ hwnd);
+                    HwndUtil.clickHwnd(hwnd);
+                    int s = 0;
+                    do
+                    {
+                        Thread.Sleep(500);
+                        hwnd = HwndUtil.FindWindow("WTWindow", null);
+                        s++;
+                    } while (hwnd != IntPtr.Zero && s < 90);
+                }
+
+            }
+            writeLogs(workingPath + "/log.txt", "processCheck");
             Process[] process = processCheck();
+            writeLogs(workingPath + "/log.txt", "killProcess  length" + process.Length);
             if (process.Length > 0)
             {
                 foreach (Process p in process)
@@ -204,6 +247,7 @@ namespace handler
         //切换任务流程
         private void taskChangeProcess()
         {
+            writeLogs(workingPath+"/log.txt", "taskChangeProcess");
             killProcess();
             rasOperate("disconnect");
             taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
@@ -320,52 +364,45 @@ namespace handler
                         taskName = TASK_VOTE_PROJECT;
                         IntPtr hwnd0, hwnd1, hwnd2, hwnd3, hwnd4;
                         do
-                            try
+                        {
+                            hwnd0 = HwndUtil.FindWindow("WTWindow", null);
+                            hwnd1 = HwndUtil.FindWindow("TForm1", null);
+                            hwnd2 = HwndUtil.FindWindow("ThunderRT6FormDC", null);
+                            hwnd3 = HwndUtil.FindWindow("obj_Form", null);
+                            hwnd4 = HwndUtil.FindWindow("TMainForm", null);
+                            if (hwnd0 != IntPtr.Zero)
                             {
-                                hwnd0 = HwndUtil.FindWindow("WTWindow", null);
-                                hwnd1 = HwndUtil.FindWindow("TForm1", null);
-                                hwnd2 = HwndUtil.FindWindow("ThunderRT6FormDC", null);
-                                hwnd3 = HwndUtil.FindWindow("obj_Form", null);
-                                hwnd4 = HwndUtil.FindWindow("TMainForm", null);
-                                if (hwnd0 != IntPtr.Zero)
+                                String title = "";
+                                int i = HwndUtil.GetWindowText(hwnd0.ToInt32(), title, 512);
+                                if (title.Substring(0, 6) == "自动投票工具")
                                 {
-                                    String title = "";
-                                    int i = HwndUtil.GetWindowText(hwnd0.ToInt32(), title, 512);
-                                    if (title.Substring(0, 6) == "自动投票工具")
-                                    {
-                                        taskName = TASK_VOTE_MM;
-                                    }
-                                    else if (title.Substring(0, 8) == "VOTE2016")
-                                    {
-                                        taskName = TASK_VOTE_ML;
-                                    }
+                                    taskName = TASK_VOTE_MM;
                                 }
-                                else if (hwnd1 != IntPtr.Zero)
+                                else if (title.Substring(0, 8) == "VOTE2016")
                                 {
-                                    taskName = TASK_VOTE_YUANQIU;
-                                }
-                                else if (hwnd2 != IntPtr.Zero)
-                                {
-                                    taskName = TASK_VOTE_JT;
-                                }
-                                else if (hwnd3 != IntPtr.Zero)
-                                {
-                                    taskName = TASK_VOTE_DM;
-                                }
-                                else if (hwnd4 != IntPtr.Zero)
-                                {
-                                    taskName = TASK_VOTE_JZ;
+                                    taskName = TASK_VOTE_ML;
                                 }
                             }
-                            catch (Exception e)
+                            else if (hwnd1 != IntPtr.Zero)
                             {
-                                MessageBox.Show(e.ToString());
-                                mainThreadClose();
+                                taskName = TASK_VOTE_YUANQIU;
                             }
-                            finally
+                            else if (hwnd2 != IntPtr.Zero)
                             {
-                                Thread.Sleep(500);
+                                taskName = TASK_VOTE_JT;
                             }
+                            else if (hwnd3 != IntPtr.Zero)
+                            {
+                                taskName = TASK_VOTE_DM;
+                            }
+                            else if (hwnd4 != IntPtr.Zero)
+                            {
+                                taskName = TASK_VOTE_JZ;
+                            }
+                            Thread.Sleep(500);
+
+                        }
+
                         while (!taskName.Equals(TASK_VOTE_PROJECT));
                     }
                     IniReadWriter.WriteIniKeys("Command", "TaskName" + no, taskName, pathShare + "/Task.ini");
@@ -450,16 +487,14 @@ namespace handler
             IntPtr hwnd = IntPtr.Zero;
             projectName = TASK_VOTE_JIUTIAN;
             do
-                try
+            {
+                if (!nameCheck())
                 {
-                    if (!nameCheck())
-                    {
-                        return;
-                    }
-                    hwnd = HwndUtil.FindWindow("WTWindow", null);
-                    Thread.Sleep(500);
+                    return;
                 }
-                catch (Exception) { }
+                hwnd = HwndUtil.FindWindow("WTWindow", null);
+                Thread.Sleep(500);
+            }
             while (hwnd == IntPtr.Zero);
             Thread.Sleep(2000);
             IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
@@ -643,72 +678,66 @@ namespace handler
             int s = 0;
             bool isOnline = false;
             do
-                try
+            {
+                isOnline = Net.isOnline();
+                taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange" + no, pathShare + "/Task.ini");
+                if (taskChange.Equals("1"))
                 {
-                    isOnline = Net.isOnline();
-                    taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange" + no, pathShare + "/Task.ini");
-                    if (taskChange.Equals("1"))
+                    taskChangeProcess();
+                    return;
+                }
+                if (isSysTask())
+                {
+                    p = 0;
+                }
+                if (taskName.Equals(TASK_VOTE_JIUTIAN) && p > 0)
+                {
+                    if (jiutianOverCheck(ref s))
                     {
-                        taskChangeProcess();
-                        return;
-                    }
-                    if (isSysTask())
-                    {
-                        p = 0;
-                    }
-                    if (taskName.Equals(TASK_VOTE_JIUTIAN) && p > 0)
-                    {
-                        if (jiutianOverCheck(ref s))
-                        {
-                            switchWatiOrder();
-                        }
-                    }
-                    else if (taskName.Equals(TASK_VOTE_MM))
-                    {
-                        //MM到票检测
-                    }
-                    else if (taskName.Equals(TASK_VOTE_YUANQIU))
-                    {
-                        //圆球到票检测
-                    }
-                    else if (taskName.Equals(TASK_VOTE_JT))
-                    {
-                        //JT到票检测
-                    }
-                    else if (taskName.Equals(TASK_VOTE_ML))
-                    {
-                        //ML到票检测
-                    }
-                    else if (taskName.Equals(TASK_VOTE_DM))
-                    {
-                        //DM到票检测
-                    }
-                    else if (taskName.Equals(TASK_VOTE_JZ))
-                    {
-                        //JZ到票检测
-                    }
-                    else if (taskName.Equals(TASK_VOTE_OUTDO))
-                    {
-                        //OUTDO到票检测
+                        switchWatiOrder();
                     }
                 }
-                catch (Exception e)
+                else if (taskName.Equals(TASK_VOTE_MM))
                 {
+                    //MM到票检测
                 }
-                finally
+                else if (taskName.Equals(TASK_VOTE_YUANQIU))
                 {
-                    if (isOnline)
-                    {
-                        p = p < 0 ? 1 : ++p;
-                    }
-                    else
-                    {
-                        p = p > 0 ? -1 : --p;
+                    //圆球到票检测
+                }
+                else if (taskName.Equals(TASK_VOTE_JT))
+                {
+                    //JT到票检测
+                }
+                else if (taskName.Equals(TASK_VOTE_ML))
+                {
+                    //ML到票检测
+                }
+                else if (taskName.Equals(TASK_VOTE_DM))
+                {
+                    //DM到票检测
+                }
+                else if (taskName.Equals(TASK_VOTE_JZ))
+                {
+                    //JZ到票检测
+                }
+                else if (taskName.Equals(TASK_VOTE_OUTDO))
+                {
+                    //OUTDO到票检测
+                }
 
-                    }
-                    label2.Text = p.ToString();
-                    Thread.Sleep(2000);
+                if (isOnline)
+                {
+                    p = p < 0 ? 1 : ++p;
                 }
+                else
+                {
+                    p = p > 0 ? -1 : --p;
+
+                }
+                label2.Text = p.ToString();
+                Thread.Sleep(2000);
+            }
             while (p == 0 || (p > 0 && p < overTime) || (p < 0 && p > -overTime));
             if (taskName.Equals(TASK_VOTE_MM))
             {
@@ -769,7 +798,7 @@ namespace handler
                         customPath = taskPath;
                     }
 
-                    Process[] pros = getProcess(null);
+                    Process[] pros = getProcess("");
                     if (pros.Length > 0)
                     {
                         notifyIcon1.ShowBalloonTip(0, now, taskName + "运行中,进入维护状态", ToolTipIcon.Info);
