@@ -602,7 +602,16 @@ namespace handler
 
         }
 
+        //到票待命
+        private void switchWatiOrder()
+        {
+            IniReadWriter.WriteIniKeys("Command", "CustomPath" + no, "", pathShare + @"\TaskPlus.ini");
+            IniReadWriter.WriteIniKeys("Command", "OVER", "1", pathShare + @"\CF.ini");
+            IniReadWriter.WriteIniKeys("Command", "TaskName" + no, TASK_SYS_WAIT_ORDER, pathShare + @"\Task.ini");
+            IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "1", pathShare + @"\Task.ini");
+        }
 
+        //九天到票检测
         private bool jiutianOverCheck(ref int s)
         {
             IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
@@ -651,10 +660,7 @@ namespace handler
                     {
                         if (jiutianOverCheck(ref s))
                         {
-                            IniReadWriter.WriteIniKeys("Command", "CustomPath" + no, "", pathShare + @"\TaskPlus.ini");
-                            IniReadWriter.WriteIniKeys("Command", "OVER", "1", pathShare + @"\CF.ini");
-                            IniReadWriter.WriteIniKeys("Command", "TaskName" + no, TASK_SYS_WAIT_ORDER, pathShare + @"\Task.ini");
-                            IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "1", pathShare + @"\Task.ini");
+                            switchWatiOrder();
                         }
                     }
                     else if (taskName.Equals(TASK_VOTE_MM))
