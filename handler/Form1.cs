@@ -104,6 +104,7 @@ namespace handler
             main.Abort();
         }
 
+        //点击停止
         private void button2_Click(object sender, EventArgs e)
         {
             button2.Enabled = false;
@@ -155,7 +156,7 @@ namespace handler
                 path = "Writein";
             }
             cacheMemory = "TaskName-" + taskName + "`TaskPath-" + path + "`Worker:" + workerId;
-            IniReadWriter.WriteIniKeys("Command", "CacheMemory" + no, cacheMemory, pathShare + "/CF.ini");
+            IniReadWriter.WriteIniKeys("Command", "CacheMemory" + no, cacheMemory, pathShare + "/TaskPlus.ini");
         }
 
         //通过进程名获取进程
@@ -165,6 +166,7 @@ namespace handler
             {
                 proName = taskPath.Substring(taskPath.LastIndexOf("\\") + 1);
             }
+            proName = proName.Replace(".exe", "");
             return Process.GetProcessesByName(proName);
         }
 
@@ -203,6 +205,7 @@ namespace handler
         private void taskChangeProcess()
         {
             killProcess();
+            rasOperate("disconnect");
             taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
             changeTask();
         }
@@ -307,8 +310,8 @@ namespace handler
                     if (customPath.Substring(customPath.LastIndexOf("\\") + 1) == "vote.exe")
                     {
                         String[] Lines = { @"start vote.exe" };
-                        File.WriteAllLines(pathShare + customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat", Lines, Encoding.GetEncoding("GBK"));
-                        startProcess(pathShare + customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat");
+                        File.WriteAllLines(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat", Lines, Encoding.GetEncoding("GBK"));
+                        startProcess(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat");
                         taskName = TASK_VOTE_JIUTIAN;
                     }
                     else
@@ -372,7 +375,7 @@ namespace handler
                 {
                     if (!taskChange.Equals("1"))
                     {
-                        startProcess(customPath.Substring(0, customPath.Length - 9) + @"/启动九天.bat");
+                        startProcess(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat");
                         Thread.Sleep(500);
                     }
                     jiutianStart();
@@ -409,6 +412,7 @@ namespace handler
                         //J开始程序
                     }
                 }
+                taskPath = customPath;
             }
             taskMonitor();
         }
@@ -422,7 +426,6 @@ namespace handler
                 taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
                 if (!taskName.Equals(projectName))
                 {
-                    MessageBox.Show(taskName + "-" + projectName);
                     IniReadWriter.WriteIniKeys("Command", "Make" + no, "1", pathShare + "/Task.ini");
                     taskChangeProcess();
                     return false;
@@ -527,11 +530,14 @@ namespace handler
 
         }
 
+        //ADSL操作
         private void rasOperate(string type)
         {
             ras = new RASDisplay();
             if (type.Equals("connect"))
             {
+                ras.Disconnect();
+                Thread.Sleep(500);
                 ras.Connect(adslName);
             }
             else
@@ -662,7 +668,6 @@ namespace handler
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show(e.ToString());
                 }
                 finally
                 {
@@ -679,8 +684,7 @@ namespace handler
                     Thread.Sleep(2000);
                 }
             while (p == 0 || (p > 0 && p < overTime) || (p < 0 && p > -overTime));
-
-            if (p == overTime && taskName.Equals(TASK_VOTE_MM))
+            if (taskName.Equals(TASK_VOTE_MM))
             {
                 //MM2 check
                 ras.Disconnect();//断开连接
@@ -688,7 +692,13 @@ namespace handler
                 //启动拨号定时timer
                 ras.Connect(adslName);//重新拨号
                 Thread.Sleep(500);
+            }else
+            {
+                taskChangeProcess();
+                return;
             }
+            
+
             taskMonitor();
         }
 
@@ -759,18 +769,18 @@ namespace handler
                     Thread.Sleep(1000);
                     rasOperate("disconnect");
                     notifyIcon1.ShowBalloonTip(0, now, "未发现项目缓存,待命中...\n请通过控制与监控端启动" + no + "号虚拟机", ToolTipIcon.Info);
-                    try
-                    {
-                        taskMonitor();
-                    }
-                    catch (ThreadAbortException)
-                    {
+                }
+                try
+                {
+                    taskMonitor();
+                }
+                catch (ThreadAbortException)
+                {
 
-                    }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show(e.ToString());
-                    }
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.ToString());
                 }
             }
         }
