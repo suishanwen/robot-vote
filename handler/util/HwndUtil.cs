@@ -5,6 +5,8 @@ namespace handler.util
 {
     class HwndUtil
     {
+        const int WM_CLOSE = 0x0010;
+
         [DllImport("User32.dll", EntryPoint = "FindWindow")]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         [DllImport("User32.dll", EntryPoint = "FindWindowEx")]
@@ -19,6 +21,16 @@ namespace handler.util
         public static void clickHwnd(IntPtr hWnd)
         {
             SendMessage(hWnd, 0xF5, IntPtr.Zero, null);
+        }
+
+        public static void setText(IntPtr hwnd,string text)
+        {
+            SendMessage(hwnd, 0x0C, IntPtr.Zero, text);
+        }
+
+        public static void closeHwnd(IntPtr hwnd)
+        {
+            SendMessage(hwnd, WM_CLOSE, IntPtr.Zero, "");
         }
     }
 }

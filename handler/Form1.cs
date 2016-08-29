@@ -215,7 +215,7 @@ namespace handler
             if (!StringUtil.isEmpty(taskName) && taskName.Equals(TASK_VOTE_JIUTIAN))
             {
                 IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
-                if (hwnd != IntPtr.Zero)
+                if (hwnd != IntPtr.Zero )
                 {
                     hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
                     hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "");
@@ -223,10 +223,17 @@ namespace handler
                     writeLogs(workingPath + "/log.txt", "九天结束 句柄为"+ hwnd);
                     HwndUtil.clickHwnd(hwnd);
                     int s = 0;
+                    IntPtr hwndEx = IntPtr.Zero;
                     do
                     {
                         Thread.Sleep(500);
                         hwnd = HwndUtil.FindWindow("WTWindow", null);
+                        hwndEx = HwndUtil.FindWindow("#32770", "信息：");
+                        if (hwndEx != IntPtr.Zero)
+                        {
+                            HwndUtil.closeHwnd(hwndEx);
+                            s = 90;
+                        }
                         s++;
                     } while (hwnd != IntPtr.Zero && s < 90);
                 }
@@ -406,7 +413,6 @@ namespace handler
                         while (!taskName.Equals(TASK_VOTE_PROJECT));
                     }
                     IniReadWriter.WriteIniKeys("Command", "TaskName" + no, taskName, pathShare + "/Task.ini");
-                    Thread.Sleep(3000);
                 }
                 if (taskName.Equals(TASK_VOTE_JIUTIAN))
                 {
@@ -496,13 +502,12 @@ namespace handler
                 Thread.Sleep(500);
             }
             while (hwnd == IntPtr.Zero);
-            Thread.Sleep(2000);
             IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
             //设置拨号延迟为0
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "拨号设置");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "SysTabControl32", "");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
-            HwndUtil.SendMessage(hwndEx, 0x0C, IntPtr.Zero, "0");
+            HwndUtil.setText(hwndEx, "0");
             //设置工号
             if (inputId.Equals("1"))
             {
@@ -513,13 +518,21 @@ namespace handler
                 }
                 hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "请输入工号");
                 hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
-                HwndUtil.SendMessage(hwndEx, 0x0C, IntPtr.Zero, id);
+                HwndUtil.setText(hwndEx, id);
             }
 
             //开始投票
+
             hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "");
-            hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "开始投票");
-            HwndUtil.clickHwnd(hwndEx);
+            IntPtr hwndExx = IntPtr.Zero;
+            do
+            {
+                hwnd = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "开始投票");
+                HwndUtil.clickHwnd(hwnd);
+                Thread.Sleep(500);
+                hwndExx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "已锁定");
+
+            } while (hwndExx == IntPtr.Zero);
             finishStart();
         }
 
