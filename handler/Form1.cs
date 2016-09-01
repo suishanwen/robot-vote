@@ -26,6 +26,8 @@ namespace handler
         private string tail;    //分号标识
         private RASDisplay ras; //ADSL对象
         private string adslName;    //拨号名称
+        private bool isAutoVote; //自动投票标识
+
 
         private string workingPath = Environment.CurrentDirectory; //当前工作路径
 
@@ -129,7 +131,7 @@ namespace handler
         }
 
         //写txt
-        private void writeLogs(string pathName,string content)
+        private void writeLogs(string pathName, string content)
         {
             if (content.Equals(""))
             {
@@ -144,7 +146,7 @@ namespace handler
                 sw.Close();
             }
         }
-       
+
 
         //判断当前是否为系统任务
         private bool isSysTask()
@@ -155,6 +157,7 @@ namespace handler
         //判断当前是否为投票项目
         private bool isVoteTask()
         {
+            isAutoVote = !StringUtil.isEmpty(IniReadWriter.ReadIniKeys("Command", "ProjectName", pathShare + "/AutoVote.ini"));
             return taskName.Equals(TASK_VOTE_JIUTIAN) || taskName.Equals(TASK_VOTE_YUANQIU) || taskName.Equals(TASK_VOTE_MM) || taskName.Equals(TASK_VOTE_ML) || taskName.Equals(TASK_VOTE_JZ) || taskName.Equals(TASK_VOTE_JT) || taskName.Equals(TASK_VOTE_DM) || taskName.Equals(TASK_VOTE_OUTDO) || taskName.Equals(TASK_VOTE_PROJECT);
         }
 
@@ -209,18 +212,18 @@ namespace handler
         }
 
         //关闭进程
-        private void killProcess()
+        private void killProcess(bool stopIndicator)
         {
             writeLogs(workingPath + "/log.txt", "killProcess");
-            if (!StringUtil.isEmpty(taskName) && taskName.Equals(TASK_VOTE_JIUTIAN))
+            if (stopIndicator && !StringUtil.isEmpty(taskName) && taskName.Equals(TASK_VOTE_JIUTIAN))
             {
                 IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
-                if (hwnd != IntPtr.Zero )
+                if (hwnd != IntPtr.Zero)
                 {
                     hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
                     hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "");
                     hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "结束投票");
-                    writeLogs(workingPath + "/log.txt", "九天结束 句柄为"+ hwnd);
+                    writeLogs(workingPath + "/log.txt", "九天结束 句柄为" + hwnd);
                     HwndUtil.clickHwnd(hwnd);
                     int s = 0;
                     IntPtr hwndEx = IntPtr.Zero;
@@ -254,8 +257,8 @@ namespace handler
         //切换任务流程
         private void taskChangeProcess()
         {
-            writeLogs(workingPath+"/log.txt", "taskChangeProcess");
-            killProcess();
+            writeLogs(workingPath + "/log.txt", "taskChangeProcess");
+            killProcess(true);
             rasOperate("disconnect");
             taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
             changeTask();
@@ -654,7 +657,6 @@ namespace handler
         private void switchWatiOrder()
         {
             IniReadWriter.WriteIniKeys("Command", "CustomPath" + no, "", pathShare + @"\TaskPlus.ini");
-            IniReadWriter.WriteIniKeys("Command", "OVER", "1", pathShare + @"\CF.ini");
             IniReadWriter.WriteIniKeys("Command", "TaskName" + no, TASK_SYS_WAIT_ORDER, pathShare + @"\Task.ini");
             IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "1", pathShare + @"\Task.ini");
         }
@@ -671,7 +673,56 @@ namespace handler
             {
                 s = 0;
             }
-            return s > 15;
+            if (s > 15)
+            {
+                IniReadWriter.WriteIniKeys("Command", "OVER", "1", pathShare + @"\CF.ini");
+                return true;
+            }
+            return false;
+        }
+
+        //添加黑名单项目
+        private void addVoteProjectNameDroped(bool isAllProject)
+        {
+            string projectName = IniReadWriter.ReadIniKeys("Command", "ProjectName", pathShare + "/AutoVote.ini");
+            if (isAllProject)
+            {
+                projectName = projectName.Substring(0, projectName.IndexOf("_"));
+            }
+            string voteProjectNameDroped = IniReadWriter.ReadIniKeys("Command", "voteProjectNameDroped", pathShare + "/AutoVote.ini");
+            voteProjectNameDroped += StringUtil.isEmpty(voteProjectNameDroped) ? projectName : "|" + projectName;
+            IniReadWriter.WriteIniKeys("Command", "voteProjectNameDroped", voteProjectNameDroped, pathShare + "/AutoVote.ini");
+        }
+
+        //九天限人检测
+        private bool jiutianRestrictCheck()
+        {
+            IntPtr hwnd = HwndUtil.FindWindow("#32770", "信息提示");
+            if (hwnd != IntPtr.Zero)
+            {
+                if (isAutoVote)
+                {
+                    addVoteProjectNameDroped(false);
+                }
+                HwndUtil.closeHwnd(hwnd);
+                return true;
+            }
+            return false;
+        }
+        //九天验证码输入检测
+        private bool isIdentifyCode()
+        {
+            IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
+            IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
+            IntPtr testHwnd = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "输入验证码后回车,看不清直接回车切换");
+            if (testHwnd != IntPtr.Zero)
+            {
+                addVoteProjectNameDroped(false);
+                killProcess(false);
+                rasOperate("disconnect");
+                return true;
+            }
+            return false;
         }
 
         //任务监控
@@ -705,7 +756,11 @@ namespace handler
                 }
                 if (taskName.Equals(TASK_VOTE_JIUTIAN) && p > 0)
                 {
-                    if (jiutianOverCheck(ref s))
+                    if (jiutianOverCheck(ref s) || jiutianRestrictCheck())
+                    {
+                        switchWatiOrder();
+                    }
+                    if (isAutoVote && isIdentifyCode())
                     {
                         switchWatiOrder();
                     }
