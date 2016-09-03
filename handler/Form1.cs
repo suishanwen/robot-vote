@@ -717,7 +717,7 @@ namespace handler
             IntPtr testHwnd = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "输入验证码后回车,看不清直接回车切换");
             if (testHwnd != IntPtr.Zero)
             {
-                addVoteProjectNameDroped(false);
+                addVoteProjectNameDroped(true);
                 killProcess(false);
                 rasOperate("disconnect");
                 return true;
@@ -762,6 +762,11 @@ namespace handler
                     }
                     if (isAutoVote && isIdentifyCode())
                     {
+                        switchWatiOrder();
+                    }
+                    if (isAutoVote && p == 14)
+                    {
+                        addVoteProjectNameDroped(false);
                         switchWatiOrder();
                     }
                 }
