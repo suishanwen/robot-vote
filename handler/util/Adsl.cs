@@ -128,6 +128,8 @@ namespace handler.util
             RASCONN lprasConn = new RASCONN();
 
             lprasConn.dwSize = Marshal.SizeOf(typeof(RASCONN));
+            //lprasConn.dwSize = 0x0501;
+
             lprasConn.hrasconn = IntPtr.Zero;
 
             int lpcb = 0;

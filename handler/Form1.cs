@@ -18,7 +18,7 @@ namespace handler
         private string taskName;    //任务名
         private string projectName;     //用于核对taskName
         private string taskPath;    //任务路径
-        private string customPath;  //本地任务路径
+        private string customPath = "";  //本地任务路径
         private string taskChange;  //任务切换标识
         private string cacheMemory; //项目缓存
         private string workerId;    //工号
@@ -38,6 +38,7 @@ namespace handler
         private const string TASK_SYS_NET_TEST = "网络测试";
         private const string TASK_HANGUP_MM2 = "mm2";
         private const string TASK_HANGUP_YUKUAI = "yukuai";
+        private const string TASK_HANGUP_XX = "xx";
         private const string TASK_VOTE_JIUTIAN = "九天";
         private const string TASK_VOTE_YUANQIU = "圆球";
         private const string TASK_VOTE_MM = "MM";
@@ -247,6 +248,16 @@ namespace handler
             writeLogs(workingPath + "/log.txt", "killProcess  length" + process.Length);
             if (process.Length > 0)
             {
+                if (taskName.Equals(TASK_HANGUP_XX))
+                {
+                    int counter = 1;
+                    while (!Net.isOnline() && counter < 120)
+                    {
+                        counter++;
+                        Thread.Sleep(500);
+                    }
+                }
+
                 foreach (Process p in process)
                 {
                     p.Kill();
@@ -332,6 +343,16 @@ namespace handler
                 IniReadWriter.WriteIniKeys("Command", "customPath" + no, "", pathShare + "/TaskPlus.ini");
                 updateSoft();
                 mainThreadClose();
+            }
+            else if (taskName.Equals(TASK_HANGUP_XX))
+            {
+                if (taskChange.Equals("1"))
+                {
+                    taskPath = IniReadWriter.ReadIniKeys("Command", "xx", pathShare + "/CF.ini");
+                }
+                netCheck();
+                startProcess(taskPath.Substring(0, taskPath.LastIndexOf("\\") + 1) + "run.bat");
+                xxStart();
             }
             else if (taskName.Equals(TASK_HANGUP_MM2))//MM2挂机
             {
@@ -488,6 +509,46 @@ namespace handler
                 return;
             }
             IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
+        }
+        //xx启动
+        private void xxStart()
+        {
+            IntPtr hwnd = IntPtr.Zero;
+            projectName = TASK_HANGUP_XX;
+            do
+            {
+                if (!nameCheck())
+                {
+                    return;
+                }
+                hwnd = HwndUtil.FindWindow("#32770", "20160911-01");
+                Thread.Sleep(500);
+            } while (hwnd == IntPtr.Zero);
+            Thread.Sleep(1000);
+            //HwndUtil.SendMessage2(hwnd, 0x0112, 0xF020, 0); // 最大化            
+            //设置工号
+            if (inputId.Equals("1"))
+            {
+                String id = workerId;
+                if (tail.Equals("1"))
+                {
+                    id = workerId + "-" + (no > 9 ? no.ToString() : "0" + no);
+                }
+                IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "#32770", null);
+                hwndEx = HwndUtil.FindWindowEx(hwnd, hwndEx, "#32770", null);
+                hwndEx = HwndUtil.FindWindowEx(hwnd, hwndEx, "#32770", null);
+                hwndEx = HwndUtil.FindWindowEx(hwnd, hwndEx, "#32770", null);
+                hwndEx = HwndUtil.FindWindowEx(hwnd, hwndEx, "#32770", null);
+                hwndEx = HwndUtil.FindWindowEx(hwnd, hwndEx, "#32770", null);
+                hwndEx = HwndUtil.FindWindowEx(hwnd, hwndEx, "#32770", null);
+                hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
+                HwndUtil.setText(hwndEx, id);
+            }
+            Thread.Sleep(1000);
+            //启动
+            IntPtr hwndExx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "启动");
+            HwndUtil.clickHwnd(hwndExx);
+            finishStart();
         }
 
         //九天启动
@@ -766,7 +827,7 @@ namespace handler
                     }
                     if (isAutoVote && p == 14)
                     {
-                        addVoteProjectNameDroped(false);
+                        addVoteProjectNameDroped(true);
                         switchWatiOrder();
                     }
                 }
@@ -797,6 +858,16 @@ namespace handler
                 else if (taskName.Equals(TASK_VOTE_OUTDO))
                 {
                     //OUTDO到票检测
+                }else if (taskName.Equals(TASK_HANGUP_XX))
+                {
+                    if (p == 12)
+                    {
+                        rasOperate("disconnect");
+                    }else if (p < -60)
+                    {
+                        Process.Start("shutdown.exe", "-r -t 0");
+                        mainThreadClose();
+                    }
                 }
 
                 if (isOnline)
@@ -811,15 +882,12 @@ namespace handler
                 label2.Text = p.ToString();
                 Thread.Sleep(2000);
             }
-            while (p == 0 || (p > 0 && p < overTime) || (p < 0 && p > -overTime));
+            while (p == 0 || (p > 0 && p < overTime) || (p < 0 && p > -overTime) || taskName.Equals(TASK_HANGUP_XX));
             if (taskName.Equals(TASK_VOTE_MM))
             {
-                //MM2 check
-                ras.Disconnect();//断开连接
-                Thread.Sleep(500);
+                rasOperate("disconnect");
                 //启动拨号定时timer
-                ras.Connect(adslName);//重新拨号
-                Thread.Sleep(500);
+                rasOperate("connect");
             }
             else
             {
@@ -864,6 +932,10 @@ namespace handler
                         else if (taskName.Equals(TASK_HANGUP_YUKUAI))
                         {
                             taskPath = IniReadWriter.ReadIniKeys("Command", "yukuai", pathShare + "/CF.ini");
+                        }
+                        else if (taskName.Equals(TASK_HANGUP_XX))
+                        {
+                            taskPath = IniReadWriter.ReadIniKeys("Command", "xx", pathShare + "/CF.ini");
                         }
                     }
                     else
