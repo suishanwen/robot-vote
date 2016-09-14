@@ -55,6 +55,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="util\Adsl.cs" />
+    <Compile Include="util\Computer.cs" />
     <Compile Include="util\HwndUtil.cs" />
     <Compile Include="util\IniReadWriter.cs" />
     <Compile Include="util\MouseKeyboard.cs" />
