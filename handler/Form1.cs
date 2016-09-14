@@ -333,6 +333,11 @@ namespace handler
             }
             else if (taskName.Equals(TASK_SYS_RESTART))//重启
             {
+                string computerRename = IniReadWriter.ReadIniKeys("Command", "computerRename", pathShare + "/CF.ini");
+                if (!StringUtil.isEmpty(computerRename))
+                {
+                    Computer.apiSetComputerNameEx(5, computerRename+"-" + no);
+                }
                 IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
                 IniReadWriter.WriteIniKeys("Command", "customPath" + no, "", pathShare + "/TaskPlus.ini");
                 Process.Start("shutdown.exe", "-r -t 0");
@@ -351,7 +356,7 @@ namespace handler
                     taskPath = IniReadWriter.ReadIniKeys("Command", "xx", pathShare + "/CF.ini");
                 }
                 netCheck();
-                startProcess(taskPath.Substring(0, taskPath.LastIndexOf("\\") + 1) + "run.bat");
+                startProcess(taskPath);
                 xxStart();
             }
             else if (taskName.Equals(TASK_HANGUP_MM2))//MM2挂机
@@ -606,10 +611,10 @@ namespace handler
             ProcessStartInfo info = new ProcessStartInfo();
             info.FileName = pathName;
             info.Arguments = "";
-            info.WorkingDirectory = pathName.Substring(0, pathName.LastIndexOf(@"\"));
-            info.WindowStyle = ProcessWindowStyle.Minimized;
+            info.WorkingDirectory = pathName.Substring(0, pathName.LastIndexOf("\\"));
+            info.WindowStyle = ProcessWindowStyle.Normal;
             Process pro = Process.Start(info);
-            pro.WaitForExit();
+            //pro.WaitForExit();
         }
 
         //升级程序
@@ -626,7 +631,7 @@ namespace handler
             {
                 File.WriteAllLines(@"./自动升级.bat", lines, Encoding.GetEncoding("GBK"));
                 IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
-                startProcess(@"./自动升级.bat");
+                startProcess(workingPath+@"\自动升级.bat");
                 mainThreadClose();
             }
             catch (Exception e)
