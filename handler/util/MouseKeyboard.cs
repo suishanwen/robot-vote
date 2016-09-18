@@ -4,6 +4,8 @@ namespace handler.util
 {
     class MouseKeyboard
     {
+        [DllImport("user32.dll")]
+        public static extern bool SetCursorPos(int X, int Y);
         //鼠标操作
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
         private static extern int mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
@@ -15,5 +17,11 @@ namespace handler.util
         const int MOUSEEVENTF_MIDDLEDOWN = 0x0020; //模拟鼠标中键按下 
         const int MOUSEEVENTF_MIDDLEUP = 0x0040; //模拟鼠标中键抬起 
         const int MOUSEEVENTF_ABSOLUTE = 0x8000; //标示是否采用绝对坐标
+
+
+        public static void moveTo(int x, int y)
+        {
+            mouse_event(MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE , x, y, 0, 0);
+        }
     }
 }

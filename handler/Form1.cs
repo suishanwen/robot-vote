@@ -1,6 +1,7 @@
 ﻿using handler.util;
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -15,6 +16,8 @@ namespace handler
         private int delay;  //拨号延时
         private int overTime;   //超时
         private Thread main;    //主线程
+        private Thread hwndThread;  //用来处理句柄阻塞事件线程
+        private IntPtr threadHwnd;  //线程句柄
         private string taskName;    //任务名
         private string projectName;     //用于核对taskName
         private string taskPath;    //任务路径
@@ -93,6 +96,7 @@ namespace handler
             button1.Enabled = false;
             button2.Enabled = true;
             writeLogs(workingPath + "/log.txt", "");//清空日志
+            this.WindowState = FormWindowState.Minimized;
             main = new Thread(_main);
             main.Start();
         }
@@ -389,8 +393,15 @@ namespace handler
                 {
                     if (customPath.Substring(customPath.LastIndexOf("\\") + 1) == "vote.exe")
                     {
-                        String[] Lines = { @"start vote.exe" };
-                        File.WriteAllLines(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat", Lines, Encoding.GetEncoding("GBK"));
+                        if(!File.Exists(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat"))
+                        {
+                            try
+                            {
+                                String[] Lines = { @"start vote.exe" };
+                                File.WriteAllLines(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat", Lines, Encoding.GetEncoding("GBK"));
+                            }
+                            catch (Exception) {}
+                        }
                         startProcess(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat");
                         taskName = TASK_VOTE_JIUTIAN;
                     }
@@ -436,10 +447,9 @@ namespace handler
                                 taskName = TASK_VOTE_JZ;
                             }
                             Thread.Sleep(500);
-
                         }
 
-                        while (!taskName.Equals(TASK_VOTE_PROJECT));
+                        while (taskName.Trim().Equals(TASK_VOTE_PROJECT));
                     }
                     IniReadWriter.WriteIniKeys("Command", "TaskName" + no, taskName, pathShare + "/Task.ini");
                 }
@@ -469,7 +479,7 @@ namespace handler
                     }
                     else if (taskName.Equals(TASK_VOTE_YUANQIU))
                     {
-                        //圆球开始程序
+                        yuanqiuStart();
                     }
                     else if (taskName.Equals(TASK_VOTE_JT))
                     {
@@ -515,6 +525,7 @@ namespace handler
             }
             IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
         }
+
         //xx启动
         private void xxStart()
         {
@@ -556,6 +567,67 @@ namespace handler
             finishStart();
         }
 
+
+
+        //hwndThread创建
+        private void createHwndThread(IntPtr hwnd)
+        {
+            threadHwnd = hwnd;
+            hwndThread = new Thread(clickHwndByThread);
+            hwndThread.Start();
+        }
+
+        //处理句柄操作线程
+        private void clickHwndByThread() {
+            HwndUtil.clickHwnd(threadHwnd);
+        }
+
+        //圆球启动
+        private void yuanqiuStart()
+        {
+            IntPtr hwnd = IntPtr.Zero;
+            projectName = TASK_VOTE_YUANQIU;
+            do
+            {
+                if (!nameCheck())
+                {
+                    return;
+                }
+                hwnd = HwndUtil.FindWindow("TForm1", null);
+                Thread.Sleep(500);
+            }
+            while (hwnd == IntPtr.Zero);
+            //设置拨号延迟
+            IntPtr hwndTGroupBox = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TGroupBox", "设置");
+            IntPtr hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, IntPtr.Zero, "TEdit", null);
+            hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+            hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+            hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+            hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+            hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+            hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+            HwndUtil.setText(hwndEx, (delay/1000).ToString());
+            //设置工号
+            if (inputId.Equals("1"))
+            {
+                String id = workerId;
+                if (tail.Equals("1"))
+                {
+                    id = workerId + "-" + (no > 9 ? no.ToString() : "0" + no);
+                }
+                hwndTGroupBox = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TGroupBox", "会员");
+                hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, IntPtr.Zero, "TEdit", null);
+                hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+                hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+                hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+                HwndUtil.setText(hwndEx, id);
+            }
+            //开始投票
+            hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TButton", "开始");
+            createHwndThread(hwndEx);
+            finishStart();
+        }
+
         //九天启动
         private void jiutianStart()
         {
@@ -572,11 +644,11 @@ namespace handler
             }
             while (hwnd == IntPtr.Zero);
             IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
-            //设置拨号延迟为0
+            //设置拨号延迟
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "拨号设置");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "SysTabControl32", "");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
-            HwndUtil.setText(hwndEx, "0");
+            HwndUtil.setText(hwndEx,delay.ToString());
             //设置工号
             if (inputId.Equals("1"))
             {
@@ -614,6 +686,8 @@ namespace handler
             info.WorkingDirectory = pathName.Substring(0, pathName.LastIndexOf("\\"));
             info.WindowStyle = ProcessWindowStyle.Normal;
             Process pro = Process.Start(info);
+            writeLogs(workingPath + "/log.txt", "startProcess IOException");//清空日志
+            Thread.Sleep(500);
             //pro.WaitForExit();
         }
 
@@ -727,6 +801,18 @@ namespace handler
             IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "1", pathShare + @"\Task.ini");
         }
 
+        private bool yuanqiuOverCheck()
+        {
+            IntPtr hwnd = HwndUtil.FindWindow("TMessageForm", "register");
+            if (hwnd != IntPtr.Zero)
+            {
+                HwndUtil.closeHwnd(hwnd);
+                IniReadWriter.WriteIniKeys("Command", "OVER", "1", pathShare + @"\CF.ini");
+                return true;
+            }
+            return false;
+        }
+
         //九天到票检测
         private bool jiutianOverCheck(ref int s)
         {
@@ -739,7 +825,7 @@ namespace handler
             {
                 s = 0;
             }
-            if (s > 15)
+            if (s > 5)
             {
                 IniReadWriter.WriteIniKeys("Command", "OVER", "1", pathShare + @"\CF.ini");
                 return true;
@@ -791,9 +877,23 @@ namespace handler
             return false;
         }
 
+        //清理托盘
+        private void refreshIcon()
+        {
+            Rectangle rect = new Rectangle();
+            rect = Screen.GetWorkingArea(this);
+            int startX = rect.Width - 200;//屏幕高
+            int startY = rect.Height +20;//屏幕高
+            for(; startX < rect.Width; startX+=5)
+            {
+                MouseKeyboard.SetCursorPos(startX, startY);
+            }
+        }
+
         //任务监控
         private void taskMonitor()
         {
+            refreshIcon();
             overTime = int.Parse(IniReadWriter.ReadIniKeys("Command", "cishu", pathShare + "/CF.ini"));
             if (taskName.Equals(TASK_HANGUP_MM2) || taskName.Equals(TASK_HANGUP_YUKUAI))
             {
@@ -843,6 +943,11 @@ namespace handler
                 else if (taskName.Equals(TASK_VOTE_YUANQIU))
                 {
                     //圆球到票检测
+                    if (yuanqiuOverCheck())
+                    {
+                        killProcess(false);
+                        switchWatiOrder();
+                    }
                 }
                 else if (taskName.Equals(TASK_VOTE_JT))
                 {
