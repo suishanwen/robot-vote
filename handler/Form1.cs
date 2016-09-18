@@ -910,6 +910,7 @@ namespace handler
             int p = 0;
             int s = 0;
             bool isOnline = false;
+            bool firstCircle = true;
             do
             {
                 isOnline = Net.isOnline();
@@ -933,9 +934,9 @@ namespace handler
                     {
                         switchWatiOrder();
                     }
-                    if (isAutoVote && p == 15)
+                    if (isAutoVote && ((firstCircle && p == 20)||(!firstCircle && p == 15)))
                     {
-                        addVoteProjectNameDroped(true);
+                        addVoteProjectNameDroped(false);
                         switchWatiOrder();
                     }
                 }
@@ -989,6 +990,7 @@ namespace handler
                 }
                 else
                 {
+                    firstCircle = false;
                     p = p > 0 ? -1 : --p;
 
                 }
