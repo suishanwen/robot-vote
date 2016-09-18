@@ -842,8 +842,11 @@ namespace handler
                 projectName = projectName.Substring(0, projectName.IndexOf("_"));
             }
             string voteProjectNameDroped = IniReadWriter.ReadIniKeys("Command", "voteProjectNameDroped", pathShare + "/AutoVote.ini");
-            voteProjectNameDroped += StringUtil.isEmpty(voteProjectNameDroped) ? projectName : "|" + projectName;
-            IniReadWriter.WriteIniKeys("Command", "voteProjectNameDroped", voteProjectNameDroped, pathShare + "/AutoVote.ini");
+            if (StringUtil.isEmpty(voteProjectNameDroped) || voteProjectNameDroped.IndexOf(projectName) == -1)
+            {
+                voteProjectNameDroped += StringUtil.isEmpty(voteProjectNameDroped) ? projectName : "|" + projectName;
+                IniReadWriter.WriteIniKeys("Command", "voteProjectNameDroped", voteProjectNameDroped, pathShare + "/AutoVote.ini");
+            }
         }
 
         //九天限人检测
@@ -930,7 +933,7 @@ namespace handler
                     {
                         switchWatiOrder();
                     }
-                    if (isAutoVote && p == 14)
+                    if (isAutoVote && p == 15)
                     {
                         addVoteProjectNameDroped(true);
                         switchWatiOrder();
