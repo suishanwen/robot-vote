@@ -340,7 +340,7 @@ namespace handler
                 string computerRename = IniReadWriter.ReadIniKeys("Command", "computerRename", pathShare + "/CF.ini");
                 if (!StringUtil.isEmpty(computerRename))
                 {
-                    Computer.apiSetComputerNameEx(5, computerRename+"-" + no);
+                    Computer.apiSetComputerNameEx(5, computerRename + "-" + no);
                 }
                 IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
                 IniReadWriter.WriteIniKeys("Command", "customPath" + no, "", pathShare + "/TaskPlus.ini");
@@ -393,14 +393,14 @@ namespace handler
                 {
                     if (customPath.Substring(customPath.LastIndexOf("\\") + 1) == "vote.exe")
                     {
-                        if(!File.Exists(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat"))
+                        if (!File.Exists(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat"))
                         {
                             try
                             {
                                 String[] Lines = { @"start vote.exe" };
                                 File.WriteAllLines(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat", Lines, Encoding.GetEncoding("GBK"));
                             }
-                            catch (Exception) {}
+                            catch (Exception) { }
                         }
                         startProcess(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat");
                         taskName = TASK_VOTE_JIUTIAN;
@@ -578,7 +578,8 @@ namespace handler
         }
 
         //处理句柄操作线程
-        private void clickHwndByThread() {
+        private void clickHwndByThread()
+        {
             HwndUtil.clickHwnd(threadHwnd);
         }
 
@@ -606,7 +607,7 @@ namespace handler
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
-            HwndUtil.setText(hwndEx, (delay/1000).ToString());
+            HwndUtil.setText(hwndEx, (delay / 1000).ToString());
             //设置工号
             if (inputId.Equals("1"))
             {
@@ -648,7 +649,7 @@ namespace handler
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "拨号设置");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "SysTabControl32", "");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
-            HwndUtil.setText(hwndEx,delay.ToString());
+            HwndUtil.setText(hwndEx, delay.ToString());
             //设置工号
             if (inputId.Equals("1"))
             {
@@ -705,7 +706,7 @@ namespace handler
             {
                 File.WriteAllLines(@"./自动升级.bat", lines, Encoding.GetEncoding("GBK"));
                 IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
-                startProcess(workingPath+@"\自动升级.bat");
+                startProcess(workingPath + @"\自动升级.bat");
                 mainThreadClose();
             }
             catch (Exception e)
@@ -844,8 +845,35 @@ namespace handler
             string voteProjectNameDroped = IniReadWriter.ReadIniKeys("Command", "voteProjectNameDroped", pathShare + "/AutoVote.ini");
             if (StringUtil.isEmpty(voteProjectNameDroped) || voteProjectNameDroped.IndexOf(projectName) == -1)
             {
-                voteProjectNameDroped += StringUtil.isEmpty(voteProjectNameDroped) ? projectName : "|" + projectName;
-                IniReadWriter.WriteIniKeys("Command", "voteProjectNameDroped", voteProjectNameDroped, pathShare + "/AutoVote.ini");
+                int validDrop;
+                int dropVote;
+                try
+                {
+                    dropVote = int.Parse(IniReadWriter.ReadIniKeys("Command", "dropVote", pathShare + "/AutoVote.ini"));
+                }
+                catch
+                {
+                    dropVote = 0;
+                }
+                try
+                {
+                    validDrop = int.Parse(IniReadWriter.ReadIniKeys("Command", "validDrop", pathShare + "/AutoVote.ini"));
+                }
+                catch
+                {
+                    validDrop = 1;
+                }
+                dropVote++;
+                if (dropVote >= validDrop)
+                {
+                    voteProjectNameDroped += StringUtil.isEmpty(voteProjectNameDroped) ? projectName : "|" + projectName;
+                    IniReadWriter.WriteIniKeys("Command", "voteProjectNameDroped", voteProjectNameDroped, pathShare + "/AutoVote.ini");
+                }
+                else
+                {
+                    IniReadWriter.WriteIniKeys("Command", "dropVote", dropVote.ToString(), pathShare + "/AutoVote.ini");
+                }
+
             }
         }
 
@@ -886,8 +914,8 @@ namespace handler
             Rectangle rect = new Rectangle();
             rect = Screen.GetWorkingArea(this);
             int startX = rect.Width - 200;//屏幕高
-            int startY = rect.Height +20;//屏幕高
-            for(; startX < rect.Width; startX+=5)
+            int startY = rect.Height + 20;//屏幕高
+            for (; startX < rect.Width; startX += 5)
             {
                 MouseKeyboard.SetCursorPos(startX, startY);
             }
@@ -934,7 +962,7 @@ namespace handler
                     {
                         switchWatiOrder();
                     }
-                    if (isAutoVote && ((firstCircle && p == 20)||(!firstCircle && p == 15)))
+                    if (isAutoVote && ((firstCircle && p == 20) || (!firstCircle && p == 15)))
                     {
                         addVoteProjectNameDroped(false);
                         switchWatiOrder();
@@ -972,12 +1000,14 @@ namespace handler
                 else if (taskName.Equals(TASK_VOTE_OUTDO))
                 {
                     //OUTDO到票检测
-                }else if (taskName.Equals(TASK_HANGUP_XX))
+                }
+                else if (taskName.Equals(TASK_HANGUP_XX))
                 {
                     if (p == 12)
                     {
                         rasOperate("disconnect");
-                    }else if (p < -60)
+                    }
+                    else if (p < -60)
                     {
                         Process.Start("shutdown.exe", "-r -t 0");
                         mainThreadClose();
