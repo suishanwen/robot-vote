@@ -42,6 +42,7 @@ namespace handler
         private const string TASK_HANGUP_MM2 = "mm2";
         private const string TASK_HANGUP_YUKUAI = "yukuai";
         private const string TASK_HANGUP_XX = "xx";
+        private const string TASK_HANGUP_MYTH = "myth";
         private const string TASK_VOTE_JIUTIAN = "九天";
         private const string TASK_VOTE_YUANQIU = "圆球";
         private const string TASK_VOTE_MM = "MM";
@@ -252,7 +253,7 @@ namespace handler
             writeLogs(workingPath + "/log.txt", "killProcess  length" + process.Length);
             if (process.Length > 0)
             {
-                if (taskName.Equals(TASK_HANGUP_XX))
+                if (taskName.Equals(TASK_HANGUP_XX)||taskName.Equals(TASK_HANGUP_MYTH))
                 {
                     int counter = 1;
                     while (!Net.isOnline() && counter < 120)
@@ -362,6 +363,15 @@ namespace handler
                 netCheck();
                 startProcess(taskPath);
                 xxStart();
+            }else if (taskName.Equals(TASK_HANGUP_MYTH))
+            {
+                if (taskChange.Equals("1"))
+                {
+                    taskPath = IniReadWriter.ReadIniKeys("Command", "myth", pathShare + "/CF.ini");
+                }
+                netCheck();
+                startProcess(taskPath);
+                mythStart();
             }
             else if (taskName.Equals(TASK_HANGUP_MM2))//MM2挂机
             {
@@ -541,7 +551,6 @@ namespace handler
                 Thread.Sleep(500);
             } while (hwnd == IntPtr.Zero);
             Thread.Sleep(1000);
-            //HwndUtil.SendMessage2(hwnd, 0x0112, 0xF020, 0); // 最大化            
             //设置工号
             if (inputId.Equals("1"))
             {
@@ -567,7 +576,40 @@ namespace handler
             finishStart();
         }
 
-
+        //myth启动
+        private void mythStart()
+        {
+            IntPtr hwnd = IntPtr.Zero;
+            projectName = TASK_HANGUP_MYTH;
+            int startCount = 0;
+            do
+            {
+                if (!nameCheck())
+                {
+                    return;
+                }
+                hwnd = HwndUtil.FindWindow("WindowsForms10.Window.8.app.0.33c0d9d", "Myth     Ver 1.0.0.3");
+                startCount++;
+                Thread.Sleep(500);
+                if (startCount > 120)
+                {
+                    Process[] pros= getProcess("AutoUpdate");
+                    foreach (Process p in pros)
+                    {
+                        p.Kill();
+                    }
+                    pros = getProcess("Myth.exe");
+                    foreach (Process p in pros)
+                    {
+                        p.Kill();
+                    }
+                    writeLogs(workingPath + "/log.txt", "Myth didn't show in 60s,restart");//清空日志
+                    changeTask();
+                }
+            } while (hwnd == IntPtr.Zero);
+            Thread.Sleep(1000);
+            finishStart();
+        }
 
         //hwndThread创建
         private void createHwndThread(IntPtr hwnd)
@@ -869,11 +911,7 @@ namespace handler
                     voteProjectNameDroped += StringUtil.isEmpty(voteProjectNameDroped) ? projectName : "|" + projectName;
                     IniReadWriter.WriteIniKeys("Command", "voteProjectNameDroped", voteProjectNameDroped, pathShare + "/AutoVote.ini");
                 }
-                else
-                {
-                    IniReadWriter.WriteIniKeys("Command", "dropVote", dropVote.ToString(), pathShare + "/AutoVote.ini");
-                }
-
+                IniReadWriter.WriteIniKeys("Command", "dropVote", dropVote.ToString(), pathShare + "/AutoVote.ini");
             }
         }
 
@@ -908,6 +946,32 @@ namespace handler
             return false;
         }
 
+        //九天成功检测
+        private bool failTooMuch()
+        {
+            IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
+            IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
+            IntPtr hwndStat = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "投票统计");
+            IntPtr hwndEx = HwndUtil.FindWindowEx(hwndStat, IntPtr.Zero, "Afx:400000:b:10011:1900015:0", "超时票数");
+            hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
+            string duration = "";
+            HwndUtil.GetWindowText(hwndEx.ToInt32(), duration, 512);
+            int min = int.Parse(duration.Split(':')[1]);
+            if (min >= 2)
+            {
+                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
+                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
+                string succ = "";
+                HwndUtil.GetWindowText(hwndEx.ToInt32(), succ, 512);
+                int success = int.Parse(succ);
+                if (success / min < 2)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         //清理托盘
         private void refreshIcon()
         {
@@ -938,7 +1002,7 @@ namespace handler
             int p = 0;
             int s = 0;
             bool isOnline = false;
-            bool firstCircle = true;
+            int circle = 0;
             do
             {
                 isOnline = Net.isOnline();
@@ -958,14 +1022,17 @@ namespace handler
                     {
                         switchWatiOrder();
                     }
-                    if (isAutoVote && isIdentifyCode())
+                    if (isAutoVote)
                     {
-                        switchWatiOrder();
-                    }
-                    if (isAutoVote && ((firstCircle && p == 20) || (!firstCircle && p == 15)))
-                    {
-                        addVoteProjectNameDroped(false);
-                        switchWatiOrder();
+                        if (isIdentifyCode())
+                        {
+                            switchWatiOrder();
+                        }
+                        else if ((circle == 0 && p == 20) || (circle > 0 && p == 15) || (circle % 5 == 0 && failTooMuch()))
+                        {
+                            addVoteProjectNameDroped(false);
+                            switchWatiOrder();
+                        }
                     }
                 }
                 else if (taskName.Equals(TASK_VOTE_MM))
@@ -1012,6 +1079,9 @@ namespace handler
                         Process.Start("shutdown.exe", "-r -t 0");
                         mainThreadClose();
                     }
+                }else if (taskName.Equals(TASK_HANGUP_MYTH))
+                {
+
                 }
 
                 if (isOnline)
@@ -1020,7 +1090,7 @@ namespace handler
                 }
                 else
                 {
-                    firstCircle = false;
+                    circle++;
                     p = p > 0 ? -1 : --p;
 
                 }
