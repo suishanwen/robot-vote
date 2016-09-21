@@ -253,7 +253,7 @@ namespace handler
             writeLogs(workingPath + "/log.txt", "killProcess  length" + process.Length);
             if (process.Length > 0)
             {
-                if (taskName.Equals(TASK_HANGUP_XX)||taskName.Equals(TASK_HANGUP_MYTH))
+                if (isHangUpTask())
                 {
                     int counter = 1;
                     while (!Net.isOnline() && counter < 120)
@@ -985,6 +985,12 @@ namespace handler
             }
         }
 
+        //是否为挂机项目
+        private bool isHangUpTask()
+        {
+            return taskName.Equals(TASK_HANGUP_XX) || taskName.Equals(TASK_HANGUP_MYTH);
+        }
+
         //任务监控
         private void taskMonitor()
         {
@@ -1068,7 +1074,7 @@ namespace handler
                 {
                     //OUTDO到票检测
                 }
-                else if (taskName.Equals(TASK_HANGUP_XX))
+                else if (isHangUpTask())
                 {
                     if (p == 12)
                     {
@@ -1079,11 +1085,7 @@ namespace handler
                         Process.Start("shutdown.exe", "-r -t 0");
                         mainThreadClose();
                     }
-                }else if (taskName.Equals(TASK_HANGUP_MYTH))
-                {
-
                 }
-
                 if (isOnline)
                 {
                     p = p < 0 ? 1 : ++p;
@@ -1097,7 +1099,7 @@ namespace handler
                 label2.Text = p.ToString();
                 Thread.Sleep(2000);
             }
-            while (p == 0 || (p > 0 && p < overTime) || (p < 0 && p > -overTime) || taskName.Equals(TASK_HANGUP_XX));
+            while (p == 0 || (p > 0 && p < overTime) || (p < 0 && p > -overTime) || isHangUpTask());
             if (taskName.Equals(TASK_VOTE_MM))
             {
                 rasOperate("disconnect");
