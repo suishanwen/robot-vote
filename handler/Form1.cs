@@ -589,11 +589,13 @@ namespace handler
                     return;
                 }
                 hwnd = HwndUtil.FindWindow("WindowsForms10.Window.8.app.0.33c0d9d", "Myth     Ver 1.0.0.3");
+                hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.Window.8.app.0.33c0d9d", null);
+                hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.BUTTON.app.0.33c0d9d", "开始");
                 startCount++;
                 Thread.Sleep(500);
-                if (startCount > 120)
+                if (startCount > 150)
                 {
-                    Process[] pros= getProcess("AutoUpdate");
+                    Process[] pros= getProcess("AutoUpdate.dll");
                     foreach (Process p in pros)
                     {
                         p.Kill();
@@ -964,6 +966,7 @@ namespace handler
                 string succ = "";
                 HwndUtil.GetWindowText(hwndEx.ToInt32(), succ, 512);
                 int success = int.Parse(succ);
+                writeLogs(workingPath + "/log.txt", "success:"+success+",min:"+min);//清空日志
                 if (success / min < 2)
                 {
                     return true;
@@ -1034,7 +1037,7 @@ namespace handler
                         {
                             switchWatiOrder();
                         }
-                        else if ((circle == 0 && p == 20) || (circle > 0 && p == 15) || (circle % 5 == 0 && failTooMuch()))
+                        else if ((circle == 0 && p == 20) || (circle > 0 && p == 15) || (circle > 0 && circle % 5 == 0 && failTooMuch()))
                         {
                             addVoteProjectNameDroped(false);
                             switchWatiOrder();
@@ -1074,7 +1077,7 @@ namespace handler
                 {
                     //OUTDO到票检测
                 }
-                else if (isHangUpTask())
+                else if (circle > 0 && isHangUpTask())
                 {
                     if (p == 12)
                     {
@@ -1153,6 +1156,10 @@ namespace handler
                         else if (taskName.Equals(TASK_HANGUP_XX))
                         {
                             taskPath = IniReadWriter.ReadIniKeys("Command", "xx", pathShare + "/CF.ini");
+                        }
+                        else if (taskName.Equals(TASK_HANGUP_MYTH))
+                        {
+                            taskPath = IniReadWriter.ReadIniKeys("Command", "myth", pathShare + "/CF.ini");
                         }
                     }
                     else
