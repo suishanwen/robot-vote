@@ -1076,17 +1076,34 @@ namespace handler
                 else if (taskName.Equals(TASK_VOTE_OUTDO))
                 {
                     //OUTDO到票检测
-                }
-                else if (circle > 0 && isHangUpTask())
+                }else if (isHangUpTask())
                 {
-                    if (p == 12)
+                    if (circle == 0)
                     {
-                        rasOperate("disconnect");
+                        IntPtr hwnd = HwndUtil.FindWindow("#32770", "");
+                        hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Static", "由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。");
+                        if (hwnd != IntPtr.Zero)
+                        {
+                            Process[] pros = getProcess("AutoUpdate.dll");
+                            foreach (Process pp in pros)
+                            {
+                                pp.Kill();
+                            }
+                            changeTask();
+                        }
                     }
-                    else if (p < -60)
+                    else
                     {
-                        Process.Start("shutdown.exe", "-r -t 0");
-                        mainThreadClose();
+                        if (p >= 12)
+                        {
+                            rasOperate("disconnect");
+
+                        }
+                        else if (p < -60)
+                        {
+                            Process.Start("shutdown.exe", "-r -t 0");
+                            mainThreadClose();
+                        }
                     }
                 }
                 if (isOnline)
