@@ -331,6 +331,7 @@ namespace handler
             }
             else if (taskName.Equals(TASK_SYS_SHUTDOWN))//关机
             {
+                IniReadWriter.WriteIniKeys("Command", "TaskName" + no, TASK_SYS_WAIT_ORDER, pathShare + "/Task.ini");
                 IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
                 IniReadWriter.WriteIniKeys("Command", "customPath" + no, "", pathShare + "/TaskPlus.ini");
                 Process.Start("shutdown.exe", "-s -t 0");
@@ -343,6 +344,7 @@ namespace handler
                 {
                     Computer.apiSetComputerNameEx(5, computerRename + "-" + no);
                 }
+                IniReadWriter.WriteIniKeys("Command", "TaskName" + no, TASK_SYS_WAIT_ORDER, pathShare + "/Task.ini");
                 IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
                 IniReadWriter.WriteIniKeys("Command", "customPath" + no, "", pathShare + "/TaskPlus.ini");
                 Process.Start("shutdown.exe", "-r -t 0");
@@ -429,13 +431,13 @@ namespace handler
                             hwnd4 = HwndUtil.FindWindow("TMainForm", null);
                             if (hwnd0 != IntPtr.Zero)
                             {
-                                String title = "";
-                                int i = HwndUtil.GetWindowText(hwnd0.ToInt32(), title, 512);
-                                if (title.Substring(0, 6) == "自动投票工具")
+                                StringBuilder title = new StringBuilder(512);
+                                int i = HwndUtil.GetWindowText(hwnd0, title, 512);
+                                if (title.ToString().Substring(0, 6) == "自动投票工具")
                                 {
                                     taskName = TASK_VOTE_MM;
                                 }
-                                else if (title.Substring(0, 8) == "VOTE2016")
+                                else if (title.ToString().Substring(0, 8) == "VOTE2016")
                                 {
                                     taskName = TASK_VOTE_ML;
                                 }
@@ -749,6 +751,7 @@ namespace handler
             try
             {
                 File.WriteAllLines(@"./自动升级.bat", lines, Encoding.GetEncoding("GBK"));
+                IniReadWriter.WriteIniKeys("Command", "TaskName" + no, TASK_SYS_WAIT_ORDER, pathShare + "/Task.ini");
                 IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
                 startProcess(workingPath + @"\自动升级.bat");
                 mainThreadClose();
@@ -956,16 +959,16 @@ namespace handler
             IntPtr hwndStat = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "投票统计");
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndStat, IntPtr.Zero, "Afx:400000:b:10011:1900015:0", "超时票数");
             hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
-            string duration = "";
-            HwndUtil.GetWindowText(hwndEx.ToInt32(), duration, 512);
-            int min = int.Parse(duration.Split(':')[1]);
+            StringBuilder duration = new StringBuilder(512);
+            HwndUtil.GetWindowText(hwndEx, duration, duration.Capacity);
+            int min = int.Parse(duration.ToString().Split('：')[1]);
             if (min >= 2)
             {
                 hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
                 hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
-                string succ = "";
-                HwndUtil.GetWindowText(hwndEx.ToInt32(), succ, 512);
-                int success = int.Parse(succ);
+                StringBuilder succ = new StringBuilder(512);
+                HwndUtil.GetWindowText(hwndEx, succ, 512);
+                int success = int.Parse(succ.ToString());
                 writeLogs(workingPath + "/log.txt", "success:"+success+",min:"+min);//清空日志
                 if (success / min < 2)
                 {

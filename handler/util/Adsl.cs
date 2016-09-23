@@ -119,7 +119,6 @@ namespace handler.util
         private bool m_connected;
         private IntPtr m_ConnectedRasHandle;
 
-        RasStats status = new RasStats();
         public RASDisplay()
         {
             m_connected = true;

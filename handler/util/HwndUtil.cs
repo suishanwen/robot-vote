@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace handler.util
 {
@@ -12,14 +13,22 @@ namespace handler.util
 
         [DllImport("User32.dll", EntryPoint = "FindWindow")]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
         [DllImport("User32.dll", EntryPoint = "FindWindowEx")]
         public static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpClassName, string lpWindowName);
+
         [DllImport("User32.dll", EntryPoint = "SendMessage")]
         public static extern int SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, string lParam);
+
         [DllImport("user32.dll", EntryPoint = "SendMessage", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern int SendMessage2(IntPtr hwnd, uint wMsg, int wParam, int lParam);
-        [DllImport("user32.dll", EntryPoint = "GetWindowText")]
-        public static extern int GetWindowText(int hwnd,string lpString,int cch);
+
+        [DllImport("user32.dll")]
+        public static extern int GetWindowTextLength(IntPtr hWnd);
+
+        [DllImport("User32.dll", CharSet = CharSet.Auto)]
+        public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int nMaxCount);
+       
         [DllImport("user32.dll", EntryPoint = "SetWindowText", CharSet = CharSet.Ansi)]
         public static extern int SetWindowText(int hwnd, string lpString);
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
