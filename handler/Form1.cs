@@ -969,9 +969,9 @@ namespace handler
                 StringBuilder succ = new StringBuilder(512);
                 HwndUtil.GetWindowText(hwndEx, succ, 512);
                 int success = int.Parse(succ.ToString());
-                writeLogs(workingPath + "/log.txt", "success:"+success+",min:"+min);//清空日志
                 if (success / min < 2)
                 {
+                    writeLogs(workingPath + "/log.txt", "Fail Too Much ---> success:" + success + ",min:" + min);//清空日志
                     return true;
                 }
             }
