@@ -405,15 +405,6 @@ namespace handler
                 {
                     if (customPath.Substring(customPath.LastIndexOf("\\") + 1) == "vote.exe")
                     {
-                        if (!File.Exists(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat"))
-                        {
-                            try
-                            {
-                                String[] Lines = { @"start vote.exe" };
-                                File.WriteAllLines(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat", Lines, Encoding.GetEncoding("GBK"));
-                            }
-                            catch (Exception) { }
-                        }
                         startProcess(customPath.Substring(0, customPath.Length - 9) + @"\启动九天.bat");
                         taskName = TASK_VOTE_JIUTIAN;
                     }
