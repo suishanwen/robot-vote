@@ -53,11 +53,33 @@ namespace handler
         private const string TASK_VOTE_OUTDO = "Outdo";
         private const string TASK_VOTE_PROJECT = "投票项目";
 
-
         public form1()
         {
             InitializeComponent();
+            Hotkey.RegisterHotKey(this.Handle, 10, Hotkey.MODKEY.None, Keys.F10);
+            Hotkey.RegisterHotKey(this.Handle, 11, Hotkey.MODKEY.None, Keys.F9);
         }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == 0x0312)
+            {
+                switch (m.WParam.ToInt32())
+                {
+                    case 10:
+                        button1_Click(null, null);
+                        break;
+                    case 11:
+                        button2_Click(null, null);
+                        break;
+                    default:
+                        break;
+                }
+                return;
+            }
+            base.WndProc(ref m);
+        }
+        
 
         //启动程序，检查配置文件，启动主线程
         private void Form1_Load(object sender, EventArgs e)
@@ -94,6 +116,7 @@ namespace handler
         //启动主线程
         public void button1_Click(object sender, EventArgs e)
         {
+            notifyIcon1.Icon =(Icon) Properties.Resources.ResourceManager.GetObject("running");
             button1.Enabled = false;
             button2.Enabled = true;
             writeLogs(workingPath + "/log.txt", "");//清空日志
@@ -107,6 +130,7 @@ namespace handler
 
         private void mainThreadClose()
         {
+            notifyIcon1.Icon = (Icon)Properties.Resources.ResourceManager.GetObject("stop");
             cache();
             button2.Enabled = false;
             button1.Enabled = true;
@@ -498,6 +522,9 @@ namespace handler
                     }
                 }
                 taskPath = customPath;
+            }else
+            {
+                taskName = TASK_SYS_WAIT_ORDER;
             }
             taskMonitor();
         }
@@ -881,33 +908,33 @@ namespace handler
                 projectName = projectName.Substring(0, projectName.IndexOf("_"));
             }
             string voteProjectNameDroped = IniReadWriter.ReadIniKeys("Command", "voteProjectNameDroped", pathShare + "/AutoVote.ini");
+            int dropVote=0;
+            try
+            {
+                dropVote = int.Parse(IniReadWriter.ReadIniKeys("Command", "dropVote", pathShare + "/AutoVote.ini"));
+            }
+            catch (Exception){ }
+            finally
+            {
+                dropVote++;
+            }
+            IniReadWriter.WriteIniKeys("Command", "dropVote", dropVote.ToString(), pathShare + "/AutoVote.ini");
             if (StringUtil.isEmpty(voteProjectNameDroped) || voteProjectNameDroped.IndexOf(projectName) == -1)
             {
                 int validDrop;
-                int dropVote;
-                try
-                {
-                    dropVote = int.Parse(IniReadWriter.ReadIniKeys("Command", "dropVote", pathShare + "/AutoVote.ini"));
-                }
-                catch
-                {
-                    dropVote = 0;
-                }
                 try
                 {
                     validDrop = int.Parse(IniReadWriter.ReadIniKeys("Command", "validDrop", pathShare + "/AutoVote.ini"));
                 }
-                catch
+                catch(Exception)
                 {
                     validDrop = 1;
                 }
-                dropVote++;
                 if (dropVote >= validDrop)
                 {
                     voteProjectNameDroped += StringUtil.isEmpty(voteProjectNameDroped) ? projectName : "|" + projectName;
                     IniReadWriter.WriteIniKeys("Command", "voteProjectNameDroped", voteProjectNameDroped, pathShare + "/AutoVote.ini");
                 }
-                IniReadWriter.WriteIniKeys("Command", "dropVote", dropVote.ToString(), pathShare + "/AutoVote.ini");
             }
         }
 
