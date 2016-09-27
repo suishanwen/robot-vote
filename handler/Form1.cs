@@ -214,7 +214,7 @@ namespace handler
         //通过进程名获取进程
         private Process[] getProcess(string proName)
         {
-            writeLogs(workingPath + "/log.txt", "getProcess:" + proName);
+            //writeLogs(workingPath + "/log.txt", "getProcess:" + proName);
             if (StringUtil.isEmpty(proName) && !StringUtil.isEmpty(taskPath))
             {
                 proName = taskPath.Substring(taskPath.LastIndexOf("\\") + 1);
@@ -313,6 +313,7 @@ namespace handler
                 inputId = IniReadWriter.ReadIniKeys("Command", "printgonghao", pathShare + "/CF.ini");
                 tail = IniReadWriter.ReadIniKeys("Command", "tail", pathShare + "/CF.ini");
                 customPath = IniReadWriter.ReadIniKeys("Command", "customPath" + no, pathShare + "/TaskPlus.ini");
+                writeLogs(workingPath + "/log.txt", "taskChange:"+ customPath);
             }
             if (StringUtil.isEmpty(workerId))
             {
@@ -697,6 +698,7 @@ namespace handler
         private void jiutianStart()
         {
             IntPtr hwnd = IntPtr.Zero;
+            IntPtr hwndSysTabControl32 = IntPtr.Zero;
             projectName = TASK_VOTE_JIUTIAN;
             do
             {
@@ -705,10 +707,10 @@ namespace handler
                     return;
                 }
                 hwnd = HwndUtil.FindWindow("WTWindow", null);
+                hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
                 Thread.Sleep(500);
             }
-            while (hwnd == IntPtr.Zero);
-            IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
+            while (hwnd == IntPtr.Zero&& hwndSysTabControl32 == IntPtr.Zero);
             //设置拨号延迟
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "拨号设置");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "SysTabControl32", "");
@@ -726,15 +728,14 @@ namespace handler
                 hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
                 HwndUtil.setText(hwndEx, id);
             }
-
-            //开始投票
-
-            hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "");
             IntPtr hwndExx = IntPtr.Zero;
             do
             {
-                hwnd = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "开始投票");
-                HwndUtil.clickHwnd(hwnd);
+                hwnd = HwndUtil.FindWindow("WTWindow", null);
+                hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
+                hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "");
+                hwndExx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "开始投票");
+                HwndUtil.clickHwnd(hwndExx);
                 Thread.Sleep(500);
                 hwndExx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "已锁定");
 
@@ -751,7 +752,7 @@ namespace handler
             info.WorkingDirectory = pathName.Substring(0, pathName.LastIndexOf("\\"));
             info.WindowStyle = ProcessWindowStyle.Normal;
             Process pro = Process.Start(info);
-            writeLogs(workingPath + "/log.txt", "startProcess IOException");//清空日志
+            writeLogs(workingPath + "/log.txt", "startProcess:" + pathName);//清空日志
             Thread.Sleep(500);
             //pro.WaitForExit();
         }
@@ -765,7 +766,7 @@ namespace handler
             string line3 = "copy / y " + path + @" """ + workingPath + @"""";
             string line4 = "ping -n 3 127.0.0.1>nul";
             string line5 = "start " + path.Substring(path.LastIndexOf("\\") + 1);
-            string[] lines = { "@echo off", line1, line2, line3, line4, line5 };
+            string[] lines = { "@echo off", line1, line2, line3, line4, line5};
             try
             {
                 File.WriteAllLines(@"./自动升级.bat", lines, Encoding.GetEncoding("GBK"));
