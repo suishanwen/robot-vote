@@ -729,8 +729,10 @@ namespace handler
                 HwndUtil.setText(hwndEx, id);
             }
             IntPtr hwndExx = IntPtr.Zero;
+            int count = 0;
             do
             {
+                count++;
                 hwnd = HwndUtil.FindWindow("WTWindow", null);
                 hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
                 hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "");
@@ -738,6 +740,12 @@ namespace handler
                 HwndUtil.clickHwnd(hwndExx);
                 Thread.Sleep(500);
                 hwndExx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "已锁定");
+                if (count > 30)
+                {
+                    killProcess(false);
+                    changeTask();
+                    return;
+                }
 
             } while (hwndExx == IntPtr.Zero);
             finishStart();
