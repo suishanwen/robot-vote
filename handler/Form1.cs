@@ -245,36 +245,49 @@ namespace handler
         private void killProcess(bool stopIndicator)
         {
             writeLogs(workingPath + "/log.txt", "killProcess");
-            if (stopIndicator && !StringUtil.isEmpty(taskName) && taskName.Equals(TASK_VOTE_JIUTIAN))
+            //传票结束
+            if (stopIndicator && !StringUtil.isEmpty(taskName))
             {
-                IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
-                if (hwnd != IntPtr.Zero)
+                writeLogs(workingPath + "/log.txt", "stop vote!");
+                if (taskName.Equals(TASK_VOTE_JIUTIAN))
                 {
-                    hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
-                    hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "");
-                    hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "结束投票");
-                    writeLogs(workingPath + "/log.txt", "九天结束 句柄为" + hwnd);
-                    HwndUtil.clickHwnd(hwnd);
-                    int s = 0;
-                    IntPtr hwndEx = IntPtr.Zero;
-                    do
+                    IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
+                    if (hwnd != IntPtr.Zero)
+                    {
+                        hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
+                        hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "");
+                        hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "结束投票");
+                        writeLogs(workingPath + "/log.txt", "九天结束 句柄为" + hwnd);
+                        HwndUtil.clickHwnd(hwnd);
+                        int s = 0;
+                        IntPtr hwndEx = IntPtr.Zero;
+                        do
+                        {
+                            Thread.Sleep(500);
+                            hwnd = HwndUtil.FindWindow("WTWindow", null);
+                            hwndEx = HwndUtil.FindWindow("#32770", "信息：");
+                            if (hwndEx != IntPtr.Zero)
+                            {
+                                HwndUtil.closeHwnd(hwndEx);
+                                s = 90;
+                            }
+                            s++;
+                        } while (hwnd != IntPtr.Zero && s < 90);
+                    }
+                }else if (taskName.Equals(TASK_VOTE_YUANQIU))
+                {
+                    IntPtr hwnd = HwndUtil.FindWindow("TForm1", null);
+                    IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TButton", "停止");
+                    while (!Net.isOnline())
                     {
                         Thread.Sleep(500);
-                        hwnd = HwndUtil.FindWindow("WTWindow", null);
-                        hwndEx = HwndUtil.FindWindow("#32770", "信息：");
-                        if (hwndEx != IntPtr.Zero)
-                        {
-                            HwndUtil.closeHwnd(hwndEx);
-                            s = 90;
-                        }
-                        s++;
-                    } while (hwnd != IntPtr.Zero && s < 90);
+                    }
+                    createHwndThread(hwndEx);
+                    Thread.Sleep(4000);
+                    
                 }
-
             }
-            writeLogs(workingPath + "/log.txt", "processCheck");
             Process[] process = processCheck();
-            writeLogs(workingPath + "/log.txt", "killProcess  length" + process.Length);
             if (process.Length > 0)
             {
                 if (isHangUpTask())
@@ -289,6 +302,7 @@ namespace handler
 
                 foreach (Process p in process)
                 {
+                    writeLogs(workingPath + "/log.txt", "killProcess  :" + p.ToString());
                     p.Kill();
                 }
             }
@@ -301,6 +315,7 @@ namespace handler
             killProcess(true);
             rasOperate("disconnect");
             taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
+            taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange" + no, pathShare + "/Task.ini");
             changeTask();
         }
 
@@ -988,7 +1003,15 @@ namespace handler
             hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
             StringBuilder duration = new StringBuilder(512);
             HwndUtil.GetWindowText(hwndEx, duration, duration.Capacity);
-            int min = int.Parse(duration.ToString().Split('：')[1]);
+            int min;
+            try
+            {
+                min = int.Parse(duration.ToString().Split('：')[1]);
+            }
+            catch (Exception)
+            {
+                min=0;
+            }
             if (min >= 2)
             {
                 hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
