@@ -246,7 +246,7 @@ namespace handler
         {
             writeLogs(workingPath + "/log.txt", "killProcess");
             //传票结束
-            if (stopIndicator && !StringUtil.isEmpty(taskName))
+            if (stopIndicator && isVoteTask())
             {
                 writeLogs(workingPath + "/log.txt", "stop vote!");
                 if (taskName.Equals(TASK_VOTE_JIUTIAN))
@@ -266,6 +266,12 @@ namespace handler
                             Thread.Sleep(500);
                             hwnd = HwndUtil.FindWindow("WTWindow", null);
                             hwndEx = HwndUtil.FindWindow("#32770", "信息：");
+                            if (s % 10 == 0&& hwnd != IntPtr.Zero)
+                            {
+                                hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "");
+                                hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "结束投票");
+                                HwndUtil.clickHwnd(hwnd);
+                            }
                             if (hwndEx != IntPtr.Zero)
                             {
                                 HwndUtil.closeHwnd(hwndEx);
@@ -309,10 +315,14 @@ namespace handler
         }
 
         //切换任务流程
-        private void taskChangeProcess()
+        private void taskChangeProcess(bool stopIndicator)
         {
             writeLogs(workingPath + "/log.txt", "taskChangeProcess");
-            killProcess(true);
+            if (StringUtil.isEmpty(taskName))
+            {
+                taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
+            }
+            killProcess(stopIndicator);
             rasOperate("disconnect");
             taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
             taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange" + no, pathShare + "/Task.ini");
@@ -440,7 +450,7 @@ namespace handler
                 {
                     IniReadWriter.WriteIniKeys("Command", "TaskName" + no, TASK_SYS_WAIT_ORDER, pathShare + "/Task.ini");
                     IniReadWriter.WriteIniKeys("Command", "CacheMemory" + no, "", pathShare + "/TaskPlus.ini");
-                    taskChangeProcess();
+                    taskChangeProcess(false);
                     return;
                 }
                 if (taskChange.Equals("1"))
@@ -496,7 +506,24 @@ namespace handler
 
                         while (taskName.Trim().Equals(TASK_VOTE_PROJECT));
                     }
-                    IniReadWriter.WriteIniKeys("Command", "TaskName" + no, taskName, pathShare + "/Task.ini");
+                    bool safeWrite = false;
+                    do
+                    {
+                        try
+                        {
+                            IniReadWriter.WriteIniKeys("Command", "TaskName" + no, taskName, pathShare + "/Task.ini");
+                            string taskNameCheck = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
+                            if (StringUtil.isEmpty(taskNameCheck) || !taskNameCheck.Equals(taskName))
+                            {
+                                throw new Exception();
+                            }
+                            safeWrite = true;
+                        }
+                        catch (Exception e)
+                        {
+
+                        }
+                    } while (!safeWrite);
                 }
                 if (taskName.Equals(TASK_VOTE_JIUTIAN))
                 {
@@ -556,8 +583,7 @@ namespace handler
                 taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
                 if (!taskName.Equals(projectName))
                 {
-                    IniReadWriter.WriteIniKeys("Command", "Make" + no, "1", pathShare + "/Task.ini");
-                    taskChangeProcess();
+                    taskChangeProcess(false);
                     return false;
                 }
             }
@@ -997,7 +1023,7 @@ namespace handler
         }
 
         //九天成功检测
-        private bool failTooMuch()
+        private bool jiutianFailTooMuch()
         {
             IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
             IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
@@ -1074,7 +1100,7 @@ namespace handler
                 taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange" + no, pathShare + "/Task.ini");
                 if (taskChange.Equals("1"))
                 {
-                    taskChangeProcess();
+                    taskChangeProcess(true);
                     return;
                 }
                 if (isSysTask())
@@ -1093,7 +1119,7 @@ namespace handler
                         {
                             switchWatiOrder();
                         }
-                        else if ((circle == 0 && p == 20) || (circle > 0 && p == 15) || (circle > 0 && circle % 5 == 0 && failTooMuch()))
+                        else if ((circle == 0 && p == 20) || (circle > 0 && p == 15) || (circle > 0 && circle % 3 == 0 && jiutianFailTooMuch()))
                         {
                             addVoteProjectNameDroped(false);
                             switchWatiOrder();
@@ -1184,7 +1210,7 @@ namespace handler
             }
             else
             {
-                taskChangeProcess();
+                taskChangeProcess(false);
                 return;
             }
 
@@ -1200,7 +1226,7 @@ namespace handler
             taskChange = IniReadWriter.ReadIniKeys("Command", "TaskChange" + no, pathShare + "/Task.ini");
             if (taskChange.Equals("1"))
             {
-                taskChangeProcess();
+                taskChangeProcess(true);
             }
             else
             {
