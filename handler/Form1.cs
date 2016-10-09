@@ -316,6 +316,7 @@ namespace handler
             rasOperate("disconnect");
             taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
             taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange" + no, pathShare + "/Task.ini");
+            notifyIcon1.Text = "taskName:" + taskName + "\ntaskChange:" + taskChange;
             changeTask();
         }
 
@@ -341,6 +342,7 @@ namespace handler
                 if (taskName.Equals(TASK_SYS_WAIT_ORDER))
                 {
                     IniReadWriter.WriteIniKeys("Command", "TaskChange" + no, "0", pathShare + "/Task.ini");
+                    IniReadWriter.WriteIniKeys("Command", "customPath" + no, "", pathShare + "/TaskPlus.ini");
                 }
             }
             else if (taskName.Equals(TASK_SYS_NET_TEST))//网络TEST
@@ -726,6 +728,7 @@ namespace handler
                 Thread.Sleep(500);
             }
             while (hwnd == IntPtr.Zero&& hwndSysTabControl32 == IntPtr.Zero);
+            Thread.Sleep(800);
             //设置拨号延迟
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "拨号设置");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "SysTabControl32", "");
