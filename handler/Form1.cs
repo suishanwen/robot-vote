@@ -561,11 +561,13 @@ namespace handler
                         while (taskName.Trim().Equals(TASK_VOTE_PROJECT));
                     }
                     bool safeWrite = false;
+                    Thread.Sleep(no % 10 * 50);
                     do
                     {
                         try
                         {
                             IniReadWriter.WriteIniKeys("Command", "TaskName" + no, taskName, pathShare + "/Task.ini");
+                            Thread.Sleep(20);
                             string taskNameCheck = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
                             if (StringUtil.isEmpty(taskNameCheck) || !taskNameCheck.Equals(taskName))
                             {
@@ -575,7 +577,7 @@ namespace handler
                         }
                         catch (Exception e)
                         {
-
+                            Thread.Sleep(no % 10 * 50);
                         }
                     } while (!safeWrite);
                 }
@@ -780,8 +782,11 @@ namespace handler
                 }
                 hwndTGroupBox = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TGroupBox", "会员");
                 hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, IntPtr.Zero, "TEdit", null);
+                HwndUtil.setText(hwndEx, id);
                 hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+                HwndUtil.setText(hwndEx, id);
                 hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+                HwndUtil.setText(hwndEx, id);
                 hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
                 HwndUtil.setText(hwndEx, id);
             }
