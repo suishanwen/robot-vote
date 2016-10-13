@@ -567,7 +567,7 @@ namespace handler
                         try
                         {
                             IniReadWriter.WriteIniKeys("Command", "TaskName" + no, taskName, pathShare + "/Task.ini");
-                            Thread.Sleep(20);
+                            Thread.Sleep(200);
                             string taskNameCheck = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
                             if (StringUtil.isEmpty(taskNameCheck) || !taskNameCheck.Equals(taskName))
                             {
@@ -939,7 +939,7 @@ namespace handler
                 Thread.Sleep(500);
             }
             while (hwnd == IntPtr.Zero&& hwndSysTabControl32 == IntPtr.Zero);
-            Thread.Sleep(800);
+            Thread.Sleep(2000);
             //设置拨号延迟
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "拨号设置");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "SysTabControl32", "");

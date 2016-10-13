@@ -1,0 +1,14 @@
+C:\Users\sw\Desktop\c#\handler\handler\bin\Debug\handler.exe
+C:\Users\sw\Desktop\c#\handler\handler\bin\Debug\handler.pdb
+C:\Users\sw\Desktop\c#\handler\handler\obj\Debug\handler.form1.resources
+C:\Users\sw\Desktop\c#\handler\handler\obj\Debug\handler.Properties.Resources.resources
+C:\Users\sw\Desktop\c#\handler\handler\obj\Debug\handler.csproj.GenerateResource.Cache
+C:\Users\sw\Desktop\c#\handler\handler\obj\Debug\handler.exe
+C:\Users\sw\Desktop\c#\handler\handler\obj\Debug\handler.pdb
+C:\Users\sw\Desktop\c#\handler\handler\obj\Debug\handler.csprojResolveAssemblyReference.cache
+C:\Users\sw\Desktop\c#\handler\handler\bin\Debug\handler.exe.manifest
+C:\Users\sw\Desktop\c#\handler\handler\bin\Debug\handler.application
+C:\Users\sw\Desktop\c#\handler\handler\obj\Debug\handler.TrustInfo.xml
+C:\Users\sw\Desktop\c#\handler\handler\obj\Debug\handler.exe.manifest
+C:\Users\sw\Desktop\c#\handler\handler\obj\Debug\handler.application
+C:\Users\sw\Desktop\c#\handler\handler\bin\Debug\handler.exe.config
