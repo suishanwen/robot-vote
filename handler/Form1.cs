@@ -43,6 +43,7 @@ namespace handler
         private const string TASK_HANGUP_YUKUAI = "yukuai";
         private const string TASK_HANGUP_XX = "xx";
         private const string TASK_HANGUP_MYTH = "myth";
+        private const string TASK_HANGUP_DANDAN = "dandan";
         private const string TASK_VOTE_JIUTIAN = "九天";
         private const string TASK_VOTE_YUANQIU = "圆球";
         private const string TASK_VOTE_MM = "MM";
@@ -456,13 +457,13 @@ namespace handler
                 Process.Start("shutdown.exe", "-r -t 0");
                 mainThreadClose();
             }
-            else if (taskName.Equals(TASK_SYS_UPDATE))
+            else if (taskName.Equals(TASK_SYS_UPDATE))//升级
             {
                 IniReadWriter.WriteIniKeys("Command", "customPath" + no, "", pathShare + "/TaskPlus.ini");
                 updateSoft();
                 mainThreadClose();
             }
-            else if (taskName.Equals(TASK_HANGUP_XX))
+            else if (taskName.Equals(TASK_HANGUP_XX))//XX挂机
             {
                 if (taskChange.Equals("1"))
                 {
@@ -471,7 +472,7 @@ namespace handler
                 netCheck();
                 startProcess(taskPath);
                 xxStart();
-            }else if (taskName.Equals(TASK_HANGUP_MYTH))
+            }else if (taskName.Equals(TASK_HANGUP_MYTH))//MYTH挂机
             {
                 if (taskChange.Equals("1"))
                 {
@@ -480,6 +481,15 @@ namespace handler
                 netCheck();
                 startProcess(taskPath);
                 mythStart();
+            }else if (taskName.Equals(TASK_HANGUP_DANDAN))//丹丹挂机
+            {
+                if (taskChange.Equals("1"))
+                {
+                    taskPath = IniReadWriter.ReadIniKeys("Command", "dandan", pathShare + "/CF.ini");
+                }
+                netCheck();
+                startProcess(taskPath);
+                dandanStart();
             }
             else if (taskName.Equals(TASK_HANGUP_MM2))//MM2挂机
             {
@@ -732,6 +742,41 @@ namespace handler
             Thread.Sleep(1000);
             finishStart();
         }
+
+        //dandan启动
+        private void dandanStart()
+        {
+            IntPtr hwnd = IntPtr.Zero;
+            bool loginIn = false;
+            projectName = TASK_HANGUP_DANDAN;
+            do
+            {
+                if (!nameCheck())
+                {
+                    return;
+                }
+                bool online = Net.isOnline();
+                if (!online)
+                {
+                    rasOperate("connect");
+                }
+                hwnd = HwndUtil.FindWindow("WindowsForms10.Window.8.app.0.378734a", "登录");
+                if (hwnd != IntPtr.Zero)
+                {
+                    IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.BUTTON.app.0.378734a", "登录");
+                    HwndUtil.clickHwnd(hwndEx);
+                }
+                Thread.Sleep(500);
+                IntPtr hwndIn = HwndUtil.FindWindow("WindowsForms10.Window.8.app.0.378734a", "挂机");
+                if (hwndIn != IntPtr.Zero)
+                {
+                    loginIn = true;
+                }
+            } while (!loginIn);
+            Thread.Sleep(1000);
+            finishStart();
+        }
+
 
         //hwndThread创建
         private void createHwndThread(IntPtr hwnd)
@@ -1044,7 +1089,7 @@ namespace handler
                     if (!online)
                     {
                         Thread.Sleep(500);
-                        IntPtr hwnd = HwndUtil.FindWindow("#32770", "连接到 宽带连接 时出错");
+                        IntPtr hwnd = HwndUtil.FindWindow("#32770", "连接到 "+adslName+" 时出错");
                         if (hwnd != IntPtr.Zero)
                         {
                             HwndUtil.closeHwnd(hwnd);
@@ -1328,7 +1373,7 @@ namespace handler
         //是否为挂机项目
         private bool isHangUpTask()
         {
-            return taskName.Equals(TASK_HANGUP_XX) || taskName.Equals(TASK_HANGUP_MYTH);
+            return taskName.Equals(TASK_HANGUP_XX) || taskName.Equals(TASK_HANGUP_MYTH)|| taskName.Equals(TASK_HANGUP_MM2)|| taskName.Equals(TASK_HANGUP_YUKUAI)|| taskName.Equals(TASK_HANGUP_DANDAN);
         }
 
         //任务监控
@@ -1444,8 +1489,13 @@ namespace handler
                     {
                         if (p >= 12)
                         {
-                            rasOperate("disconnect");
-
+                            if (taskName.Equals(TASK_HANGUP_DANDAN))
+                            {
+                                taskChangeProcess(false);
+                            }else
+                            {
+                                rasOperate("disconnect");
+                            }
                         }
                         else if (p < -60)
                         {
@@ -1525,6 +1575,10 @@ namespace handler
                         else if (taskName.Equals(TASK_HANGUP_MYTH))
                         {
                             taskPath = IniReadWriter.ReadIniKeys("Command", "myth", pathShare + "/CF.ini");
+                        }
+                        else if (taskName.Equals(TASK_HANGUP_DANDAN))
+                        {
+                            taskPath = IniReadWriter.ReadIniKeys("Command", "dandan", pathShare + "/CF.ini");
                         }
                     }
                     else
