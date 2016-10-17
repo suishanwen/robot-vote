@@ -1028,17 +1028,47 @@ namespace handler
         //ADSL操作
         private void rasOperate(string type)
         {
-            ras = new RASDisplay();
+
             if (type.Equals("connect"))
             {
-                ras.Disconnect();
-                Thread.Sleep(500);
-                ras.Connect(adslName);
+
+                Thread.Sleep(200);
+                Thread rasThread = new Thread(rasConnect);
+                rasThread.Start();
+                bool online = false;
+                bool err = false;
+                int count = 0;
+                do
+                {
+                    online = Net.isOnline();
+                    if (!online)
+                    {
+                        Thread.Sleep(500);
+                        IntPtr hwnd = HwndUtil.FindWindow("#32770", "连接到 宽带连接 时出错");
+                        if (hwnd != IntPtr.Zero)
+                        {
+                            HwndUtil.closeHwnd(hwnd);
+                            err = true;
+                        }
+                    }
+                    count++;
+                } while (!online && !err);
             }
             else
             {
+                ras = new RASDisplay();
                 ras.Disconnect();
             }
+        }
+
+        //ras子线程，处理IE8线程阻塞
+        private void rasConnect()
+        {
+            writeLogs(workingPath + "/log.txt", "rasConnect");//清空日志
+            ras = new RASDisplay();
+            ras.Disconnect();
+            ras.Connect(adslName);
+
         }
 
         //网络检测
