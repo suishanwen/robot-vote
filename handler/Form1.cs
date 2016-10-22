@@ -364,7 +364,13 @@ namespace handler
                 foreach (Process p in process)
                 {
                     writeLogs(workingPath + "/log.txt", "killProcess  :" + p.ToString());
-                    p.Kill();
+                    try
+                    {
+                        p.Kill();
+                    }
+                    catch (Exception e) {
+                        writeLogs(workingPath + "/log.txt", "killProcess  :" + e.ToString());
+                    }
                 }
             }
         }
