@@ -1402,6 +1402,11 @@ namespace handler
             int circle = 0;
             do
             {
+                IntPtr adslErr = HwndUtil.FindWindow("#32770", "连接到 " + adslName + " 时出错");
+                if (adslErr != IntPtr.Zero)
+                {
+                    HwndUtil.closeHwnd(adslErr);
+                }
                 isOnline = Net.isOnline();
                 taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange" + no, pathShare + "/Task.ini");
                 if (taskChange.Equals("1"))
