@@ -587,6 +587,8 @@ namespace handler
                             string taskNameCheck = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
                             if (StringUtil.isEmpty(taskNameCheck) || !taskNameCheck.Equals(taskName))
                             {
+                                writeLogs(workingPath + "/log.txt", "TaskName Write Error!");//清空日志
+                                IniReadWriter.WriteIniKeys("Command", "TaskName" + no, taskName, pathShare + "/Task.ini");
                                 throw new Exception();
                             }
                             safeWrite = true;
@@ -990,7 +992,7 @@ namespace handler
                 Thread.Sleep(500);
             }
             while (hwnd == IntPtr.Zero&& hwndSysTabControl32 == IntPtr.Zero);
-            Thread.Sleep(2000);
+            Thread.Sleep(3000);
             //设置拨号延迟
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "拨号设置");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "SysTabControl32", "");
