@@ -1,4 +1,5 @@
 ﻿using handler.util;
+using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -30,7 +31,7 @@ namespace handler
         private RASDisplay ras; //ADSL对象
         private string adslName;    //拨号名称
         private bool isAutoVote; //自动投票标识
-
+        private bool ie8 = isIE8();
 
         private string workingPath = Environment.CurrentDirectory; //当前工作路径
 
@@ -747,6 +748,22 @@ namespace handler
                     changeTask();
                 }
             } while (hwnd == IntPtr.Zero);
+            Thread.Sleep(3000);
+            hwnd = HwndUtil.FindWindow("WindowsForms10.Window.8.app.0.33c0d9d", "Myth     Ver 1.0.0.3");
+            hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.Window.8.app.0.33c0d9d", null);
+            IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.EDIT.app.0.33c0d9d", null);
+            //设置工号
+            if (inputId.Equals("1"))
+            {
+                String id = workerId;
+                if (tail.Equals("1"))
+                {
+                    id = workerId + "-" + (no > 9 ? no.ToString() : "0" + no);
+                }
+                HwndUtil.setText(hwndEx, id);
+            }
+            hwndEx = HwndUtil.FindWindowEx(hwnd, hwndEx, "WindowsForms10.EDIT.app.0.33c0d9d", null);
+            HwndUtil.setText(hwndEx, delay.ToString());
             Thread.Sleep(1000);
             finishStart();
         }
@@ -989,10 +1006,10 @@ namespace handler
                 }
                 hwnd = HwndUtil.FindWindow("WTWindow", null);
                 hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
-                Thread.Sleep(500);
+                Thread.Sleep(1000);
             }
             while (hwnd == IntPtr.Zero&& hwndSysTabControl32 == IntPtr.Zero);
-            Thread.Sleep(3000);
+            Thread.Sleep(3500);
             //设置拨号延迟
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "拨号设置");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "SysTabControl32", "");
@@ -1078,34 +1095,51 @@ namespace handler
 
         }
 
+
+        //检测IE版本
+        private static bool isIE8()
+        {
+            RegistryKey mreg;
+            mreg = Registry.LocalMachine;
+            mreg = mreg.CreateSubKey("software\\Microsoft\\Internet Explorer");
+            return mreg.GetValue("Version").ToString().Substring(0,1)=="8";
+        }
+
         //ADSL操作
         private void rasOperate(string type)
         {
 
             if (type.Equals("connect"))
             {
-
-                Thread.Sleep(200);
-                Thread rasThread = new Thread(rasConnect);
-                rasThread.Start();
-                bool online = false;
-                bool err = false;
-                int count = 0;
-                do
+                if (ie8)
                 {
-                    online = Net.isOnline();
-                    if (!online)
+                    Thread.Sleep(200);
+                    Thread rasThread = new Thread(rasConnect);
+                    rasThread.Start();
+                    bool online = false;
+                    bool err = false;
+                    int count = 0;
+                    do
                     {
-                        Thread.Sleep(500);
-                        IntPtr hwnd = HwndUtil.FindWindow("#32770", "连接到 "+adslName+" 时出错");
-                        if (hwnd != IntPtr.Zero)
+                        online = Net.isOnline();
+                        if (!online)
                         {
-                            HwndUtil.closeHwnd(hwnd);
-                            err = true;
+                            Thread.Sleep(500);
+                            IntPtr hwnd = HwndUtil.FindWindow("#32770", "连接到 " + adslName + " 时出错");
+                            if (hwnd != IntPtr.Zero)
+                            {
+                                HwndUtil.closeHwnd(hwnd);
+                                err = true;
+                            }
                         }
-                    }
-                    count++;
-                } while (!online && !err);
+                        count++;
+                    } while (!online && !err);
+                }
+                else
+                {
+                    ras = new RASDisplay();
+                    ras.Connect(adslName);
+                }
             }
             else
             {
@@ -1404,10 +1438,13 @@ namespace handler
             int circle = 0;
             do
             {
-                IntPtr adslErr = HwndUtil.FindWindow("#32770", "连接到 " + adslName + " 时出错");
-                if (adslErr != IntPtr.Zero)
+                if (ie8)
                 {
-                    HwndUtil.closeHwnd(adslErr);
+                    IntPtr adslErr = HwndUtil.FindWindow("#32770", "连接到 " + adslName + " 时出错");
+                    if (adslErr != IntPtr.Zero)
+                    {
+                        HwndUtil.closeHwnd(adslErr);
+                    }
                 }
                 isOnline = Net.isOnline();
                 taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange" + no, pathShare + "/Task.ini");
