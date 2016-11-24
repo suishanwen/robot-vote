@@ -355,7 +355,7 @@ namespace handler
                 if (isHangUpTask()||isVoteTask())
                 {
                     int counter = 1;
-                    while (!Net.isOnline() && counter < 120)
+                    while (!Net.isOnline() && counter < 60)
                     {
                         counter++;
                         Thread.Sleep(500);
@@ -384,7 +384,7 @@ namespace handler
             {
                 taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
             }
-            killProcess(stopIndicator);
+            killProcess(getStopIndicator());
             rasOperate("disconnect");
             taskName = IniReadWriter.ReadIniKeys("Command", "TaskName" + no, pathShare + "/Task.ini");
             taskChange = IniReadWriter.ReadIniKeys("Command", "taskChange" + no, pathShare + "/Task.ini");
@@ -997,6 +997,8 @@ namespace handler
         {
             IntPtr hwnd = IntPtr.Zero;
             IntPtr hwndSysTabControl32 = IntPtr.Zero;
+            IntPtr preparedCheck = IntPtr.Zero;
+            IntPtr startButton = IntPtr.Zero;
             projectName = TASK_VOTE_JIUTIAN;
             do
             {
@@ -1006,10 +1008,13 @@ namespace handler
                 }
                 hwnd = HwndUtil.FindWindow("WTWindow", null);
                 hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
-                Thread.Sleep(1000);
+                preparedCheck = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "工作情况");
+                preparedCheck = HwndUtil.FindWindowEx(preparedCheck, IntPtr.Zero, "Afx:400000:b:10011:1900015:0", "加载成功 可开始投票");
+                startButton = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "");
+                startButton = HwndUtil.FindWindowEx(startButton, IntPtr.Zero, "Button", "开始投票");
+                Thread.Sleep(500);
             }
-            while (hwnd == IntPtr.Zero&& hwndSysTabControl32 == IntPtr.Zero);
-            Thread.Sleep(3500);
+            while (preparedCheck == IntPtr.Zero || startButton == IntPtr.Zero);
             //设置拨号延迟
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "拨号设置");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "SysTabControl32", "");
@@ -1027,26 +1032,8 @@ namespace handler
                 hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
                 HwndUtil.setText(hwndEx, id);
             }
-            IntPtr hwndExx = IntPtr.Zero;
-            int count = 0;
-            do
-            {
-                count++;
-                hwnd = HwndUtil.FindWindow("WTWindow", null);
-                hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
-                hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "");
-                hwndExx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "开始投票");
-                HwndUtil.clickHwnd(hwndExx);
-                Thread.Sleep(500);
-                hwndExx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Button", "已锁定");
-                if (count > 30)
-                {
-                    killProcess(false);
-                    changeTask();
-                    return;
-                }
-
-            } while (hwndExx == IntPtr.Zero);
+            HwndUtil.clickHwnd(startButton);
+            Thread.Sleep(500);
             finishStart();
         }
 
@@ -1362,6 +1349,33 @@ namespace handler
                 return true;
             }
             return false;
+        }
+
+        //获取 是否需要传票关闭
+        private bool getStopIndicator()
+        {
+            if (taskName.Equals(TASK_VOTE_JIUTIAN))
+            {
+                IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
+                if (hwnd != IntPtr.Zero)
+                {
+                    IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
+                    IntPtr hwndStat = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "投票统计");
+                    IntPtr hwndEx = HwndUtil.FindWindowEx(hwndStat, IntPtr.Zero, "Afx:400000:b:10011:1900015:0", "运行时间");
+                    hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
+                    hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
+                    hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
+                    StringBuilder unUpload = new StringBuilder(512);
+                    HwndUtil.GetWindowText(hwndEx, unUpload, unUpload.Capacity);
+                    return int.Parse(unUpload.ToString()) > 0;
+                }
+                return false;
+                
+            }else
+            {
+                return true;
+            }
+            
         }
 
         //九天成功检测
