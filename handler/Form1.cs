@@ -727,7 +727,7 @@ namespace handler
                 {
                     return;
                 }
-                hwnd = HwndUtil.FindWindow("WindowsForms10.Window.8.app.0.33c0d9d", "Myth     Ver 1.0.0.4");
+                hwnd = HwndUtil.FindWindow("WindowsForms10.Window.8.app.0.33c0d9d", null);
                 hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.Window.8.app.0.33c0d9d", null);
                 hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.BUTTON.app.0.33c0d9d", "开始");
                 startCount++;
