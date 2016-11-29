@@ -69,6 +69,7 @@ namespace handler
                 switch (m.WParam.ToInt32())
                 {
                     case 10:
+                        button2_Click(null, null);
                         button1_Click(null, null);
                         break;
                     case 11:
