@@ -732,21 +732,36 @@ namespace handler
                 hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.Window.8.app.0.33c0d9d", null);
                 hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.BUTTON.app.0.33c0d9d", "开始");
                 startCount++;
-                Thread.Sleep(500);
-                if (startCount > 150)
+                Thread.Sleep(1000);
+                if (startCount > 15)
                 {
-                    Process[] pros= getProcess("AutoUpdate.dll");
+                    IntPtr hwndE = HwndUtil.FindWindow("#32770", "");
+                    hwndE = HwndUtil.FindWindowEx(hwndE, IntPtr.Zero, "Static", "由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。");
+                    if (hwndE != IntPtr.Zero)
+                    {
+                        Process[] pros = getProcess("AutoUpdate.dll");
+                        if (pros.Length > 0)
+                        {
+                            foreach (Process p in pros)
+                            {
+                                p.Kill();
+                            }
+                            writeLogs(workingPath + "/log.txt", "Myth start Fail,restart");//清空日志
+                            changeTask();
+                            return;
+                        }
+                    }
+                }
+                if (startCount > 90)
+                {
+                    Process[] pros = getProcess("Myth.exe");
                     foreach (Process p in pros)
                     {
                         p.Kill();
                     }
-                    pros = getProcess("Myth.exe");
-                    foreach (Process p in pros)
-                    {
-                        p.Kill();
-                    }
-                    writeLogs(workingPath + "/log.txt", "Myth didn't show in 60s,restart");//清空日志
+                    writeLogs(workingPath + "/log.txt", "Myth didn't show in 90s,restart");//清空日志
                     changeTask();
+                    return;
                 }
             } while (hwnd == IntPtr.Zero);
             Thread.Sleep(3000);
@@ -1538,17 +1553,7 @@ namespace handler
                 {
                     if (circle == 0)
                     {
-                        IntPtr hwnd = HwndUtil.FindWindow("#32770", "");
-                        hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Static", "由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。");
-                        if (hwnd != IntPtr.Zero)
-                        {
-                            Process[] pros = getProcess("AutoUpdate.dll");
-                            foreach (Process pp in pros)
-                            {
-                                pp.Kill();
-                            }
-                            changeTask();
-                        }
+
                     }
                     else
                     {
