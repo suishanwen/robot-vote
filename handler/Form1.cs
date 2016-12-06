@@ -229,6 +229,14 @@ namespace handler
         //获取项目进程
         private Process[] processCheck()
         {
+            Process[] pros = getProcess("AutoUpdate.dll");
+            if (pros.Length > 0)
+            {
+                foreach (Process p in pros)
+                {
+                    p.Kill();
+                }
+            }
             string process1 = "vote.exe";
             string process2 = "register.exe";
             Process[] process = getProcess(process1);
@@ -845,9 +853,10 @@ namespace handler
                     return;
                 }
                 hwnd = HwndUtil.FindWindow("TForm1", null);
-                Thread.Sleep(500);
+                Thread.Sleep(1000);
             }
             while (hwnd == IntPtr.Zero);
+            Thread.Sleep(1000);
             //设置拨号延迟
             IntPtr hwndTGroupBox = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TGroupBox", "设置");
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, IntPtr.Zero, "TEdit", null);
