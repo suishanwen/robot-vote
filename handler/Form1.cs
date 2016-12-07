@@ -728,6 +728,7 @@ namespace handler
         private void mythStart()
         {
             IntPtr hwnd = IntPtr.Zero;
+            IntPtr hwndEx1, hwndEx2, hwndEx3, hwndEx4;
             projectName = TASK_HANGUP_MYTH;
             int startCount = 0;
             do
@@ -738,7 +739,10 @@ namespace handler
                 }
                 hwnd = HwndUtil.FindWindow("WindowsForms10.Window.8.app.0.33c0d9d", null);
                 hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.Window.8.app.0.33c0d9d", null);
-                hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.BUTTON.app.0.33c0d9d", "开始");
+                hwndEx1 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.EDIT.app.0.33c0d9d", null);
+                hwndEx2 = HwndUtil.FindWindowEx(hwnd, hwndEx1, "WindowsForms10.EDIT.app.0.33c0d9d", null);
+                hwndEx3 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.STATIC.app.0.33c0d9d", "已连接");
+                hwndEx4 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.STATIC.app.0.33c0d9d", "运行中....");
                 startCount++;
                 Thread.Sleep(1000);
                 if (startCount > 15)
@@ -755,7 +759,7 @@ namespace handler
                                 p.Kill();
                             }
                             writeLogs(workingPath + "/log.txt", "Myth start Fail,restart");//清空日志
-                            changeTask();
+                            taskChangeProcess(false);
                             return;
                         }
                     }
@@ -768,14 +772,11 @@ namespace handler
                         p.Kill();
                     }
                     writeLogs(workingPath + "/log.txt", "Myth didn't show in 90s,restart");//清空日志
-                    changeTask();
+                    taskChangeProcess(false);
                     return;
                 }
-            } while (hwnd == IntPtr.Zero);
-            Thread.Sleep(3000);
-            hwnd = HwndUtil.FindWindow("WindowsForms10.Window.8.app.0.33c0d9d", "Myth     Ver 1.0.0.3");
-            hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.Window.8.app.0.33c0d9d", null);
-            IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.EDIT.app.0.33c0d9d", null);
+            } while (hwndEx1 == IntPtr.Zero || hwndEx2 == IntPtr.Zero || (hwndEx3 == IntPtr.Zero && hwndEx4 == IntPtr.Zero));
+            Thread.Sleep(1000);
             //设置工号
             if (inputId.Equals("1"))
             {
@@ -784,10 +785,12 @@ namespace handler
                 {
                     id = workerId + "-" + (no > 9 ? no.ToString() : "0" + no);
                 }
-                HwndUtil.setText(hwndEx, id);
+                HwndUtil.setText(hwndEx1, id);
             }
-            hwndEx = HwndUtil.FindWindowEx(hwnd, hwndEx, "WindowsForms10.EDIT.app.0.33c0d9d", null);
-            HwndUtil.setText(hwndEx, delay.ToString());
+            HwndUtil.setText(hwndEx2, delay.ToString());
+            StringBuilder title = new StringBuilder(512);
+            HwndUtil.GetWindowText(hwnd, title, title.Capacity);
+            HwndUtil.setText(hwnd, title.ToString()+" [Handler监控中]");
             Thread.Sleep(1000);
             finishStart();
         }
