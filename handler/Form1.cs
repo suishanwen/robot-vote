@@ -1406,6 +1406,27 @@ namespace handler
             
         }
 
+        //获取九天成功数
+        private int getJiutianSucc()
+        {
+            IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
+            IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
+            IntPtr hwndStat = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "投票统计");
+            IntPtr hwndEx = HwndUtil.FindWindowEx(hwndStat, IntPtr.Zero, "Afx:400000:b:10011:1900015:0", "超时票数");
+            hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
+            try
+            {
+                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
+                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
+                StringBuilder succ = new StringBuilder(512);
+                HwndUtil.GetWindowText(hwndEx, succ, 512);
+                return int.Parse(succ.ToString());
+            }
+            catch (Exception) { }
+            return 0;
+
+        }
+
         //九天成功检测
         private bool jiutianFailTooMuch()
         {
