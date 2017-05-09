@@ -1754,6 +1754,10 @@ namespace handler
                         {
                             taskPath = IniReadWriter.ReadIniKeys("Command", "dandan", pathShare + "/CF.ini");
                         }
+                        else if (taskName.Equals(TASK_HANGUP_DAHAI))
+                        {
+                            taskPath = IniReadWriter.ReadIniKeys("Command", "dahai", pathShare + "/CF.ini");
+                        }
                     }
                     else
                     {
