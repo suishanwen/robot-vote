@@ -45,6 +45,7 @@ namespace handler
         private const string TASK_HANGUP_XX = "xx";
         private const string TASK_HANGUP_MYTH = "myth";
         private const string TASK_HANGUP_DANDAN = "dandan";
+        private const string TASK_HANGUP_DAHAI = "dahai";
         private const string TASK_VOTE_JIUTIAN = "九天";
         private const string TASK_VOTE_YUANQIU = "圆球";
         private const string TASK_VOTE_MM = "MM";
@@ -245,6 +246,10 @@ namespace handler
                 return process;
             }
             process = getProcess(process2);
+            if (process.Length > 0)
+            {
+                return process;
+            }
             if (process.Length > 0)
             {
                 return process;
@@ -523,6 +528,16 @@ namespace handler
                 }
                 // start YUKUAI function
             }
+            else if (taskName.Equals(TASK_HANGUP_DAHAI))//大海挂机
+            {
+                if (taskChange.Equals("1"))
+                {
+                    taskPath = IniReadWriter.ReadIniKeys("Command", "dahai", pathShare + "/CF.ini");
+                }
+                netCheck();
+                startProcess(taskPath);
+                dahaiStart();
+            }
             else if (isVoteTask())//投票
             {
                 netCheck();
@@ -728,7 +743,7 @@ namespace handler
         private void mythStart()
         {
             IntPtr hwnd = IntPtr.Zero;
-            IntPtr hwndEx1, hwndEx2, hwndEx3, hwndEx4;
+            IntPtr hwndEx1, hwndEx2, hwndEx3, hwndEx4, hwndE;
             projectName = TASK_HANGUP_MYTH;
             int startCount = 0;
             do
@@ -745,32 +760,24 @@ namespace handler
                 hwndEx4 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.STATIC.app.0.33c0d9d", "运行中....");
                 startCount++;
                 Thread.Sleep(1000);
-                if (startCount > 15)
+                hwndE = HwndUtil.FindWindow("#32770", "");
+                hwndE = HwndUtil.FindWindowEx(hwndE, IntPtr.Zero, "Static", "由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。");
+                if (hwndE != IntPtr.Zero)
                 {
-                    IntPtr hwndE = HwndUtil.FindWindow("#32770", "");
-                    hwndE = HwndUtil.FindWindowEx(hwndE, IntPtr.Zero, "Static", "由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。");
-                    if (hwndE != IntPtr.Zero)
+                    Process[] pros = getProcess("AutoUpdate.dll");
+                    if (pros.Length > 0)
                     {
-                        Process[] pros = getProcess("AutoUpdate.dll");
-                        if (pros.Length > 0)
+                        foreach (Process p in pros)
                         {
-                            foreach (Process p in pros)
-                            {
-                                p.Kill();
-                            }
-                            writeLogs(workingPath + "/log.txt", "Myth start Fail,restart");//清空日志
-                            taskChangeProcess(false);
-                            return;
+                            p.Kill();
                         }
+                        writeLogs(workingPath + "/log.txt", "Myth start Fail,restart");//清空日志
+                        taskChangeProcess(false);
+                        return;
                     }
                 }
                 if (startCount > 90)
                 {
-                    Process[] pros = getProcess("Myth.exe");
-                    foreach (Process p in pros)
-                    {
-                        p.Kill();
-                    }
                     writeLogs(workingPath + "/log.txt", "Myth didn't show in 90s,restart");//清空日志
                     taskChangeProcess(false);
                     return;
@@ -828,7 +835,71 @@ namespace handler
             Thread.Sleep(1000);
             finishStart();
         }
-
+        //dahai启动
+        private void dahaiStart()
+        {
+            IntPtr hwnd = IntPtr.Zero;
+            IntPtr hwndEx1, hwndEx2, hwndEx3, hwndEx4;
+            StringBuilder test = new StringBuilder(512);
+            projectName = TASK_HANGUP_DAHAI;
+            int startCount = 0;
+            do
+            {
+                if (!nameCheck())
+                {
+                    return;
+                }
+                hwnd = HwndUtil.FindWindow("WindowsForms10.Window.8.app.0.33c0d9d", null);
+                hwndEx1 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.Window.8.app.0.33c0d9d", "");
+                hwndEx2 = HwndUtil.FindWindowEx(hwndEx1, IntPtr.Zero, "WindowsForms10.EDIT.app.0.33c0d9d", null);
+                hwndEx2 = HwndUtil.FindWindowEx(hwndEx1, hwndEx2, "WindowsForms10.EDIT.app.0.33c0d9d", null);
+                hwndEx3 = HwndUtil.FindWindowEx(hwndEx1, hwndEx2, "WindowsForms10.EDIT.app.0.33c0d9d", null);
+                hwndEx4 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "WindowsForms10.Window.8.app.0.33c0d9d", "statusStrip1");
+                startCount++;
+                Thread.Sleep(1000);
+                IntPtr hwndE = HwndUtil.FindWindow("#32770", "");
+                hwndE = HwndUtil.FindWindowEx(hwndE, IntPtr.Zero, "Static", "由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。");
+                if (hwndE != IntPtr.Zero)
+                {
+                    Process[] pros = getProcess("AutoUpdate.dll");
+                    if (pros.Length > 0)
+                    {
+                        foreach (Process p in pros)
+                        {
+                            p.Kill();
+                        }
+                        writeLogs(workingPath + "/log.txt", "Dahai start Fail,restart");//清空日志
+                        taskChangeProcess(false);
+                        return;
+                    }
+                }
+                if (startCount > 90)
+                {
+                   
+                    writeLogs(workingPath + "/log.txt", "Dahai didn't show in 90s,restart");//清空日志
+                    taskChangeProcess(false);
+                    return;
+                }
+                HwndUtil.setText(hwnd, "大海挂机[Handler监控中]");
+                HwndUtil.GetWindowText(hwnd, test, test.Capacity);
+            } while (hwndEx1 == IntPtr.Zero || hwndEx2 == IntPtr.Zero || hwndEx3 == IntPtr.Zero || hwndEx4 == IntPtr.Zero || !"大海挂机[Handler监控中]".Equals(test.ToString()));
+            HwndUtil.GetWindowText(hwnd, test, test.Capacity);
+            writeLogs(workingPath + "/log.txt", test.ToString());//清空日志
+            Thread.Sleep(1000);
+            //设置工号
+            if (inputId.Equals("1"))
+            {
+                String id = workerId;
+                if (tail.Equals("1"))
+                {
+                    id = workerId + "-" + (no > 9 ? no.ToString() : "0" + no);
+                }
+                HwndUtil.setText(hwndEx3, id);
+            }
+            HwndUtil.setText(hwndEx2, delay.ToString());
+            Thread.Sleep(1000);
+            finishStart();
+        }
 
         //hwndThread创建
         private void createHwndThread(IntPtr hwnd)
@@ -1469,7 +1540,7 @@ namespace handler
             rect = Screen.GetWorkingArea(this);
             int startX = rect.Width - 200;//屏幕高
             int startY = rect.Height + 20;//屏幕高
-            for (; startX < rect.Width; startX += 5)
+            for (; startX < rect.Width; startX += 3)
             {
                 MouseKeyboard.SetCursorPos(startX, startY);
             }
@@ -1478,7 +1549,7 @@ namespace handler
         //是否为挂机项目
         private bool isHangUpTask()
         {
-            return taskName.Equals(TASK_HANGUP_XX) || taskName.Equals(TASK_HANGUP_MYTH)|| taskName.Equals(TASK_HANGUP_MM2)|| taskName.Equals(TASK_HANGUP_YUKUAI)|| taskName.Equals(TASK_HANGUP_DANDAN);
+            return taskName.Equals(TASK_HANGUP_XX) || taskName.Equals(TASK_HANGUP_MYTH)|| taskName.Equals(TASK_HANGUP_MM2)|| taskName.Equals(TASK_HANGUP_YUKUAI)|| taskName.Equals(TASK_HANGUP_DANDAN) || taskName.Equals(TASK_HANGUP_DAHAI);
         }
 
         //任务监控
