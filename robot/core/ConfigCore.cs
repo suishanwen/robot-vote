@@ -14,9 +14,9 @@ namespace robot.core
         {
             Sort = IniReadWriter.ReadIniKeys("Base", "sort", "./cf.ini");
             WorkerId = IniReadWriter.ReadIniKeys("Base", "workerId", "./cf.ini");
-            AdslName = IniReadWriter.ReadIniKeys("Base", "adslName", "./cf.ini");
             Delay = IniReadWriter.ReadIniKeys("Base", "delay", "./cf.ini");
             Id = WorkerId + "-" + Sort;
+            AdslName = RasName.GetAdslName();
         }
     }
 }

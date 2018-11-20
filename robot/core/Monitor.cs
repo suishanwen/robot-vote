@@ -26,6 +26,8 @@ namespace robot.core
         public static void MonitorThread()
         {
             Notification.Show("启动监控程序", ToolTipIcon.Info);
+//            NetCore.NetCheck();
+            MessageBox.Show(ConfigCore.AdslName);
         }
     }
 }

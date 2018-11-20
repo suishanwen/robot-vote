@@ -73,7 +73,7 @@ namespace robot.core
         }
 
         //网络检测
-        public static void NetCheck()
+        public static bool NetCheck()
         {
             bool online = Net.isOnline();
             if (!online)
@@ -88,9 +88,12 @@ namespace robot.core
                     online = Net.isOnline();
                     if (!online)
                     {
+                        return false;
                     }
                 }
             }
+
+            return true;
         }
     }
 }
