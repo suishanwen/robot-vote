@@ -5,24 +5,25 @@ namespace robot.core
 {
     public class Monitor
     {
-        private Thread monitorThread;
+        private static Thread _monitorThread;
 
-        public void Start()
+        public static void Start()
         {
-            monitorThread = new Thread(MonitorThread);
-            monitorThread.Start();
+            _monitorThread = new Thread(MonitorThread);
+            _monitorThread.Start();
         }
 
-        public void Stop()
+        public static void Stop()
         {
-            if (monitorThread.IsAlive)
+            if (_monitorThread.IsAlive)
             {
-                monitorThread.Abort();
+                _monitorThread.Abort();
             }
+
             Notification.Show("结束监控程序", ToolTipIcon.Info);
         }
 
-        public void MonitorThread()
+        public static void MonitorThread()
         {
             Notification.Show("启动监控程序", ToolTipIcon.Info);
         }

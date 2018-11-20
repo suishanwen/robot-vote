@@ -11,10 +11,6 @@ namespace robot
 {
     public partial class form1 : Form
     {
-
-        //监控线程
-        private Monitor monitor;
-        
         public form1()
         {
             InitializeComponent();
@@ -36,6 +32,7 @@ namespace robot
                         button2_Click(null, null);
                         break;
                 }
+
                 return;
             }
 
@@ -87,7 +84,7 @@ namespace robot
             IniReadWriter.WriteIniKeys("Base", "delay", textBox4.Text, "./cf.ini");
         }
 
-        //启动主线程
+        //启动监控线程
         public void button1_Click(object sender, EventArgs e)
         {
             notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("running");
@@ -95,8 +92,7 @@ namespace robot
             button2.Enabled = true;
             LogCore.Clear(); //清空日志
             this.WindowState = FormWindowState.Minimized;
-            monitor = new Monitor();
-            monitor.Start();
+            Monitor.Start();
         }
 
         //终止监控线程
@@ -105,9 +101,9 @@ namespace robot
             notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("stop");
             button2.Enabled = false;
             button1.Enabled = true;
-            monitor.Stop();
+            Monitor.Stop();
         }
-        
+
         //点击停止
         private void button2_Click(object sender, EventArgs e)
         {
@@ -128,7 +124,6 @@ namespace robot
                 this.WindowState = FormWindowState.Normal;
             }
         }
-
 
         //清理托盘
         private void RefreshIcon()
