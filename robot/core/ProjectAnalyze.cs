@@ -117,7 +117,7 @@ namespace robot.core
                                 voteProject.BackgroundNo = innerTd;
                                 break;
                             case 13:
-                                voteProject.RefreshDate = Convert.ToDateTime("2018-" + innerTd + ":00");
+                                voteProject.RefreshDate = Convert.ToDateTime(DateTime.Now.Year+"-" + innerTd + ":00");
                                 break;
                         }
 
