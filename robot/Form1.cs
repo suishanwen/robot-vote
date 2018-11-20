@@ -12,9 +12,6 @@ namespace handler
     {
         private Thread main; //主线程
 
-
-        private string workingPath = Environment.CurrentDirectory; //当前工作路径
-
         public form1()
         {
             InitializeComponent();
@@ -155,6 +152,7 @@ namespace handler
         //主线程
         public void _main()
         {
+            ShowNotification("启动程序", ToolTipIcon.Info);
             //进程初始化部分
             string now = DateTime.Now.ToLocalTime().ToString();
             try
@@ -167,6 +165,7 @@ namespace handler
             {
                 MessageBox.Show(e.ToString());
             }
+            MainThreadClose();
         }
     }
 }
