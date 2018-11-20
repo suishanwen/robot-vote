@@ -15,7 +15,6 @@ namespace robot.core
         public static string voteProjectNameDroped;
         public static string voteProjectNameGreen;
         public static int downLoadCount;
-
         public static List<VoteProject> GetVoteProjects()
         {
             HttpManager httpUtil = HttpManager.getInstance();
@@ -118,7 +117,7 @@ namespace robot.core
                                 voteProject.BackgroundNo = innerTd;
                                 break;
                             case 13:
-                                voteProject.RefreshDate = Convert.ToDateTime("2016-" + innerTd + ":00");
+                                voteProject.RefreshDate = Convert.ToDateTime("2018-" + innerTd + ":00");
                                 break;
                         }
 
