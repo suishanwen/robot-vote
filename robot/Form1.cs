@@ -43,7 +43,7 @@ namespace robot
         //启动程序，检查配置文件，启动主线程
         private void Form1_Load(object sender, EventArgs e)
         {
-            if (!File.Exists(@".\handler.ini"))
+            if (!File.Exists(@".\cf.ini"))
             {
                 IniReadWriter.WriteIniKeys("Base", "sort", textBox1.Text, "./cf.ini");
                 IniReadWriter.WriteIniKeys("Base", "workerId", textBox2.Text, "./cf.ini");
