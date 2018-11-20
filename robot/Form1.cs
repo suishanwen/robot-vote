@@ -84,7 +84,7 @@ namespace robot
             button1.Enabled = false;
             button2.Enabled = true;
             LogCore.Clear(); //清空日志
-            this.WindowState = FormWindowState.Minimized;
+//            this.WindowState = FormWindowState.Minimized;
             Monitor.Start();
         }
 
