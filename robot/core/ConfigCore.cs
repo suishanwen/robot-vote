@@ -1,8 +1,6 @@
-using System;
-using System.IO;
-using handler.util;
+using robot.util;
 
-namespace handler.core
+namespace robot.core
 {
     public class ConfigCore
     {

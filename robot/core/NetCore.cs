@@ -1,10 +1,9 @@
 using System;
 using System.Threading;
-using System.Windows.Forms;
-using handler.util;
 using Microsoft.Win32;
+using robot.util;
 
-namespace handler.core
+namespace robot.core
 {
     public class NetCore
     {

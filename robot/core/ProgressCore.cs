@@ -1,10 +1,9 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using handler.core;
-using handler.util;
+using robot.util;
 
-namespace handler.module
+namespace robot.core
 {
     public class ProgressCore
     {

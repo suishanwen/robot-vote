@@ -1,12 +1,12 @@
-﻿using handler.util;
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
-using handler.core;
+using robot.core;
+using robot.util;
 
-namespace handler
+namespace robot
 {
     public partial class form1 : Form
     {
