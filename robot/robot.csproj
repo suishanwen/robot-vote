@@ -84,7 +84,9 @@
     <Compile Include="core\Notification.cs" />
     <Compile Include="core\PathCore.cs" />
     <Compile Include="core\ProgressCore.cs" />
+    <Compile Include="core\ProjectAnalyze.cs" />
     <Compile Include="core\TaskCore.cs" />
+    <Compile Include="core\VoteProject.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -102,12 +104,15 @@
     <Compile Include="util\Adsl.cs" />
     <Compile Include="util\Computer.cs" />
     <Compile Include="util\Hotkey.cs" />
+    <Compile Include="util\HtmlMatch.cs" />
+    <Compile Include="util\HttpManager.cs" />
     <Compile Include="util\HwndUtil.cs" />
     <Compile Include="util\IniReadWriter.cs" />
     <Compile Include="util\MouseKeyboard.cs" />
     <Compile Include="util\Net.cs" />
     <Compile Include="util\RasName.cs" />
     <Compile Include="util\StringUtil.cs" />
+    <Compile Include="util\Winrar.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
