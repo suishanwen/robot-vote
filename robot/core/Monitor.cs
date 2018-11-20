@@ -19,6 +19,7 @@ namespace robot.core
             {
                 monitorThread.Abort();
             }
+            Notification.Show("结束监控程序", ToolTipIcon.Info);
         }
 
         public void MonitorThread()
