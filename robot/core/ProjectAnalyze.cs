@@ -49,7 +49,7 @@ namespace robot.core
             List<VoteProject> voteProjectList = new List<VoteProject>();
             foreach (Match mTR in mcTR)
             {
-                if (mTR.Value.IndexOf("不换") == -1 && !isDropedProject(mTR.Value, 1))
+                if (mTR.Value.IndexOf("不换") == -1)
                 {
                     MatchCollection mcTD = regTD.Matches(mTR.Value);
                     int index = 0;
