@@ -17,6 +17,7 @@ namespace robot
             Hotkey.RegisterHotKey(this.Handle, 10, Hotkey.MODKEY.None, Keys.F10);
             Hotkey.RegisterHotKey(this.Handle, 11, Hotkey.MODKEY.None, Keys.F9);
         }
+        
 
         protected override void WndProc(ref Message m)
         {
@@ -48,14 +49,12 @@ namespace robot
             {
                 IniReadWriter.WriteIniKeys("Base", "sort", textBox1.Text, "./cf.ini");
                 IniReadWriter.WriteIniKeys("Base", "workerId", textBox2.Text, "./cf.ini");
-                IniReadWriter.WriteIniKeys("Base", "adslName", textBox3.Text, "./cf.ini");
                 IniReadWriter.WriteIniKeys("Base", "delay", textBox4.Text, "./cf.ini");
             }
 
             ConfigCore.InitConfig();
             textBox1.Text = ConfigCore.Sort;
             textBox2.Text = ConfigCore.WorkerId;
-            textBox3.Text = ConfigCore.AdslName;
             textBox4.Text = ConfigCore.Delay;
             button1_Click(null, null);
         }
@@ -70,12 +69,6 @@ namespace robot
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             IniReadWriter.WriteIniKeys("Base", "worker", textBox2.Text, "./cf.ini");
-        }
-
-        //改变拨号
-        private void textBox3_TextChanged(object sender, EventArgs e)
-        {
-            IniReadWriter.WriteIniKeys("Base", "adslName", textBox3.Text, "./cf.ini");
         }
 
         //改变延时
