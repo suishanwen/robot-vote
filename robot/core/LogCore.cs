@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace handler.core
+namespace robot.core
 {
     public class LogCore
     {

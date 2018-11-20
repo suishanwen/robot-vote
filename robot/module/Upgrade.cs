@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using handler.core;
+using robot.core;
 
-namespace handler.module
+namespace robot.module
 {
     public class Upgrade
     {

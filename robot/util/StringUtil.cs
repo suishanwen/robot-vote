@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace handler.util
+namespace robot.util
 {
     class StringUtil
     {

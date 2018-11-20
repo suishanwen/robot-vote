@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Runtime.InteropServices;
 
-namespace handler.util
+namespace robot.util
 {
-    using System;
-    using System.Runtime.InteropServices;
-
     public struct RASCONN
     {
         public int dwSize;
