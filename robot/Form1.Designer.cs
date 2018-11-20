@@ -150,6 +150,7 @@
             this.textBox4.Size = new System.Drawing.Size(49, 21);
             this.textBox4.TabIndex = 10;
             this.textBox4.Text = "0";
+            this.textBox3.TextChanged += new System.EventHandler(this.textBox4_TextChanged);
             // 
             // form1
             // 

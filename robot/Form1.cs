@@ -5,13 +5,16 @@ using System.Threading;
 using System.Windows.Forms;
 using robot.core;
 using robot.util;
+using Monitor = robot.core.Monitor;
 
 namespace robot
 {
     public partial class form1 : Form
     {
-        private Thread main; //主线程
 
+        //监控线程
+        private Monitor monitor;
+        
         public form1()
         {
             InitializeComponent();
@@ -43,6 +46,7 @@ namespace robot
         //启动程序，检查配置文件，启动主线程
         private void Form1_Load(object sender, EventArgs e)
         {
+            Notification.Init(notifyIcon1);
             if (!File.Exists(@".\cf.ini"))
             {
                 IniReadWriter.WriteIniKeys("Base", "sort", textBox1.Text, "./cf.ini");
@@ -91,25 +95,22 @@ namespace robot
             button2.Enabled = true;
             LogCore.Clear(); //清空日志
             this.WindowState = FormWindowState.Minimized;
-            main = new Thread(_main);
-            main.Start();
+            monitor = new Monitor();
+            monitor.Start();
         }
 
-
-        //终止主线程
+        //终止监控线程
         private void MainThreadClose()
         {
             notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("stop");
             button2.Enabled = false;
             button1.Enabled = true;
-            main.Abort();
+            monitor.Stop();
         }
-
+        
         //点击停止
         private void button2_Click(object sender, EventArgs e)
         {
-            button2.Enabled = false;
-            button1.Enabled = true;
             MainThreadClose();
         }
 
@@ -129,15 +130,8 @@ namespace robot
         }
 
 
-        //显示通知
-        private void ShowNotification(string content, ToolTipIcon toolTipIcon)
-        {
-            notifyIcon1.ShowBalloonTip(0, content, DateTime.Now.ToLocalTime().ToString(), toolTipIcon);
-        }
-
-
         //清理托盘
-        private void refreshIcon()
+        private void RefreshIcon()
         {
             Rectangle rect = new Rectangle();
             rect = Screen.GetWorkingArea(this);
@@ -147,25 +141,6 @@ namespace robot
             {
                 MouseKeyboard.SetCursorPos(startX, startY);
             }
-        }
-
-        //主线程
-        public void _main()
-        {
-            ShowNotification("启动程序", ToolTipIcon.Info);
-            //进程初始化部分
-            string now = DateTime.Now.ToLocalTime().ToString();
-            try
-            {
-            }
-            catch (ThreadAbortException)
-            {
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-            MainThreadClose();
         }
     }
 }
