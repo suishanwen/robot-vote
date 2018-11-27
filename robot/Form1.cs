@@ -64,7 +64,7 @@ namespace robot
         //改变延时
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            IniReadWriter.WriteIniKeys("Command", "delay", textBox2.Text, ConfigCore.BaseConfig);
+            IniReadWriter.WriteIniKeys("Command", "yanchi", textBox2.Text, ConfigCore.BaseConfig);
         }
 
         //改变延时
