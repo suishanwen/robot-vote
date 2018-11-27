@@ -30,7 +30,7 @@ namespace robot.core
             {
                 InitPathShare();
                 Sort = int.Parse(IniReadWriter.ReadIniKeys("Command", "bianhao", BaseConfig));
-                Delay = int.Parse(IniReadWriter.ReadIniKeys("Base", "yanchi", BaseConfig));
+                Delay = int.Parse(IniReadWriter.ReadIniKeys("Command", "yanchi", BaseConfig));
                 _form1.Sort = Sort.ToString();
                 _form1.Delay = Delay.ToString();
                 _form1.button1_Click(null, null);
@@ -55,7 +55,7 @@ namespace robot.core
         {
             if (StringUtil.isEmpty(workerId))
             {
-                workerId = IniReadWriter.ReadIniKeys("Base", "worker", PathShareConfig);
+                workerId = IniReadWriter.ReadIniKeys("Command", "worker", PathShareConfig);
             }
 
             InputId = IniReadWriter.ReadIniKeys("Command", "printgonghao", PathShareConfig);
