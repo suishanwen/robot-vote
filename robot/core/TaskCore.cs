@@ -642,46 +642,46 @@ namespace robot.core
             if (ConfigCore.GetTaskChange().Equals("1"))
             {
                 TaskChangeProcess(true);
+                return;
             }
-            else
+            String cacheMemory = ConfigCore.GetCacheMemory();
+            if (!StringUtil.isEmpty(cacheMemory))
             {
-                String cacheMemory = ConfigCore.GetCacheMemory();
-                if (!StringUtil.isEmpty(cacheMemory))
+                string[] arr = cacheMemory.Split('`');
+                TaskName = arr[0].Substring(9);
+                TaskPath = arr[1].Substring(9);
+                String workerId = arr[2].Substring(7);
+                if (!StringUtil.isEmpty(workerId))
                 {
-                    string[] arr = cacheMemory.Split('`');
-                    TaskName = arr[0].Substring(9);
-                    TaskPath = arr[1].Substring(9);
-                    String workerId = arr[2].Substring(7);
-                    if (!StringUtil.isEmpty(workerId))
-                    {
-                        ConfigCore.InputId = "1";
-                        ConfigCore.Tail = "1";
-                    }
+                    ConfigCore.InputId = "1";
+                    ConfigCore.Tail = "1";
+                }
 
-                    CustomPath = TaskPath;
-                    Process[] pros = ProgressCore.GetProcess("");
-                    if (pros.Length > 0)
-                    {
-                        Notification.Show(TaskName + "运行中,进入维护状态", ToolTipIcon.Info);
-                    }
-                    else
-                    {
-                        Notification.Show("发现项目缓存,通过自定义路径启动" + TaskName, ToolTipIcon.Info);
-                        ChangeTask();
-                    }
-
-                    ConfigCore.ClearCacheMemory();
+                CustomPath = TaskPath;
+                Process[] pros = ProgressCore.GetProcess("");
+                if (pros.Length > 0)
+                {
+                    Notification.Show(TaskName + "运行中,进入维护状态", ToolTipIcon.Info);
                 }
                 else
                 {
-                    //无缓存待命
-                    TaskName = TASK_SYS_WAIT_ORDER;
-                    NetCore.NetCheck();
-                    Thread.Sleep(1000);
-                    NetCore.DisConnect();
-                    Notification.Show("未发现项目缓存,待命中...\n请通过控制与监控端启动" + ConfigCore.Sort + "号虚拟机", ToolTipIcon.Info);
+                    Notification.Show("发现项目缓存,通过自定义路径启动" + TaskName, ToolTipIcon.Info);
+                    ChangeTask();
+                    return;
                 }
+
+                ConfigCore.ClearCacheMemory();
             }
+            else
+            {
+                //无缓存待命
+                TaskName = TASK_SYS_WAIT_ORDER;
+                NetCore.NetCheck();
+                Thread.Sleep(1000);
+                NetCore.DisConnect();
+                Notification.Show("未发现项目缓存,待命中...\n请通过控制与监控端启动" + ConfigCore.Sort + "号虚拟机", ToolTipIcon.Info);
+            }
+            TaskMonitor();
         }
     }
 }
