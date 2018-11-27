@@ -38,7 +38,7 @@ namespace robot.core
             else
             {
                 MessageBox.Show(@"请设置handler.ini");
-                _form1.Close();
+                Environment.Exit(0);
             }
 
             AdslName = RasName.GetAdslName();
