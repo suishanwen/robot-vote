@@ -50,7 +50,7 @@ namespace robot.core
             PathShareConfig = pathShare + "/CF.ini";
             _pathShareTask = pathShare + "/Task.ini";
             _pathShareTaskPlus = pathShare + "/TaskPlus.ini";
-            _pathShareAutoVote = _pathShareAutoVote;
+            _pathShareAutoVote = pathShare + "/AutoVote.ini";
         }
 
         public static void InitWorker(String workerId)

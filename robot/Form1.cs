@@ -58,7 +58,7 @@ namespace robot
         //改变编号
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            IniReadWriter.WriteIniKeys("Command", "sort", textBox1.Text, ConfigCore.BaseConfig);
+            IniReadWriter.WriteIniKeys("Command", "bianhao", textBox1.Text, ConfigCore.BaseConfig);
         }
 
         //改变延时
