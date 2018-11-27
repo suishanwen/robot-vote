@@ -34,6 +34,11 @@ namespace robot.core
         public static string CustomPath;
         public static bool IsAutoVote;
 
+        public static void InitForm(Form1 form1)
+        {
+            _form1 = form1;
+        }
+
         //判断当前是否为系统任务
         public static bool IsSysTask()
         {

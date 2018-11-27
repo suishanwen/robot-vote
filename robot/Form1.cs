@@ -52,7 +52,7 @@ namespace robot
         private void Form1_Load(object sender, EventArgs e)
         {
             Notification.Init(notifyIcon1);
-            ConfigCore.InitConfig();
+            ConfigCore.InitConfig(this);
         }
 
         //改变编号

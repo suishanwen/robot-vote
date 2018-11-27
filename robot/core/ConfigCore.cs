@@ -24,13 +24,15 @@ namespace robot.core
         public static string Tail = "1";
         public static string Id;
 
-        public static void InitConfig()
+        public static void InitConfig(Form1 form1)
         {
             if (File.Exists(BaseConfig))
             {
                 InitPathShare();
                 Sort = int.Parse(IniReadWriter.ReadIniKeys("Command", "bianhao", BaseConfig));
                 Delay = int.Parse(IniReadWriter.ReadIniKeys("Base", "yanchi", BaseConfig));
+                _form1 = form1;
+                TaskCore.InitForm(form1);
                 _form1.Sort = Sort.ToString();
                 _form1.Delay = Delay.ToString();
                 _form1.button1_Click(null, null);
@@ -39,6 +41,7 @@ namespace robot.core
             {
                 MessageBox.Show(@"请设置handler.ini");
             }
+
             AdslName = RasName.GetAdslName();
         }
 
