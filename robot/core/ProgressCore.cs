@@ -7,18 +7,16 @@ namespace robot.core
 {
     public class ProgressCore
     {
-        private string workingPath = Environment.CurrentDirectory; //当前工作路径
-
         //通过进程名获取进程
-        private Process[] getProcess(string proName)
+        public static Process[] GetProcess(string proName)
         {
             return Process.GetProcessesByName(proName);
         }
 
         //获取项目进程
-        private Process[] processCheck()
+        private static Process[] ProcessCheck()
         {
-            Process[] pros = getProcess("AutoUpdate.dll");
+            Process[] pros = GetProcess("AutoUpdate.dll");
             if (pros.Length > 0)
             {
                 foreach (Process p in pros)
@@ -29,13 +27,13 @@ namespace robot.core
 
             string process1 = "vote.exe";
             string process2 = "register.exe";
-            Process[] process = getProcess(process1);
+            Process[] process = GetProcess(process1);
             if (process.Length > 0)
             {
                 return process;
             }
 
-            process = getProcess(process2);
+            process = GetProcess(process2);
             if (process.Length > 0)
             {
                 return process;
@@ -46,20 +44,13 @@ namespace robot.core
                 return process;
             }
 
-            return getProcess("");
+            return GetProcess("");
         }
 
         //关闭进程
-        public void killProcess(bool stopIndicator)
+        public static void KillProcess()
         {
-            LogCore.Write("killProcess");
-            //传票结束
-            if (stopIndicator && TaskCore.IsVoteTask())
-            {
-                LogCore.Write("stop vote!");
-            }
-
-            Process[] process = processCheck();
+            Process[] process = ProcessCheck();
             if (process.Length > 0)
             {
                 if (TaskCore.IsVoteTask())
@@ -85,20 +76,6 @@ namespace robot.core
                     }
                 }
             }
-        }
-
-        //切换任务流程
-        private void taskChangeProcess(bool stopIndicator)
-        {
-            LogCore.Write("taskChangeProcess");
-            killProcess(true);
-            NetCore.RasOperate("disconnect");
-            changeTask();
-        }
-
-        //切换任务
-        private void changeTask()
-        {
         }
 
 

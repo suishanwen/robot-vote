@@ -8,36 +8,35 @@ namespace robot.module
     public class JZ
     {
         //JZ启动
-        public static void start(int delay, string id)
+        public static void start()
         {
             IntPtr hwnd = IntPtr.Zero;
             do
             {
                 hwnd = HwndUtil.FindWindow("TMainForm", null);
                 Thread.Sleep(500);
-            }
-            while (hwnd == IntPtr.Zero);
+            } while (hwnd == IntPtr.Zero);
             //设置拨号延迟
 
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TEdit", null);
             hwndEx = HwndUtil.FindWindowEx(hwnd, hwndEx, "TEdit", null);
             hwndEx = HwndUtil.FindWindowEx(hwnd, hwndEx, "TEdit", null);
-            HwndUtil.setText(hwndEx, (delay / 1000).ToString());
+            HwndUtil.setText(hwndEx, (ConfigCore.Delay / 1000).ToString());
             //设置工号
             IntPtr hwndTGroupBox0 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TGroupBox", "会员选项");
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox0, IntPtr.Zero, "TEdit", null);
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox0, hwndEx, "TEdit", null);
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox0, hwndEx, "TEdit", null);
-            HwndUtil.setText(hwndEx, id);
+            HwndUtil.setText(hwndEx, ConfigCore.Id);
             //开始投票
             IntPtr hwndTGroupBox = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TGroupBox", "当前状态");
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, IntPtr.Zero, "TButton", "开 始");
             HwndThread.createHwndThread(hwndEx);
         }
 
-        
+
         //JZ到票检测
-        private bool OverCheck()
+        public static bool OverCheck()
         {
             IntPtr hwnd = HwndUtil.FindWindow("TMessageForm", null);
             if (hwnd != IntPtr.Zero)
@@ -45,6 +44,7 @@ namespace robot.module
                 HwndUtil.closeHwnd(hwnd);
                 return true;
             }
+
             return false;
         }
 
@@ -59,6 +59,7 @@ namespace robot.module
                 {
                     Thread.Sleep(500);
                 }
+
                 HwndThread.createHwndThread(hwndEx);
                 Thread.Sleep(5000);
             }

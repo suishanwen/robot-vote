@@ -8,7 +8,7 @@ namespace robot.module
     public class YuanQiu
     {
         //圆球启动
-        public static void Start(int delay, string id)
+        public static void Start()
         {
             IntPtr hwnd = IntPtr.Zero;
             do
@@ -27,15 +27,15 @@ namespace robot.module
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
-            HwndUtil.setText(hwndEx, (delay / 1000).ToString());
+            HwndUtil.setText(hwndEx, (ConfigCore.Delay / 1000).ToString());
             //设置工号
             hwndTGroupBox = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TGroupBox", "会员");
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, IntPtr.Zero, "TEdit", null);
-            HwndUtil.setText(hwndEx, id);
+            HwndUtil.setText(hwndEx, ConfigCore.Id);
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
-            HwndUtil.setText(hwndEx, id);
+            HwndUtil.setText(hwndEx, ConfigCore.Id);
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
-            HwndUtil.setText(hwndEx, id);
+            HwndUtil.setText(hwndEx, ConfigCore.Id);
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
             //开始投票
             hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TButton", "开始");

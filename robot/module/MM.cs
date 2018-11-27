@@ -8,7 +8,7 @@ namespace robot.module
     public class MM
     {
         //MM启动
-        public static void start(int delay, string id)
+        public static void Start()
         {
             IntPtr hwnd = IntPtr.Zero;
             do
@@ -25,7 +25,7 @@ namespace robot.module
                 hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, IntPtr.Zero, "Edit", "4");
             }
 
-            HwndUtil.setText(hwndEx, (delay / 1000).ToString());
+            HwndUtil.setText(hwndEx, (ConfigCore.Delay / 1000).ToString());
             //设置工号
             ButtonHwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "会员");
             hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, IntPtr.Zero, "Edit", null);
@@ -33,14 +33,14 @@ namespace robot.module
             hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
             hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
             hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
-            HwndUtil.setText(hwndEx, id);
+            HwndUtil.setText(hwndEx, ConfigCore.Id);
             //开始投票
             hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, null, "自动投票");
             HwndThread.createHwndThread(hwndEx);
         }
 
         //MM到票检测
-        private bool OverCheck()
+        public static bool OverCheck()
         {
             IntPtr hwnd = HwndUtil.FindWindow(null, "投票软件提示");
             if (hwnd != IntPtr.Zero)

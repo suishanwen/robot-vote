@@ -11,7 +11,7 @@ namespace robot.module
         private string workingPath = Environment.CurrentDirectory; //当前工作路径
 
         //九天启动
-        public static void start(int delay, string id)
+        public static void Start()
         {
             IntPtr hwnd = IntPtr.Zero;
             IntPtr hwndSysTabControl32 = IntPtr.Zero;
@@ -33,17 +33,17 @@ namespace robot.module
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "拨号设置");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "SysTabControl32", "");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
-            HwndUtil.setText(hwndEx, delay.ToString());
+            HwndUtil.setText(hwndEx, ConfigCore.Delay.ToString());
             //设置工号
             hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "请输入工号");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
-            HwndUtil.setText(hwndEx, id);
+            HwndUtil.setText(hwndEx, ConfigCore.Id);
             HwndUtil.clickHwnd(startButton);
             Thread.Sleep(500);
         }
 
         //九天到票检测
-        private bool jiutianOverCheck(ref int s)
+        public static bool OverCheck(ref int s)
         {
             IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
             if (hwnd == IntPtr.Zero)
@@ -65,7 +65,7 @@ namespace robot.module
 
 
         //九天限人检测
-        private bool jiutianRestrictCheck()
+        public static bool RestrictCheck()
         {
             IntPtr hwnd = HwndUtil.FindWindow("#32770", "信息提示");
             if (hwnd != IntPtr.Zero)
@@ -78,7 +78,7 @@ namespace robot.module
         }
 
         //九天验证码输入检测
-        private bool isIdentifyCode()
+        public static bool IsIdentifyCode()
         {
             IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
             IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
@@ -86,7 +86,7 @@ namespace robot.module
             if (testHwnd != IntPtr.Zero)
             {
 //                ProgressCore.killProcess(false);
-                NetCore.RasOperate("disconnect");
+                NetCore.DisConnect();
                 return true;
             }
 
@@ -94,7 +94,7 @@ namespace robot.module
         }
 
         //获取 是否需要传票关闭
-        private bool GetStopIndicator()
+        private static bool GetStopIndicator()
         {
             IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
             if (hwnd != IntPtr.Zero)
@@ -110,11 +110,12 @@ namespace robot.module
                 HwndUtil.GetWindowText(hwndEx, unUpload, unUpload.Capacity);
                 return int.Parse(unUpload.ToString()) > 0;
             }
+
             return false;
         }
 
         //获取九天成功数
-        private int GetJiutianSucc()
+        private static int GetSucc()
         {
             IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
             IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
@@ -137,7 +138,7 @@ namespace robot.module
         }
 
         //九天成功检测
-        private bool jiutianFailTooMuch()
+        public static bool FailTooMuch()
         {
             IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
             IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");

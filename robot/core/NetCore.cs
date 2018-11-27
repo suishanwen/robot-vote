@@ -20,8 +20,18 @@ namespace robot.core
             return mreg.GetValue("Version").ToString().Substring(0, 1) == "8";
         }
 
+        public static void Connect()
+        {
+            RasOperate("connect");
+        }
+
+        public static void DisConnect()
+        {
+            RasOperate("disconnect");
+        }
+        
         //ADSL操作
-        public static void RasOperate(string type)
+        private static void RasOperate(string type)
         {
             if (type.Equals("connect"))
             {

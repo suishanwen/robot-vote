@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.IO;
-using System.Threading;
 using System.Windows.Forms;
 using robot.core;
 using robot.util;
@@ -9,15 +7,24 @@ using Monitor = robot.core.Monitor;
 
 namespace robot
 {
-    public partial class form1 : Form
+    public partial class Form1 : Form
     {
-        public form1()
+        public Form1()
         {
             InitializeComponent();
-            Hotkey.RegisterHotKey(this.Handle, 10, Hotkey.MODKEY.None, Keys.F10);
-            Hotkey.RegisterHotKey(this.Handle, 11, Hotkey.MODKEY.None, Keys.F9);
+            Hotkey.RegisterHotKey(Handle, 10, Hotkey.MODKEY.None, Keys.F10);
+            Hotkey.RegisterHotKey(Handle, 11, Hotkey.MODKEY.None, Keys.F9);
         }
-        
+
+        public string Sort
+        {
+            set { textBox1.Text = value; }
+        }
+
+        public string Delay
+        {
+            set { textBox2.Text = value; }
+        }
 
         protected override void WndProc(ref Message m)
         {
@@ -45,36 +52,37 @@ namespace robot
         private void Form1_Load(object sender, EventArgs e)
         {
             Notification.Init(notifyIcon1);
-            if (!File.Exists(@".\cf.ini"))
-            {
-                IniReadWriter.WriteIniKeys("Base", "sort", textBox1.Text, "./cf.ini");
-                IniReadWriter.WriteIniKeys("Base", "workerId", textBox2.Text, "./cf.ini");
-                IniReadWriter.WriteIniKeys("Base", "delay", textBox4.Text, "./cf.ini");
-            }
-
             ConfigCore.InitConfig();
-            textBox1.Text = ConfigCore.Sort;
-            textBox2.Text = ConfigCore.WorkerId;
-            textBox4.Text = ConfigCore.Delay;
-            button1_Click(null, null);
         }
 
         //改变编号
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            IniReadWriter.WriteIniKeys("Base", "sort", textBox1.Text, "./cf.ini");
-        }
-
-        //改变工号
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
-            IniReadWriter.WriteIniKeys("Base", "worker", textBox2.Text, "./cf.ini");
+            IniReadWriter.WriteIniKeys("Command", "sort", textBox1.Text, ConfigCore.BaseConfig);
         }
 
         //改变延时
-        private void textBox4_TextChanged(object sender, EventArgs e)
+        private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            IniReadWriter.WriteIniKeys("Base", "delay", textBox4.Text, "./cf.ini");
+            IniReadWriter.WriteIniKeys("Command", "delay", textBox2.Text, ConfigCore.BaseConfig);
+        }
+
+        //改变延时
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+            IniReadWriter.WriteIniKeys("Command", "gongxiang", textBox3.Text, ConfigCore.BaseConfig);
+            ConfigCore.InitPathShare();
+            IniReadWriter.WriteIniKeys("Command", "gongxiang", textBox3.Text, ConfigCore.PathShareConfig);
+        }
+
+        //选择共享button
+        private void button3_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog fd = new FolderBrowserDialog();
+            if (fd.ShowDialog() == DialogResult.OK)
+            {
+                textBox3.Text = fd.SelectedPath;
+            }
         }
 
         //启动监控线程
@@ -84,14 +92,15 @@ namespace robot
             button1.Enabled = false;
             button2.Enabled = true;
             LogCore.Clear(); //清空日志
-//            this.WindowState = FormWindowState.Minimized;
+            WindowState = FormWindowState.Minimized;
             Monitor.Start();
         }
 
         //终止监控线程
-        private void MainThreadClose()
+        public void MainThreadClose()
         {
             notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("stop");
+            ConfigCore.Cache();
             button2.Enabled = false;
             button1.Enabled = true;
             Monitor.Stop();
@@ -119,7 +128,7 @@ namespace robot
         }
 
         //清理托盘
-        private void RefreshIcon()
+        public void RefreshIcon()
         {
             Rectangle rect = new Rectangle();
             rect = Screen.GetWorkingArea(this);

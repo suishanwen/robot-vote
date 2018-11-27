@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -28,8 +28,25 @@ namespace robot.core
         {
             Notification.Show("启动监控程序", ToolTipIcon.Info);
 //            NetCore.NetCheck();
-            List<VoteProject> voteProjects = ProjectAnalyze.GetVoteProjects();
-            MessageBox.Show(ConfigCore.AdslName);
+//            List<VoteProject> voteProjects = ProjectAnalyze.GetVoteProjects();
+            TaskCore.InitTask();
+            try
+            {
+                TaskMonitor();
+            }
+            catch (ThreadAbortException)
+            {
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+
+
+        //主线程
+        private static void TaskMonitor()
+        {
         }
     }
 }

@@ -93,6 +93,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="module\HY.cs" />
     <Compile Include="module\JiuTian.cs" />
     <Compile Include="module\JT.cs" />
     <Compile Include="module\JZ.cs" />
