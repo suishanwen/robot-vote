@@ -28,13 +28,12 @@ namespace robot.core
         {
             if (File.Exists(BaseConfig))
             {
-                InitPathShare();
+                _form1 = form1;
+                string pathShare = InitPathShare();
                 Sort = int.Parse(IniReadWriter.ReadIniKeys("Command", "bianhao", BaseConfig));
                 Delay = int.Parse(IniReadWriter.ReadIniKeys("Command", "yanchi", BaseConfig));
-                _form1 = form1;
                 TaskCore.InitForm(form1);
-                _form1.Sort = Sort.ToString();
-                _form1.Delay = Delay.ToString();
+                _form1.SetFormData(Sort,Delay, pathShare);
                 _form1.button1_Click(null, null);
             }
             else
@@ -45,13 +44,14 @@ namespace robot.core
             AdslName = RasName.GetAdslName();
         }
 
-        public static void InitPathShare()
+        public static string InitPathShare()
         {
             String pathShare = IniReadWriter.ReadIniKeys("Command", "gongxiang", BaseConfig);
             PathShareConfig = pathShare + "/CF.ini";
             _pathShareTask = pathShare + "/Task.ini";
             _pathShareTaskPlus = pathShare + "/TaskPlus.ini";
             _pathShareAutoVote = pathShare + "/AutoVote.ini";
+            return pathShare;
         }
 
         public static void InitWorker(String workerId)

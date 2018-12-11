@@ -353,7 +353,6 @@ namespace robot.core
                 }
 
                 Thread.Sleep(2000);
-                MessageBox.Show((p == 0 || (p > 0 && p < overTime) || (p < 0 && p > -overTime)).ToString());
             } while (p == 0 || (p > 0 && p < overTime) || (p < 0 && p > -overTime));
 
             if (TaskName.Equals(TASK_VOTE_MM))

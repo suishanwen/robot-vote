@@ -16,14 +16,22 @@ namespace robot
             Hotkey.RegisterHotKey(Handle, 11, Hotkey.MODKEY.None, Keys.F9);
         }
 
-        public string Sort
-        {
-            set { textBox1.Text = value; }
-        }
+        //委托 解决线程间操作问题
+        delegate void SetForm(int sort,int delay,string share);
 
-        public string Delay
+        public void SetFormData(int sort, int delay, string share)
         {
-            set { textBox2.Text = value; }
+            if (this.InvokeRequired)
+            {
+                SetForm d = new SetForm(SetFormData);
+                this.Invoke(d, new object[] { sort, delay, share });
+            }
+            else
+            {
+                textBox1.Text = sort.ToString();
+                textBox2.Text = delay.ToString();
+                textBox3.Text = share;
+            }
         }
 
         protected override void WndProc(ref Message m)
@@ -128,16 +136,28 @@ namespace robot
             }
         }
 
+
+        //委托 解决线程间操作问题
+        delegate void Refresh();
+
         //清理托盘
         public void RefreshIcon()
         {
-            Rectangle rect = new Rectangle();
-            rect = Screen.GetWorkingArea(this);
-            int startX = rect.Width - 200; //屏幕高
-            int startY = rect.Height + 20; //屏幕高
-            for (; startX < rect.Width; startX += 3)
+            if (this.InvokeRequired)
             {
-                MouseKeyboard.SetCursorPos(startX, startY);
+                Refresh d = new Refresh(RefreshIcon);
+                this.Invoke(d, new object[] {  });
+            }
+            else
+            {
+                Rectangle rect = new Rectangle();
+                rect = Screen.GetWorkingArea(this);
+                int startX = rect.Width - 200; //屏幕高
+                int startY = rect.Height + 20; //屏幕高
+                for (; startX < rect.Width; startX += 3)
+                {
+                    MouseKeyboard.SetCursorPos(startX, startY);
+                }
             }
         }
     }
