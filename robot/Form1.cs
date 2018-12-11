@@ -104,14 +104,27 @@ namespace robot
             Monitor.Start();
         }
 
+        
+        //委托 解决线程间操作问题
+        delegate void MainClose();
+        
         //终止监控线程
         public void MainThreadClose()
         {
-            notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("stop");
-            ConfigCore.Cache();
-            button2.Enabled = false;
-            button1.Enabled = true;
-            Monitor.Stop();
+            if (this.InvokeRequired)
+            {
+                MainClose d = new MainClose(MainThreadClose);
+                this.Invoke(d, new object[] {  });
+            }
+            else
+            {
+                notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("stop");
+                ConfigCore.Cache();
+                button2.Enabled = false;
+                button1.Enabled = true;
+                Monitor.Stop();
+            }
+            
         }
 
         //点击停止
