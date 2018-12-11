@@ -31,9 +31,6 @@ namespace robot.core
             {
                 TaskCore.InitTask();
             }
-            catch (ThreadAbortException)
-            {
-            }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
