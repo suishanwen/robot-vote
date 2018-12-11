@@ -48,10 +48,10 @@ namespace robot.core
         public static void InitPathShare()
         {
             String pathShare = IniReadWriter.ReadIniKeys("Command", "gongxiang", BaseConfig);
-            PathShareConfig = pathShare + @"/CF.ini";
-            _pathShareTask = pathShare + @"/Task.ini";
-            _pathShareTaskPlus = pathShare + @"/TaskPlus.ini";
-            _pathShareAutoVote = pathShare + @"/AutoVote.ini";
+            PathShareConfig = pathShare + "/CF.ini";
+            _pathShareTask = pathShare + "/Task.ini";
+            _pathShareTaskPlus = pathShare + "/TaskPlus.ini";
+            _pathShareAutoVote = pathShare + "/AutoVote.ini";
         }
 
         public static void InitWorker(String workerId)
@@ -75,6 +75,8 @@ namespace robot.core
 
         public static int GetOverTime()
         {
+            MessageBox.Show(PathShareConfig);
+            MessageBox.Show(IniReadWriter.ReadIniKeys("Command", "cishu", PathShareConfig));
             return int.Parse(IniReadWriter.ReadIniKeys("Command", "cishu", PathShareConfig));
         }
 
