@@ -243,11 +243,6 @@ namespace robot.core
         {
             _form1.RefreshIcon();
             int overTime = ConfigCore.GetOverTime();
-            if (overTime == 0)
-            {
-                MessageBox.Show(@"未设置共享目录或超时！");
-                _form1.MainThreadClose();
-            }
             if (overTime % 2 == 1)
             {
                 overTime += 1;

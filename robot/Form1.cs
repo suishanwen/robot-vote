@@ -104,7 +104,6 @@ namespace robot
             button2.Enabled = false;
             button1.Enabled = true;
             Monitor.Stop();
-            Environment.Exit(0);
         }
 
         //点击停止
@@ -117,6 +116,7 @@ namespace robot
         private void form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             MainThreadClose();
+            Environment.Exit(0);
         }
 
         //双击托盘
