@@ -75,8 +75,6 @@ namespace robot.core
 
         public static int GetOverTime()
         {
-            MessageBox.Show(PathShareConfig);
-            MessageBox.Show(IniReadWriter.ReadIniKeys("Command", "cishu", PathShareConfig));
             return int.Parse(IniReadWriter.ReadIniKeys("Command", "cishu", PathShareConfig));
         }
 
