@@ -40,6 +40,10 @@ namespace robot.core
             {
                 TaskCore taskCore = GetTaskCore();
                 taskCore.InitTask();
+                while (true)
+                {
+                    taskCore.TaskMonitor();
+                }
             }
             catch (ThreadAbortException)
             {

@@ -10,36 +10,31 @@ namespace robot.core
 {
     public class TaskCore
     {
-        private const string TASK_SYS_UPDATE = "Update";
-        private const string TASK_SYS_WAIT_ORDER = "待命";
-        private const string TASK_SYS_SHUTDOWN = "关机";
-        private const string TASK_SYS_RESTART = "重启";
-        private const string TASK_SYS_NET_TEST = "网络测试";
-        private const string TASK_VOTE_JIUTIAN = "九天";
-        private const string TASK_VOTE_YUANQIU = "圆球";
-        private const string TASK_VOTE_PROJECT = "投票项目";
-        private const string TASK_VOTE_MM = "MM";
-        private const string TASK_VOTE_JT = "JT";
-        private const string TASK_VOTE_ML = "ML";
-        private const string TASK_VOTE_DM = "DM";
-        private const string TASK_VOTE_JZ = "JZ";
-        private const string TASK_VOTE_HY = "HY";
-        private const string TASK_VOTE_OUTDO = "Outdo";
+        public static string TASK_SYS_UPDATE = "Update";
+        private static string TASK_SYS_WAIT_ORDER = "待命";
+        public static string TASK_SYS_SHUTDOWN = "关机";
+        public static string TASK_SYS_RESTART = "重启";
+        public static string TASK_SYS_NET_TEST = "网络测试";
+        public static string TASK_VOTE_JIUTIAN = "九天";
+        public static string TASK_VOTE_YUANQIU = "圆球";
+        public static string TASK_VOTE_PROJECT = "投票项目";
+        public static string TASK_VOTE_MM = "MM";
+        public static string TASK_VOTE_JT = "JT";
+        public static string TASK_VOTE_ML = "ML";
+        public static string TASK_VOTE_DM = "DM";
+        public static string TASK_VOTE_JZ = "JZ";
+        public static string TASK_VOTE_HY = "HY";
+        public static string TASK_VOTE_OUTDO = "Outdo";
 
-        private string taskChange;
-        private string taskName;
-        private string projectName;
-        private string taskPath;
-        private string customPath;
-        private bool isAutoVote;
-
-        public string ProjectName { get => projectName; set => projectName = value; }
-        public string TaskPath { get => taskPath; set => taskPath = value; }
-        public string CustomPath { get => customPath; set => customPath = value; }
-        public bool IsAutoVote { get => isAutoVote; set => isAutoVote = value; }
-        public string TaskChange { get => taskChange; set => taskChange = value; }
-        public string TaskName { get => taskName; set => taskName = value; }
-
+        public string ProjectName { get; set; }
+        public string TaskPath { get; set; }
+        public string CustomPath { get; set; }
+        public bool IsAutoVote { get; set; }
+        public string TaskChange { get; set; }
+        public string TaskName { get; set; }
+        public int TimerChecked { get; set; }
+        public int SuccCount { get; set; }
+        public bool FailTooMuch { get; set; }
 
         //判断当前是否为系统任务
         public bool IsSysTask()
@@ -236,142 +231,10 @@ namespace robot.core
         //待命
         private void WaitOrder()
         {
+            KillProcess(false);
             ConfigCore.WriteTaskName(TASK_SYS_WAIT_ORDER);
             ConfigCore.ClearTask();
         }
-
-        //任务监控
-        public void TaskMonitor()
-        {
-            Notification.Refresh();
-            int overTime = ConfigCore.GetOverTime();
-            if (overTime % 2 == 1)
-            {
-                overTime += 1;
-            }
-
-            overTime = overTime / 2 - 1;
-            int p = 0;
-            int s = 0;
-            bool isOnline = false;
-            int circle = 0;
-            do
-            {
-                isOnline = Net.isOnline();
-                TaskChange = ConfigCore.GetTaskChange();
-                if (TaskChange.Equals("1"))
-                {
-                    TaskChangeProcess(true);
-                    return;
-                }
-
-                if (IsSysTask())
-                {
-                    p = 0;
-                }
-
-                if (TaskName.Equals(TASK_VOTE_JIUTIAN) && p > 0)
-                {
-                    if (JiuTian.OverCheck(ref s) || JiuTian.RestrictCheck())
-                    {
-                        WaitOrder();
-                    }
-
-                    if (IsAutoVote)
-                    {
-                        if (JiuTian.IsIdentifyCode())
-                        {
-                            WaitOrder();
-                        }
-                        else if ((circle == 0 && p == 20) || (circle > 0 && p == 15) ||
-                                 (circle > 0 && circle % 3 == 0 && JiuTian.FailTooMuch()))
-                        {
-                            ConfigCore.AddVoteProjectNameDroped(false);
-                            WaitOrder();
-                        }
-                    }
-                }
-                else if (TaskName.Equals(TASK_VOTE_MM))
-                {
-                    if (MM.OverCheck())
-                    {
-                        KillProcess(false);
-                        WaitOrder();
-                    }
-                }
-                else if (TaskName.Equals(TASK_VOTE_YUANQIU))
-                {
-                    if (YuanQiu.OverCheck())
-                    {
-                        KillProcess(false);
-                        WaitOrder();
-                    }
-                }
-                else if (TaskName.Equals(TASK_VOTE_JT))
-                {
-                    if (JT.OverCheck())
-                    {
-                        KillProcess(false);
-                        WaitOrder();
-                    }
-                }
-                else if (TaskName.Equals(TASK_VOTE_ML))
-                {
-                    //ML到票检测
-                }
-                else if (TaskName.Equals(TASK_VOTE_DM))
-                {
-                    //DM到票检测
-                }
-                else if (TaskName.Equals(TASK_VOTE_JZ))
-                {
-                    if (JZ.OverCheck())
-                    {
-                        KillProcess(false);
-                        WaitOrder();
-                    }
-                }
-                else if (TaskName.Equals(TASK_VOTE_HY))
-                {
-                    if (HY.OverCheck())
-                    {
-                        KillProcess(false);
-                        WaitOrder();
-                    }
-                }
-                else if (TaskName.Equals(TASK_VOTE_OUTDO))
-                {
-                    //OUTDO到票检测
-                }
-
-                if (isOnline)
-                {
-                    p = p < 0 ? 1 : ++p;
-                }
-                else
-                {
-                    circle++;
-                    p = p > 0 ? -1 : --p;
-                }
-
-                Thread.Sleep(2000);
-            } while (p == 0 || (p > 0 && p < overTime) || (p < 0 && p > -overTime));
-
-            if (TaskName.Equals(TASK_VOTE_MM))
-            {
-                NetCore.DisConnect();
-                //启动拨号定时timer
-                NetCore.Connect();
-            }
-            else
-            {
-                TaskChangeProcess(false);
-                return;
-            }
-
-            TaskMonitor();
-        }
-
 
         //切换任务
         private void ChangeTask()
@@ -448,7 +311,7 @@ namespace robot.core
                 if (CustomPath.Equals(""))
                 {
                     WaitOrder();
-                    TaskChangeProcess(false);
+                    TaskChangeProcess();
                     return;
                 }
 
@@ -589,14 +452,119 @@ namespace robot.core
             {
                 TaskName = TASK_SYS_WAIT_ORDER;
             }
+        }
 
-            TaskMonitor();
+        //添加黑名单项目 临
+        public void addVoteProjectNameDropedTemp(bool isAllProject)
+        {
+            string projectName = IniReadWriter.ReadIniKeys("Command", "ProjectName", ConfigCore.PathShareAutoVote);
+            if (isAllProject)
+            {
+                projectName = projectName.Substring(0, projectName.IndexOf("_"));
+            }
+            string voteProjectNameDroped = IniReadWriter.ReadIniKeys("Command", "voteProjectNameDropedTemp", ConfigCore.PathShareAutoVote);
+            int dropVote = 0;
+            try
+            {
+                dropVote = int.Parse(IniReadWriter.ReadIniKeys("Command", "dropVote", ConfigCore.PathShareAutoVote));
+            }
+            catch (Exception) { }
+            finally
+            {
+                dropVote++;
+            }
+            IniReadWriter.WriteIniKeys("Command", "dropVote", dropVote.ToString(), ConfigCore.PathShareAutoVote);
+            if (StringUtil.isEmpty(voteProjectNameDroped) || voteProjectNameDroped.IndexOf(projectName) == -1)
+            {
+                int validDrop;
+                try
+                {
+                    validDrop = int.Parse(IniReadWriter.ReadIniKeys("Command", "validDrop", ConfigCore.PathShareAutoVote));
+                }
+                catch (Exception)
+                {
+                    validDrop = 1;
+                }
+                if (dropVote >= validDrop)
+                {
+                    voteProjectNameDroped += StringUtil.isEmpty(voteProjectNameDroped) ? projectName : "|" + projectName;
+                    IniReadWriter.WriteIniKeys("Command", "voteProjectNameDropedTemp", voteProjectNameDroped, ConfigCore.PathShareAutoVote);
+                }
+            }
+        }
+
+        //添加黑名单项目
+        public void AddVoteProjectNameDroped(bool isAllProject)
+        {
+            string projectName = IniReadWriter.ReadIniKeys("Command", "ProjectName", ConfigCore.PathShareAutoVote);
+            if (isAllProject)
+            {
+                projectName = projectName.Substring(0, projectName.IndexOf("_"));
+            }
+            string voteProjectNameDroped = IniReadWriter.ReadIniKeys("Command", "voteProjectNameDroped", ConfigCore.PathShareAutoVote);
+            int dropVote = 0;
+            try
+            {
+                dropVote = int.Parse(IniReadWriter.ReadIniKeys("Command", "dropVote", ConfigCore.PathShareAutoVote));
+            }
+            catch (Exception) { }
+            finally
+            {
+                dropVote++;
+            }
+            IniReadWriter.WriteIniKeys("Command", "dropVote", dropVote.ToString(), ConfigCore.PathShareAutoVote);
+            if (StringUtil.isEmpty(voteProjectNameDroped) || voteProjectNameDroped.IndexOf(projectName) == -1)
+            {
+                int validDrop;
+                try
+                {
+                    validDrop = int.Parse(IniReadWriter.ReadIniKeys("Command", "validDrop", ConfigCore.PathShareAutoVote));
+                }
+                catch (Exception)
+                {
+                    validDrop = 1;
+                }
+                if (dropVote >= validDrop)
+                {
+                    voteProjectNameDroped += StringUtil.isEmpty(voteProjectNameDroped) ? projectName : "|" + projectName;
+                    IniReadWriter.WriteIniKeys("Command", "voteProjectNameDroped", voteProjectNameDroped, ConfigCore.PathShareAutoVote);
+                }
+            }
+        }
+
+
+        public void CheckFailTooMuch()
+        {
+            if (IsVoteTask())
+            {
+                int succ = 0;
+                if (TaskName.Equals(TASK_VOTE_JIUTIAN))
+                {
+                    TimerChecked++;
+                    succ = JiuTian.GetSucc();
+                }
+                else if (TaskName.Equals(TASK_VOTE_MM))
+                {
+                    TimerChecked++;
+                    succ = MM.GetSucc();
+                }
+                else if (TaskName.Equals(TASK_VOTE_YUANQIU))
+                {
+                    TimerChecked++;
+                    succ = YuanQiu.GetSucc();
+                }
+                if (succ - SuccCount < 2 && TimerChecked >= 2)
+                {
+                    FailTooMuch = true;
+                }
+                LogCore.Write("success:" + succ + " last:" + SuccCount);
+                SuccCount = succ;
+            }
         }
 
         //切换任务流程
-        public void TaskChangeProcess(bool stopIndicator)
+        public void TaskChangeProcess()
         {
-            LogCore.Write("taskChangeProcess");
             if (StringUtil.isEmpty(TaskName))
             {
                 TaskName = ConfigCore.GetTaskName();
@@ -618,7 +586,7 @@ namespace robot.core
                 TaskName = ConfigCore.GetTaskName();
                 if (!TaskName.Equals(ProjectName))
                 {
-                    TaskChangeProcess(false);
+                    TaskChangeProcess();
                     return false;
                 }
             }
@@ -633,22 +601,22 @@ namespace robot.core
             {
                 return;
             }
-
             ConfigCore.SetTaskChange("0");
         }
 
+        //任务初始化
         public void InitTask()
         {
-            //进程初始化部分
             string now = DateTime.Now.ToLocalTime().ToString();
+            String cacheMemory = ConfigCore.GetCacheMemory();
             if (ConfigCore.GetTaskChange().Equals("1"))
             {
-                TaskChangeProcess(true);
-                return;
+                //切换任务
+                TaskChangeProcess();
             }
-            String cacheMemory = ConfigCore.GetCacheMemory();
-            if (!StringUtil.isEmpty(cacheMemory))
+            else if (!StringUtil.isEmpty(cacheMemory))
             {
+                //缓存任务启动
                 string[] arr = cacheMemory.Split('`');
                 TaskName = arr[0].Substring(9);
                 TaskPath = arr[1].Substring(9);
@@ -671,7 +639,6 @@ namespace robot.core
                     ChangeTask();
                     return;
                 }
-
                 ConfigCore.ClearCacheMemory();
             }
             else
@@ -683,7 +650,109 @@ namespace robot.core
                 NetCore.DisConnect();
                 Notification.Show("未发现项目缓存,待命中...\n请通过控制与监控端启动" + ConfigCore.Sort + "号虚拟机", ToolTipIcon.Info);
             }
-            TaskMonitor();
+        }
+
+
+        //任务监控
+        public void TaskMonitor()
+        {
+            Notification.Refresh();
+            //最大超时数
+            int overTime = ConfigCore.GetOverTime();
+            int delay = 1000;
+            if (ConfigCore.IsAdsl)
+            {
+                overTime *= 2;
+                delay /= 2;
+            }
+            //连续在线、离线次数
+            int p = 0;
+            //计数
+            int s = 0;
+            //拨号次数
+            int circle = 0;
+            bool isOnline = false;
+            do
+            {
+                isOnline = Net.isOnline();
+                NetCore.CloseException();
+                if (ConfigCore.GetTaskChange().Equals("1"))
+                {
+                    TaskChangeProcess();
+                    return;
+                }
+                if (IsSysTask())
+                {
+                    p = 0;
+                }
+                if (TaskName.Equals(TASK_VOTE_JIUTIAN) && p > 0)
+                {
+                    if (JiuTian.OverCheck(ref s) || JiuTian.RestrictCheck()||JiuTian.IsIdentifyCode()||JiuTian.VmBanCheck())
+                    {
+                        WaitOrder();
+                    }
+                }
+                else if (TaskName.Equals(TASK_VOTE_MM))
+                {
+                    if (MM.OverCheck())
+                    {
+                        WaitOrder();
+                    }
+                }
+                else if (TaskName.Equals(TASK_VOTE_YUANQIU))
+                {
+                    if (YuanQiu.OverCheck())
+                    {
+                        WaitOrder();
+                    }
+                }
+                else if (TaskName.Equals(TASK_VOTE_JT))
+                {
+                    if (JT.OverCheck())
+                    {
+                        WaitOrder();
+                    }
+                }
+                else if (TaskName.Equals(TASK_VOTE_ML))
+                {
+                    //ML到票检测
+                }
+                else if (TaskName.Equals(TASK_VOTE_DM))
+                {
+                    //DM到票检测
+                }
+                else if (TaskName.Equals(TASK_VOTE_JZ))
+                {
+                    if (JZ.OverCheck())
+                    {
+                        WaitOrder();
+                    }
+                }
+                else if (TaskName.Equals(TASK_VOTE_HY))
+                {
+                    if (HY.OverCheck())
+                    {
+                        WaitOrder();
+                    }
+                }
+                else if (TaskName.Equals(TASK_VOTE_OUTDO))
+                {
+                    //OUTDO到票检测
+                }
+
+                if (isOnline)
+                {
+                    p = p < 0 ? 1 : ++p;
+                }
+                else
+                {
+                    circle++;
+                    p = p > 0 ? -1 : --p;
+                }
+                Thread.Sleep(delay);
+            } while (p == 0 || (p > 0 && p < overTime) || (p < 0 && p > -overTime));
+            TaskChangeProcess();
         }
     }
+
 }

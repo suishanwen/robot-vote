@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.Win32;
 using robot.util;
 
 namespace robot.core
@@ -12,13 +13,14 @@ namespace robot.core
 
         public static string BaseConfig = @"./handler.ini";
         public static string PathShareConfig;
-        private static string _pathShareTask;
-        private static string _pathShareTaskPlus;
-        private static string _pathShareAutoVote;
+        public static string PathShareTask;
+        public static string PathShareTaskPlus;
+        public static string PathShareAutoVote;
 
         public static int Sort;
         public static int Delay;
         public static string AdslName;
+        public static bool IsAdsl;
 
         public static string InputId = "1";
         public static string Tail = "1";
@@ -41,15 +43,16 @@ namespace robot.core
             }
 
             AdslName = RasName.GetAdslName();
+            IsAdsl = AdslName == "宽带连接";
         }
 
         public static string InitPathShare()
         {
             String pathShare = IniReadWriter.ReadIniKeys("Command", "gongxiang", BaseConfig);
             PathShareConfig = pathShare + "/CF.ini";
-            _pathShareTask = pathShare + "/Task.ini";
-            _pathShareTaskPlus = pathShare + "/TaskPlus.ini";
-            _pathShareAutoVote = pathShare + "/AutoVote.ini";
+            PathShareTask = pathShare + "/Task.ini";
+            PathShareTaskPlus = pathShare + "/TaskPlus.ini";
+            PathShareAutoVote = pathShare + "/AutoVote.ini";
             return pathShare;
         }
 
@@ -84,44 +87,44 @@ namespace robot.core
 
         public static String GetTaskChange()
         {
-            return IniReadWriter.ReadIniKeys("Command", "TaskChange" + Sort, _pathShareTask);
+            return IniReadWriter.ReadIniKeys("Command", "TaskChange" + Sort, PathShareTask);
         }
 
         public static void SetTaskChange(String taskChange)
         {
-            IniReadWriter.WriteIniKeys("Command", "TaskChange" + Sort, taskChange, _pathShareTask);
+            IniReadWriter.WriteIniKeys("Command", "TaskChange" + Sort, taskChange, PathShareTask);
         }
 
         public static String GetTaskName()
         {
-            return IniReadWriter.ReadIniKeys("Command", "TaskName" + Sort, _pathShareTask);
+            return IniReadWriter.ReadIniKeys("Command", "TaskName" + Sort, PathShareTask);
         }
 
         public static String GetCustomPath()
         {
-            return IniReadWriter.ReadIniKeys("Command", "customPath" + Sort, _pathShareTaskPlus);
+            return IniReadWriter.ReadIniKeys("Command", "customPath" + Sort, PathShareTaskPlus);
         }
 
         public static String GetCacheMemory()
         {
-            return IniReadWriter.ReadIniKeys("Command", "CacheMemory" + Sort, _pathShareTaskPlus);
+            return IniReadWriter.ReadIniKeys("Command", "CacheMemory" + Sort, PathShareTaskPlus);
         }
 
         public static void ClearCacheMemory()
         {
-            IniReadWriter.WriteIniKeys("Command", "CacheMemory" + Sort, "", _pathShareTaskPlus);
+            IniReadWriter.WriteIniKeys("Command", "CacheMemory" + Sort, "", PathShareTaskPlus);
         }
 
         public static void ClearTask()
         {
-            IniReadWriter.WriteIniKeys("Command", "TaskChange" + Sort, "0", _pathShareTask);
-            IniReadWriter.WriteIniKeys("Command", "CustomPath" + Sort, "", _pathShareTaskPlus);
+            IniReadWriter.WriteIniKeys("Command", "TaskChange" + Sort, "0", PathShareTask);
+            IniReadWriter.WriteIniKeys("Command", "CustomPath" + Sort, "", PathShareTaskPlus);
         }
 
         public static void WriteTaskName(String task)
         {
             IniReadWriter.WriteIniKeys("Command", "TaskName" + Sort, task,
-                _pathShareTask);
+                PathShareTask);
         }
 
         //缓存
@@ -144,7 +147,7 @@ namespace robot.core
             }
 
             string cacheMemory = "TaskName-" + taskCore.TaskName + "`TaskPath-" + path + "`Worker:" + Id;
-            IniReadWriter.WriteIniKeys("Command", "CacheMemory" + Sort, cacheMemory, _pathShareTaskPlus);
+            IniReadWriter.WriteIniKeys("Command", "CacheMemory" + Sort, cacheMemory, PathShareTaskPlus);
         }
 
         //网络异常处理
@@ -174,18 +177,18 @@ namespace robot.core
         //添加黑名单项目
         public static void AddVoteProjectNameDroped(bool isAllProject)
         {
-            string projectName = IniReadWriter.ReadIniKeys("Command", "ProjectName", _pathShareAutoVote);
+            string projectName = IniReadWriter.ReadIniKeys("Command", "ProjectName", PathShareAutoVote);
             if (isAllProject)
             {
                 projectName = projectName.Substring(0, projectName.IndexOf("_"));
             }
 
             string voteProjectNameDroped =
-                IniReadWriter.ReadIniKeys("Command", "voteProjectNameDroped", _pathShareAutoVote);
+                IniReadWriter.ReadIniKeys("Command", "voteProjectNameDroped", PathShareAutoVote);
             int dropVote = 0;
             try
             {
-                dropVote = int.Parse(IniReadWriter.ReadIniKeys("Command", "dropVote", _pathShareAutoVote));
+                dropVote = int.Parse(IniReadWriter.ReadIniKeys("Command", "dropVote", PathShareAutoVote));
             }
             catch (Exception)
             {
@@ -195,13 +198,13 @@ namespace robot.core
                 dropVote++;
             }
 
-            IniReadWriter.WriteIniKeys("Command", "dropVote", dropVote.ToString(), _pathShareAutoVote);
+            IniReadWriter.WriteIniKeys("Command", "dropVote", dropVote.ToString(), PathShareAutoVote);
             if (StringUtil.isEmpty(voteProjectNameDroped) || voteProjectNameDroped.IndexOf(projectName) == -1)
             {
                 int validDrop;
                 try
                 {
-                    validDrop = int.Parse(IniReadWriter.ReadIniKeys("Command", "validDrop", _pathShareAutoVote));
+                    validDrop = int.Parse(IniReadWriter.ReadIniKeys("Command", "validDrop", PathShareAutoVote));
                 }
                 catch (Exception)
                 {
@@ -213,7 +216,7 @@ namespace robot.core
                     voteProjectNameDroped +=
                         StringUtil.isEmpty(voteProjectNameDroped) ? projectName : "|" + projectName;
                     IniReadWriter.WriteIniKeys("Command", "voteProjectNameDroped", voteProjectNameDroped,
-                        _pathShareAutoVote);
+                        PathShareAutoVote);
                 }
             }
         }

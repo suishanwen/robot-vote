@@ -170,11 +170,11 @@ namespace robot
         delegate void DelegateRefresh();
 
         //清理托盘
-        public void Refresh()
+        public void RefreshI()
         {
             if (this.InvokeRequired)
             {
-                DelegateRefresh d = new DelegateRefresh(Refresh);
+                DelegateRefresh d = new DelegateRefresh(RefreshI);
                 this.Invoke(d, new object[] {  });
             }
             else
@@ -188,6 +188,11 @@ namespace robot
                     MouseKeyboard.SetCursorPos(startX, startY);
                 }
             }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            
         }
     }
 }

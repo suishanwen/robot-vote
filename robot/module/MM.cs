@@ -10,33 +10,63 @@ namespace robot.module
         //MM启动
         public static void Start()
         {
+            TaskCore taskCore = MonitorCore.GetTaskCore();
+            taskCore.ProjectName = TaskCore.TASK_VOTE_MM;
             IntPtr hwnd = IntPtr.Zero;
             do
             {
+                if (!taskCore.NameCheck())
+                {
+                    return;
+                }
                 hwnd = HwndUtil.FindWindow("WTWindow", null);
                 Thread.Sleep(500);
             } while (hwnd == IntPtr.Zero);
 
             //设置拨号延迟
             IntPtr ButtonHwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "设置");
-            IntPtr hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, IntPtr.Zero, "Edit", "3");
+            IntPtr hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, IntPtr.Zero, "Edit", "2");
             if (hwndEx == IntPtr.Zero)
             {
-                hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, IntPtr.Zero, "Edit", "4");
+                hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, IntPtr.Zero, "Edit", "3");
             }
-
             HwndUtil.setText(hwndEx, (ConfigCore.Delay / 1000).ToString());
             //设置工号
-            ButtonHwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "会员");
-            hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, IntPtr.Zero, "Edit", null);
-            hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
-            hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
-            hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
-            hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
-            HwndUtil.setText(hwndEx, ConfigCore.Id);
+            if (ConfigCore.InputId.Equals("1"))
+            {
+                ButtonHwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "会员");
+                hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, IntPtr.Zero, "Edit", null);
+                hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
+                hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
+                hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
+                hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
+                HwndUtil.setText(hwndEx, ConfigCore.Id);
+            }
             //开始投票
             hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, null, "自动投票");
             HwndThread.createHwndThread(hwndEx);
+            taskCore.FinishStart();
+        }
+
+        //获取MM成功数
+        public static int GetSucc()
+        {
+            IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
+            IntPtr ButtonHwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "统计");
+            IntPtr hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, IntPtr.Zero, "Edit", null);
+            hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
+            hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
+            hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
+            hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
+            try
+            {
+                return int.Parse(HwndUtil.GetControlText(hwndEx));
+            }
+            catch (Exception)
+            {
+                LogCore.Write("获取mm成功失败！");
+            }
+            return 0;
         }
 
         //MM到票检测

@@ -9,21 +9,42 @@ namespace robot.module
     public class JiuTian
     {
         private string workingPath = Environment.CurrentDirectory; //当前工作路径
+        private static string jiutianCode = "Afx:400000:b:10011:1900015:0";
 
         //九天启动
         public static void Start()
         {
+            TaskCore taskCore = MonitorCore.GetTaskCore();
+            taskCore.ProjectName = TaskCore.TASK_VOTE_JIUTIAN;
             IntPtr hwnd = IntPtr.Zero;
             IntPtr hwndSysTabControl32 = IntPtr.Zero;
+            IntPtr workCondition = IntPtr.Zero;
             IntPtr preparedCheck = IntPtr.Zero;
             IntPtr startButton = IntPtr.Zero;
             do
             {
+                if (!taskCore.NameCheck())
+                {
+                    return;
+                }
                 hwnd = HwndUtil.FindWindow("WTWindow", null);
                 hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
-                preparedCheck = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "工作情况");
-                preparedCheck = HwndUtil.FindWindowEx(preparedCheck, IntPtr.Zero, "Afx:400000:b:10011:1900015:0",
-                    "加载成功 可开始投票");
+                workCondition = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "工作情况");
+                jiutianCode = "Afx:400000:b:10011:1900015:0";
+                preparedCheck = HwndUtil.FindWindowEx(workCondition, IntPtr.Zero, jiutianCode,"加载成功 可开始投票");
+                if (preparedCheck == IntPtr.Zero)
+                {
+                    //WIN7
+                    jiutianCode = "Afx:400000:b:10003:1900015:0";
+
+                    preparedCheck = HwndUtil.FindWindowEx(workCondition, IntPtr.Zero, jiutianCode, "加载成功 可开始投票");
+                }
+                if (preparedCheck == IntPtr.Zero)
+                {
+                    //WIN10
+                    jiutianCode = "Afx:400000:b:10003:900015:0";
+                    preparedCheck = HwndUtil.FindWindowEx(workCondition, IntPtr.Zero, jiutianCode, "加载成功 可开始投票");
+                }
                 startButton = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "");
                 startButton = HwndUtil.FindWindowEx(startButton, IntPtr.Zero, "Button", "开始投票");
                 Thread.Sleep(500);
@@ -35,11 +56,15 @@ namespace robot.module
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
             HwndUtil.setText(hwndEx, ConfigCore.Delay.ToString());
             //设置工号
-            hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "请输入工号");
-            hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
-            HwndUtil.setText(hwndEx, ConfigCore.Id);
+            if (ConfigCore.InputId.Equals("1"))
+            {
+                hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "请输入工号");
+                hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "Edit", null);
+                HwndUtil.setText(hwndEx, ConfigCore.Id);
+            }
             HwndUtil.clickHwnd(startButton);
             Thread.Sleep(500);
+            taskCore.FinishStart();
         }
 
         //九天到票检测
@@ -93,6 +118,24 @@ namespace robot.module
             return false;
         }
 
+        //九天禁止虚拟机检测
+        public static bool VmBanCheck()
+        {
+            IntPtr hwnd = HwndUtil.FindWindow("#32770", "信息：");
+            IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Static", "本任务禁止在虚拟机内运行");
+            if (hwndEx != IntPtr.Zero)
+            {
+                TaskCore taskCore = MonitorCore.GetTaskCore();
+                if (taskCore.IsAutoVote)
+                {
+                    taskCore.AddVoteProjectNameDroped(false);
+                }
+                HwndUtil.closeHwnd(hwnd);
+                return true;
+            }
+            return false;
+        }
+
         //获取 是否需要传票关闭
         private static bool GetStopIndicator()
         {
@@ -114,64 +157,29 @@ namespace robot.module
             return false;
         }
 
+
         //获取九天成功数
-        private static int GetSucc()
+        public static int GetSucc()
         {
             IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
             IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
             IntPtr hwndStat = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "投票统计");
-            IntPtr hwndEx = HwndUtil.FindWindowEx(hwndStat, IntPtr.Zero, "Afx:400000:b:10011:1900015:0", "超时票数");
-            hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
+            IntPtr hwndEx = HwndUtil.FindWindowEx(hwndStat, IntPtr.Zero, jiutianCode, "超时票数");
+            hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, jiutianCode, null);
             try
             {
-                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
-                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
+                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, jiutianCode, null);
+                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, jiutianCode, null);
                 StringBuilder succ = new StringBuilder(512);
                 HwndUtil.GetWindowText(hwndEx, succ, 512);
                 return int.Parse(succ.ToString());
             }
             catch (Exception)
             {
+                LogCore.Write("获取九天成功失败！");
             }
-
             return 0;
-        }
 
-        //九天成功检测
-        public static bool FailTooMuch()
-        {
-            IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
-            IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
-            IntPtr hwndStat = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "投票统计");
-            IntPtr hwndEx = HwndUtil.FindWindowEx(hwndStat, IntPtr.Zero, "Afx:400000:b:10011:1900015:0", "超时票数");
-            hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
-            StringBuilder duration = new StringBuilder(512);
-            HwndUtil.GetWindowText(hwndEx, duration, duration.Capacity);
-            int min;
-            try
-            {
-                min = int.Parse(duration.ToString().Split('：')[1]);
-            }
-            catch (Exception)
-            {
-                min = 0;
-            }
-
-            if (min >= 2)
-            {
-                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
-                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
-                StringBuilder succ = new StringBuilder(512);
-                HwndUtil.GetWindowText(hwndEx, succ, 512);
-                int success = int.Parse(succ.ToString());
-                if (success / min < 2)
-                {
-                    LogCore.Write("Fail Too Much ---> success:" + success + ",min:" + min); //清空日志
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         public static void StopAndUpload()

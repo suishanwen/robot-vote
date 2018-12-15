@@ -9,15 +9,41 @@ namespace robot.core
     {
         private static RASDisplay ras; //ADSL对象
 
-        private static readonly bool ie8 = isIE8();
+        private static readonly bool ie8 = IsIE8();
+
 
         //检测IE版本
-        private static bool isIE8()
+        private static bool IsIE8()
         {
             RegistryKey mreg;
             mreg = Registry.LocalMachine;
-            mreg = mreg.CreateSubKey("software\\Microsoft\\Internet Explorer");
+            try
+            {
+                mreg = mreg.CreateSubKey("software\\Microsoft\\Internet Explorer");
+            }
+            catch (Exception)
+            {
+                return false;
+            }
             return mreg.GetValue("Version").ToString().Substring(0, 1) == "8";
+        }
+
+
+        public static void CloseException()
+        {
+            if (ie8)
+            {
+                IntPtr adslErr = HwndUtil.FindWindow("#32770", "连接到 " + ConfigCore.AdslName + " 时出错");
+                if (adslErr != IntPtr.Zero)
+                {
+                    HwndUtil.closeHwnd(adslErr);
+                }
+            }
+            IntPtr adslExcp = HwndUtil.FindWindow("#32770", "网络连接");
+            if (adslExcp != IntPtr.Zero)
+            {
+                HwndUtil.closeHwnd(adslExcp);
+            }
         }
 
         public static void Connect()

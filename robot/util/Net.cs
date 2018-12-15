@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace robot.util
 {
@@ -16,17 +15,14 @@ namespace robot.util
             System.Int32 dwFlag = new int();
             if (!InternetGetConnectedState(ref dwFlag, 0))
             {
-                Console.WriteLine("未连网");
                 return false;
             }
             else if ((dwFlag & INTERNET_CONNECTION_MODEM) != 0)
             {
-                Console.WriteLine("采用调制解调器上网");
                 return true;
             }
             else
             {
-                Console.WriteLine("采用网卡上网");
                 return false;
             }
         }
