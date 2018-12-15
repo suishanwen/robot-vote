@@ -10,10 +10,11 @@ namespace robot.module
         //HY启动
         public static void Start()
         {
+            TaskCore taskCore = MonitorCore.GetTaskCore();
             IntPtr hwnd = IntPtr.Zero;
             do
             {
-                if (!TaskCore.NameCheck())
+                if (!taskCore.NameCheck())
                 {
                     return;
                 }
@@ -43,7 +44,7 @@ namespace robot.module
             //开始投票
             IntPtr hwndStart = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "投票");
             HwndThread.createHwndThread(hwndStart);
-            TaskCore.FinishStart();
+            taskCore.FinishStart();
         }
 
         //HY到票检测

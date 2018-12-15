@@ -50,10 +50,11 @@ namespace robot.core
         //关闭进程
         public static void KillProcess()
         {
+            TaskCore taskCore = MonitorCore.GetTaskCore();
             Process[] process = ProcessCheck();
             if (process.Length > 0)
             {
-                if (TaskCore.IsVoteTask())
+                if (taskCore.IsVoteTask())
                 {
                     int counter = 1;
                     while (!Net.isOnline() && counter < 60)

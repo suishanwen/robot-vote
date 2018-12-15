@@ -32,7 +32,6 @@ namespace robot.core
                 string pathShare = InitPathShare();
                 Sort = int.Parse(IniReadWriter.ReadIniKeys("Command", "bianhao", BaseConfig));
                 Delay = int.Parse(IniReadWriter.ReadIniKeys("Command", "yanchi", BaseConfig));
-                TaskCore.InitForm(form1);
                 _form1.SetFormData(Sort,Delay, pathShare);
                 _form1.button1_Click(null, null);
             }
@@ -128,22 +127,23 @@ namespace robot.core
         //缓存
         public static void Cache()
         {
-            if (TaskCore.IsSysTask())
+            TaskCore taskCore = MonitorCore.GetTaskCore();
+            if (taskCore.IsSysTask())
             {
                 return;
             }
 
             string path = "";
-            if (TaskCore.CustomPath.Equals(TaskCore.TaskPath))
+            if (taskCore.CustomPath.Equals(taskCore.TaskPath))
             {
-                path = TaskCore.TaskPath;
+                path = taskCore.TaskPath;
             }
             else
             {
                 path = "Writein";
             }
 
-            string cacheMemory = "TaskName-" + TaskCore.TaskName + "`TaskPath-" + path + "`Worker:" + Id;
+            string cacheMemory = "TaskName-" + taskCore.TaskName + "`TaskPath-" + path + "`Worker:" + Id;
             IniReadWriter.WriteIniKeys("Command", "CacheMemory" + Sort, cacheMemory, _pathShareTaskPlus);
         }
 

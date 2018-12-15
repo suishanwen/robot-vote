@@ -79,7 +79,7 @@
     <Compile Include="core\ConfigCore.cs" />
     <Compile Include="core\HwndThread.cs" />
     <Compile Include="core\LogCore.cs" />
-    <Compile Include="core\Monitor.cs" />
+    <Compile Include="core\MonitorCore.cs" />
     <Compile Include="core\NetCore.cs" />
     <Compile Include="core\Notification.cs" />
     <Compile Include="core\PathCore.cs" />

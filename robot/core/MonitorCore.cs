@@ -4,14 +4,23 @@ using System.Windows.Forms;
 
 namespace robot.core
 {
-    public class Monitor
+    public class MonitorCore
     {
         private static Thread _monitorThread;
-
+        private static TaskCore _taskCore;
         public static void Start()
         {
             _monitorThread = new Thread(MonitorThread);
             _monitorThread.Start();
+        }
+
+        public static TaskCore GetTaskCore()
+        {
+            if(_taskCore == null)
+            {
+                _taskCore = new TaskCore();
+            }
+            return _taskCore;
         }
 
         public static void Stop()
@@ -20,7 +29,7 @@ namespace robot.core
             {
                 _monitorThread.Abort();
             }
-
+            ConfigCore.Cache();
             Notification.Show("结束监控程序", ToolTipIcon.Info);
         }
 
@@ -29,7 +38,8 @@ namespace robot.core
             Notification.Show("启动监控程序", ToolTipIcon.Info);
             try
             {
-                TaskCore.InitTask();
+                TaskCore taskCore = GetTaskCore();
+                taskCore.InitTask();
             }
             catch (ThreadAbortException)
             {

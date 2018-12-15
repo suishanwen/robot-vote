@@ -3,17 +3,24 @@ using System.Drawing;
 using System.Windows.Forms;
 using robot.core;
 using robot.util;
-using Monitor = robot.core.Monitor;
+using MonitorCore = robot.core.MonitorCore;
 
 namespace robot
 {
     public partial class Form1 : Form
     {
+
+        public static Form1 mainForm;
+
         public Form1()
         {
             InitializeComponent();
             Hotkey.RegisterHotKey(Handle, 10, Hotkey.MODKEY.None, Keys.F10);
             Hotkey.RegisterHotKey(Handle, 11, Hotkey.MODKEY.None, Keys.F9);
+            if (mainForm == null)
+            {
+                mainForm = this;
+            }
         }
 
         //委托 解决线程间操作问题
@@ -59,7 +66,6 @@ namespace robot
         //启动程序，检查配置文件，启动主线程
         private void Form1_Load(object sender, EventArgs e)
         {
-            Notification.Init(notifyIcon1);
             ConfigCore.InitConfig(this);
         }
 
@@ -101,7 +107,7 @@ namespace robot
             button2.Enabled = true;
             LogCore.Clear(); //清空日志
             WindowState = FormWindowState.Minimized;
-            Monitor.Start();
+            MonitorCore.Start();
         }
 
         
@@ -119,10 +125,9 @@ namespace robot
             else
             {
                 notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("stop");
-                ConfigCore.Cache();
                 button2.Enabled = false;
                 button1.Enabled = true;
-                Monitor.Stop();
+                MonitorCore.Stop();
             }
             
         }
@@ -149,16 +154,27 @@ namespace robot
             }
         }
 
-
-        //委托 解决线程间操作问题
-        delegate void Refresh();
+        //显示通知
+        public static void ShowTip(string content, ToolTipIcon toolTipIcon)
+        {
+            mainForm.notifyIcon1.ShowBalloonTip(0, content, DateTime.Now.ToLocalTime().ToString(), toolTipIcon);
+        }
 
         //清理托盘
-        public void RefreshIcon()
+        public static void RefreshIcon()
+        {
+            mainForm.Refresh();
+        }
+
+        //委托 解决线程间操作问题
+        delegate void DelegateRefresh();
+
+        //清理托盘
+        public void Refresh()
         {
             if (this.InvokeRequired)
             {
-                Refresh d = new Refresh(RefreshIcon);
+                DelegateRefresh d = new DelegateRefresh(Refresh);
                 this.Invoke(d, new object[] {  });
             }
             else

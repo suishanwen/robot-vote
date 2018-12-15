@@ -26,7 +26,7 @@ namespace robot.core
                     result = httpUtil.requestHttpGet(
                         "http://butingzhuan.com/tasks.php?t=" + DateTime.Now.Millisecond.ToString(), "", "");
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     LogCore.Write("Request Fail!Retry in 10s...");
                     Thread.Sleep(10000);
@@ -80,7 +80,7 @@ namespace robot.core
                                     voteProject.TotalRequire =
                                         long.Parse(quantityInfo[1].Substring(0, quantityInfo[1].IndexOf(" ")));
                                 }
-                                catch (Exception e)
+                                catch (Exception)
                                 {
                                 }
 
@@ -96,7 +96,7 @@ namespace robot.core
                                 {
                                     voteProject.IdType = HtmlMatch.GetAttr(innerTd, "input", "value").Substring(0, 2);
                                 }
-                                catch (Exception e)
+                                catch (Exception)
                                 {
                                     if (innerTd.IndexOf("BT-") != -1)
                                     {

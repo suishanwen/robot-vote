@@ -10,7 +10,6 @@ namespace robot.core
 {
     public class TaskCore
     {
-        private static Form1 _form1;
         private const string TASK_SYS_UPDATE = "Update";
         private const string TASK_SYS_WAIT_ORDER = "待命";
         private const string TASK_SYS_SHUTDOWN = "关机";
@@ -27,20 +26,23 @@ namespace robot.core
         private const string TASK_VOTE_HY = "HY";
         private const string TASK_VOTE_OUTDO = "Outdo";
 
-        public static string TaskChange;
-        public static string TaskName;
-        public static string ProjectName;
-        public static string TaskPath;
-        public static string CustomPath;
-        public static bool IsAutoVote;
+        private string taskChange;
+        private string taskName;
+        private string projectName;
+        private string taskPath;
+        private string customPath;
+        private bool isAutoVote;
 
-        public static void InitForm(Form1 form1)
-        {
-            _form1 = form1;
-        }
+        public string ProjectName { get => projectName; set => projectName = value; }
+        public string TaskPath { get => taskPath; set => taskPath = value; }
+        public string CustomPath { get => customPath; set => customPath = value; }
+        public bool IsAutoVote { get => isAutoVote; set => isAutoVote = value; }
+        public string TaskChange { get => taskChange; set => taskChange = value; }
+        public string TaskName { get => taskName; set => taskName = value; }
+
 
         //判断当前是否为系统任务
-        public static bool IsSysTask()
+        public bool IsSysTask()
         {
             return TaskName.Equals(TASK_SYS_UPDATE) || TaskName.Equals(TASK_SYS_WAIT_ORDER) ||
                    TaskName.Equals(TASK_SYS_SHUTDOWN) || TaskName.Equals(TASK_SYS_RESTART) ||
@@ -48,14 +50,14 @@ namespace robot.core
         }
 
         //判断当前是否为投票项目
-        public static bool IsVoteTask()
+        public bool IsVoteTask()
         {
-            return TaskName.Equals(TASK_VOTE_JIUTIAN) || TaskName.Equals(TASK_VOTE_YUANQIU) ||
+            return TaskName.Equals(TASK_VOTE_PROJECT) || TaskName.Equals(TASK_VOTE_JIUTIAN) || TaskName.Equals(TASK_VOTE_YUANQIU) ||
                    TaskName.Equals(TASK_VOTE_MM) || TaskName.Equals(TASK_VOTE_ML) || TaskName.Equals(TASK_VOTE_JZ) ||
                    TaskName.Equals(TASK_VOTE_JT) || TaskName.Equals(TASK_VOTE_DM) || TaskName.Equals(TASK_VOTE_OUTDO);
         }
 
-        public static void StopAndUpload()
+        public void StopAndUpload()
         {
             if (TaskName.Equals(TASK_VOTE_JIUTIAN))
             {
@@ -75,7 +77,7 @@ namespace robot.core
         }
 
         //获取 是否需要传票关闭
-        private static bool GetStopIndicator()
+        private bool GetStopIndicator()
         {
             if (TaskName.Equals(TASK_VOTE_JIUTIAN))
             {
@@ -101,7 +103,7 @@ namespace robot.core
         }
 
         //关闭进程
-        private static void KillProcess(bool stopIndicator)
+        private void KillProcess(bool stopIndicator)
         {
             LogCore.Write("KillProcess");
             //传票结束
@@ -232,16 +234,16 @@ namespace robot.core
         }
 
         //待命
-        private static void WaitOrder()
+        private void WaitOrder()
         {
             ConfigCore.WriteTaskName(TASK_SYS_WAIT_ORDER);
             ConfigCore.ClearTask();
         }
 
         //任务监控
-        public static void TaskMonitor()
+        public void TaskMonitor()
         {
-            _form1.RefreshIcon();
+            Notification.Refresh();
             int overTime = ConfigCore.GetOverTime();
             if (overTime % 2 == 1)
             {
@@ -372,7 +374,7 @@ namespace robot.core
 
 
         //切换任务
-        private static void ChangeTask()
+        private void ChangeTask()
         {
             if (TaskChange.Equals("1"))
             {
@@ -420,7 +422,7 @@ namespace robot.core
             {
                 WaitOrder();
                 Process.Start("shutdown.exe", "-s -t 0");
-                _form1.MainThreadClose();
+                MonitorCore.Stop();
             }
             else if (TaskName.Equals(TASK_SYS_RESTART)) //重启
             {
@@ -432,13 +434,13 @@ namespace robot.core
 
                 WaitOrder();
                 Process.Start("shutdown.exe", "-r -t 0");
-                _form1.MainThreadClose();
+                MonitorCore.Stop();
             }
             else if (TaskName.Equals(TASK_SYS_UPDATE)) //升级
             {
                 WaitOrder();
                 Upgrade.Update();
-                _form1.MainThreadClose();
+                MonitorCore.Stop();
             }
             else if (IsVoteTask()) //投票
             {
@@ -525,7 +527,7 @@ namespace robot.core
 
                             safeWrite = true;
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Thread.Sleep(ConfigCore.Sort % 10 * 50);
                         }
@@ -592,7 +594,7 @@ namespace robot.core
         }
 
         //切换任务流程
-        public static void TaskChangeProcess(bool stopIndicator)
+        public void TaskChangeProcess(bool stopIndicator)
         {
             LogCore.Write("taskChangeProcess");
             if (StringUtil.isEmpty(TaskName))
@@ -608,7 +610,7 @@ namespace robot.core
         }
 
         //NAME检测
-        public static bool NameCheck()
+        public bool NameCheck()
         {
             TaskChange = ConfigCore.GetTaskChange();
             if (TaskChange.Equals("1"))
@@ -625,7 +627,7 @@ namespace robot.core
         }
 
         //结束启动
-        public static void FinishStart()
+        public void FinishStart()
         {
             if (!NameCheck())
             {
@@ -635,7 +637,7 @@ namespace robot.core
             ConfigCore.SetTaskChange("0");
         }
 
-        public static void InitTask()
+        public void InitTask()
         {
             //进程初始化部分
             string now = DateTime.Now.ToLocalTime().ToString();
