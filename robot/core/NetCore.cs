@@ -39,11 +39,11 @@ namespace robot.core
                     HwndUtil.closeHwnd(adslErr);
                 }
             }
-            IntPtr adslExcp = HwndUtil.FindWindow("#32770", "网络连接");
-            if (adslExcp != IntPtr.Zero)
-            {
-                HwndUtil.closeHwnd(adslExcp);
-            }
+            //IntPtr adslExcp = HwndUtil.FindWindow("#32770", "网络连接");
+            //if (adslExcp != IntPtr.Zero)
+            //{
+            //    HwndUtil.closeHwnd(adslExcp);
+            //}
         }
 
         public static void Connect()
