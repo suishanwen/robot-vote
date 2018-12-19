@@ -150,6 +150,11 @@ namespace robot.core
             IniReadWriter.WriteIniKeys("Command", "OVER", "1", PathShareConfig);
         }
 
+        public static string GetConfig(string name)
+        {
+            return IniReadWriter.ReadIniKeys("Command", name, PathShareConfig);
+        }
+
         //缓存
         public static void Cache()
         {

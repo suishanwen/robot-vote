@@ -49,8 +49,7 @@ namespace robot.core
         //判断当前是否为投票项目
         public bool IsVoteTask()
         {
-            String projectName = ConfigCore.GetAutoVote("ProjectName");
-            IsAutoVote = !StringUtil.isEmpty(projectName);
+            IsAutoVote = ConfigCore.GetConfig("isAutoVote") == "1";
             return TaskName.Equals(TASK_VOTE_PROJECT) || TaskName.Equals(TASK_VOTE_JIUTIAN) ||
                    TaskName.Equals(TASK_VOTE_YUANQIU) ||
                    TaskName.Equals(TASK_VOTE_MM) || TaskName.Equals(TASK_VOTE_ML) || TaskName.Equals(TASK_VOTE_JZ) ||
