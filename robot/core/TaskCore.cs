@@ -329,6 +329,11 @@ namespace robot.core
                 Upgrade.Update();
                 Form1.MainClose();
             }
+            else if (TaskName.Equals(TASK_SYS_CLEAN))//清理
+            {
+                WaitOrder();
+                FileUtil.DeleteFolder(PathCore.WorkingPath + "\\投票项目");
+            }
             else if (IsVoteTask()) //投票
             {
                 NetCore.NetCheck();

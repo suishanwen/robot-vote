@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 using robot.core;
 using robot.util;
 
@@ -14,7 +15,7 @@ namespace robot.module
         {
             Download();
             Execute();
-            Environment.Exit(0);
+            Application.Exit();
         }
 
         //下载更新
