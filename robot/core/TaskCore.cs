@@ -57,24 +57,6 @@ namespace robot.core
                    TaskName.Equals(TASK_VOTE_JT) || TaskName.Equals(TASK_VOTE_DM) || TaskName.Equals(TASK_VOTE_OUTDO);
         }
 
-        public void StopAndUpload()
-        {
-            if (TaskName.Equals(TASK_VOTE_JIUTIAN))
-            {
-            }
-            else if (TaskName.Equals(TASK_VOTE_YUANQIU))
-            {
-            }
-            else if (TaskName.Equals(TASK_VOTE_JZ))
-            {
-            }
-            else if (TaskName.Equals(TASK_VOTE_JT))
-            {
-            }
-            else if (TaskName.Equals(TASK_VOTE_MM))
-            {
-            }
-        }
 
         //获取 是否需要传票关闭
         private bool GetStopIndicator()
