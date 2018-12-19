@@ -61,6 +61,10 @@ namespace robot.core
         //获取 是否需要传票关闭
         private bool GetStopIndicator()
         {
+            if (TaskName == null)
+            {
+                TaskName = ConfigCore.GetTaskName();
+            }
             if (TaskName.Equals(TASK_VOTE_JIUTIAN))
             {
                 return JiuTian.GetSucc() > 0;
