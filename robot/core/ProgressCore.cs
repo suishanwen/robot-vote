@@ -56,7 +56,7 @@ namespace robot.core
             TaskCore taskCore = MonitorCore.GetTaskCore();
             string taskName = taskCore.TaskName;
             //传票结束
-            if (stopIndicator && taskCore.IsVoteTask())
+            if (stopIndicator && taskCore.IsVoteTask() && !taskName.Equals(TaskCore.TASK_VOTE_PROJECT))
             {
                 LogCore.Write($"{taskCore.ProjectName}传票结束!");
                 if (taskName.Equals(TaskCore.TASK_VOTE_JIUTIAN))
