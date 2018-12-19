@@ -92,6 +92,7 @@ namespace robot.module
             IntPtr hwnd = HwndUtil.FindWindow("TForm1", null);
             IntPtr hwndTGroupBox = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TGroupBox", "状态");
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, IntPtr.Zero, "TEdit", null);
+            hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
             try
             {
                 return int.Parse(HwndUtil.GetControlText(hwndEx));
@@ -100,7 +101,6 @@ namespace robot.module
             {
                 LogCore.Write("获取圆球成功失败！");
             }
-
             return 0;
         }
 

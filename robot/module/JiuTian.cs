@@ -168,8 +168,7 @@ namespace robot.module
                 hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, jiutianCode, null);
                 return int.Parse(HwndUtil.GetControlText(hwndEx));
             }
-            catch (Exception)
-            {
+            catch (Exception) {
                 LogCore.Write("获取九天成功失败！");
             }
             return 0;

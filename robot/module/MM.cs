@@ -70,11 +70,9 @@ namespace robot.module
             {
                 return int.Parse(HwndUtil.GetControlText(hwndEx));
             }
-            catch (Exception)
-            {
+            catch (Exception) {
                 LogCore.Write("获取mm成功失败！");
             }
-
             return 0;
         }
 
