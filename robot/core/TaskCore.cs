@@ -487,11 +487,6 @@ namespace robot.core
             //重启资源管理器
             Notification.Refresh();
             AutoVote.Init();
-            if (StringUtil.isEmpty(TaskName))
-            {
-                TaskName = ConfigCore.GetTaskName();
-            }
-
             ProgressCore.KillProcess(GetStopIndicator());
             NetCore.DisConnect();
             TaskName = ConfigCore.GetTaskName();
