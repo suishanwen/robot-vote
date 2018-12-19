@@ -182,7 +182,7 @@ namespace robot.core
                 Upgrade.Update();
                 Form1.MainClose();
             }
-            else if (TaskName.Equals(TASK_SYS_CLEAN))//清理
+            else if (TaskName.Equals(TASK_SYS_CLEAN)) //清理
             {
                 WaitOrder();
                 FileUtil.DeleteFolder(PathCore.WorkingPath + "\\投票项目");
@@ -519,6 +519,7 @@ namespace robot.core
             {
                 //缓存任务启动
                 string[] arr = cacheMemory.Split('`');
+                TaskChange = "0";
                 TaskName = arr[0].Substring(9);
                 TaskPath = arr[1].Substring(9);
                 String workerId = arr[2].Substring(7);
