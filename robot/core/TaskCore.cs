@@ -525,8 +525,7 @@ namespace robot.core
                 String workerId = arr[2].Substring(7);
                 if (!StringUtil.isEmpty(workerId))
                 {
-                    ConfigCore.InputId = "1";
-                    ConfigCore.Tail = "1";
+                    ConfigCore.InitWorker("");
                 }
 
                 CustomPath = TaskPath;
