@@ -470,10 +470,10 @@ namespace robot.core
         //切换任务流程
         public void TaskChangeProcess()
         {
-            //重启资源管理器
-            Notification.Refresh();
             AutoVote.Init();
             ProgressCore.KillProcess(GetStopIndicator());
+            //重启资源管理器
+            Notification.Refresh();
             NetCore.DisConnect();
             TaskName = ConfigCore.GetTaskName();
             TaskChange = ConfigCore.GetTaskChange();
