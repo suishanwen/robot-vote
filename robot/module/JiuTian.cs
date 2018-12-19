@@ -129,7 +129,6 @@ namespace robot.module
                     AutoVote.AddVoteProjectNameDroped(false);
                 }
                 ProgressCore.KillProcess(false);
-                NetCore.DisConnect();
                 return true;
             }
 
