@@ -13,6 +13,13 @@ namespace robot.core
         //通过进程名获取进程
         public static Process[] GetProcess(string proName)
         {
+            string taskPath = MonitorCore.GetTaskCore().TaskPath;
+            if (StringUtil.isEmpty(proName) && !StringUtil.isEmpty(taskPath))
+            {
+                proName = taskPath.Substring(taskPath.LastIndexOf("\\") + 1);
+                LogCore.Write("结束进程！");
+            }
+            proName = proName.Replace(".exe", "");
             return Process.GetProcessesByName(proName);
         }
 
@@ -33,20 +40,16 @@ namespace robot.core
             Process[] process = GetProcess(process1);
             if (process.Length > 0)
             {
+                LogCore.Write("结束九天进程！");
                 return process;
             }
 
             process = GetProcess(process2);
             if (process.Length > 0)
             {
+                LogCore.Write("结束圆球进程！");
                 return process;
             }
-
-            if (process.Length > 0)
-            {
-                return process;
-            }
-
             return GetProcess("");
         }
 
