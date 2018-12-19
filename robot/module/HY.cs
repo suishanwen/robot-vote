@@ -54,11 +54,25 @@ namespace robot.module
             if (hwnd != IntPtr.Zero)
             {
                 HwndUtil.closeHwnd(hwnd);
-//                IniReadWriter.WriteIniKeys("Command", "OVER", "1", pathShare + @"\CF.ini");
+                ConfigCore.WriteOver();
                 return true;
             }
-
             return false;
+        }
+        
+        public static void StopAndUpload()
+        {
+            IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
+            if (hwnd != IntPtr.Zero)
+            {
+                IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "停止");
+                while (!Net.IsOnline())
+                {
+                    Thread.Sleep(500);
+                }
+                HwndThread.createHwndThread(hwndEx);
+                Thread.Sleep(5000);
+            }
         }
     }
 }

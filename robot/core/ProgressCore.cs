@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using robot.module;
 using robot.util;
 
 namespace robot.core
@@ -60,113 +61,26 @@ namespace robot.core
                 LogCore.Write($"{taskCore.ProjectName}传票结束!");
                 if (taskName.Equals(TaskCore.TASK_VOTE_JIUTIAN))
                 {
-                    IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
-                    if (hwnd != IntPtr.Zero)
-                    {
-                        hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
-                        hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "");
-                        hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "结束投票");
-                        HwndUtil.clickHwnd(hwnd);
-                        int s = 0;
-                        IntPtr hwndEx = IntPtr.Zero;
-                        do
-                        {
-                            Thread.Sleep(500);
-                            hwnd = HwndUtil.FindWindow("WTWindow", null);
-                            hwndEx = HwndUtil.FindWindow("#32770", "信息：");
-                            if (s % 10 == 0&& hwnd != IntPtr.Zero)
-                            {
-                                IntPtr hwnd0 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
-                                hwnd0 = HwndUtil.FindWindowEx(hwnd0, IntPtr.Zero, "Button", "");
-                                hwnd0 = HwndUtil.FindWindowEx(hwnd0, IntPtr.Zero, "Button", "结束投票");
-                                HwndUtil.clickHwnd(hwnd0);
-                            }
-                            if (hwndEx != IntPtr.Zero)
-                            {
-                                HwndUtil.closeHwnd(hwndEx);
-                                s = 90;
-                            }
-                            s++;
-                        } while (hwnd != IntPtr.Zero && s < 90);
-                    }
+                    JiuTian.StopAndUpload();
                 }else if (taskName.Equals(TaskCore.TASK_VOTE_YUANQIU))
                 {
-                    IntPtr hwnd = HwndUtil.FindWindow("TForm1", null);
-                    if (hwnd != IntPtr.Zero)
-                    {
-                        IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TButton", "停止");
-                        while (!Net.IsOnline())
-                        {
-                            Thread.Sleep(500);
-                        }
-                        HwndThread.createHwndThread(hwndEx);
-                        Thread.Sleep(5000);
-                    }
-                    
+                    YuanQiu.StopAndUpload();
                 }
                 else if (taskName.Equals(TaskCore.TASK_VOTE_JZ))
                 {
-                    IntPtr hwnd = HwndUtil.FindWindow("TMainForm", null);
-                    if (hwnd != IntPtr.Zero)
-                    {
-                        IntPtr hwndTGroupBox = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TGroupBox", "当前状态");
-                        IntPtr hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, IntPtr.Zero, "TButton", "停 止");
-                        while (!Net.IsOnline())
-                        {
-                            Thread.Sleep(500);
-                        }
-                        HwndThread.createHwndThread(hwndEx);
-                        Thread.Sleep(5000);
-                    }
+                    JZ.StopAndUpload();
                 }
                 else if (taskName.Equals(TaskCore.TASK_VOTE_JT))
                 {
-                    IntPtr hwnd = HwndUtil.FindWindow("ThunderRT6FormDC", null);
-                    if (hwnd != IntPtr.Zero)
-                    {
-                        IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, null, "停止投票");
-                        while (!Net.IsOnline())
-                        {
-                            Thread.Sleep(500);
-                        }
-                        HwndThread.createHwndThread(hwndEx);
-                        Thread.Sleep(5000);
-                    }
+                    JT.StopAndUpload();
                 }
                 else if (taskName.Equals(TaskCore.TASK_VOTE_HY))
                 {
-                    IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
-                    if (hwnd != IntPtr.Zero)
-                    {
-                        IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "停止");
-                        while (!Net.IsOnline())
-                        {
-                            Thread.Sleep(500);
-                        }
-                        HwndThread.createHwndThread(hwndEx);
-                        Thread.Sleep(5000);
-                    }
+                    HY.StopAndUpload();
                 }
                 else if (taskName.Equals(TaskCore.TASK_VOTE_MM))
                 {
-                    IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
-                    if (hwnd != IntPtr.Zero)
-                    {
-                        IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, null, "停止投票");
-                        while (!Net.IsOnline())
-                        {
-                            Thread.Sleep(500);
-                        }
-                        HwndThread.createHwndThread(hwndEx);
-                        int s = 0;
-                        IntPtr hwndTip;
-                        do
-                        {
-                            s++;
-                            hwndTip = HwndUtil.FindWindow(null, "投票软件提示");
-                            Thread.Sleep(500);
-                        } while (hwndTip == IntPtr.Zero && s < 60);
-                    }
+                    MM.StopAndUpload();
                 }
             }
             Process[] process = ProcessCheck();

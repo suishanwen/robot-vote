@@ -185,7 +185,6 @@ namespace robot.module
                 hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
                 hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "");
                 hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "结束投票");
-                LogCore.Write("九天结束 句柄为" + hwnd);
                 HwndUtil.clickHwnd(hwnd);
                 int s = 0;
                 IntPtr hwndEx = IntPtr.Zero;
@@ -194,20 +193,18 @@ namespace robot.module
                     Thread.Sleep(500);
                     hwnd = HwndUtil.FindWindow("WTWindow", null);
                     hwndEx = HwndUtil.FindWindow("#32770", "信息：");
-                    if (s % 10 == 0 && hwnd != IntPtr.Zero)
+                    if (s % 10 == 0&& hwnd != IntPtr.Zero)
                     {
                         IntPtr hwnd0 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
                         hwnd0 = HwndUtil.FindWindowEx(hwnd0, IntPtr.Zero, "Button", "");
                         hwnd0 = HwndUtil.FindWindowEx(hwnd0, IntPtr.Zero, "Button", "结束投票");
                         HwndUtil.clickHwnd(hwnd0);
                     }
-
                     if (hwndEx != IntPtr.Zero)
                     {
                         HwndUtil.closeHwnd(hwndEx);
                         s = 90;
                     }
-
                     s++;
                 } while (hwnd != IntPtr.Zero && s < 90);
             }
