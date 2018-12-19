@@ -11,6 +11,7 @@ namespace robot.module
         public static void Start()
         {
             TaskCore taskCore = MonitorCore.GetTaskCore();
+            taskCore.ProjectName = TaskCore.TASK_VOTE_HY;
             IntPtr hwnd = IntPtr.Zero;
             do
             {
@@ -25,7 +26,6 @@ namespace robot.module
 
             //设置拨号延迟
             IntPtr hwndCf = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "设置");
-
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndCf, IntPtr.Zero, "Edit", null);
             hwndEx = HwndUtil.FindWindowEx(hwndCf, hwndEx, "Edit", null);
             hwndEx = HwndUtil.FindWindowEx(hwndCf, hwndEx, "Edit", null);

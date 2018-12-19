@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using robot.core;
+using robot.module;
 using robot.util;
 using MonitorCore = robot.core.MonitorCore;
 
@@ -9,38 +10,54 @@ namespace robot
 {
     public partial class Form1 : Form
     {
+        public static Form1 This;
 
-        public static Form1 mainForm;
-
+        //初始化
         public Form1()
         {
             InitializeComponent();
             Hotkey.RegisterHotKey(Handle, 10, Hotkey.MODKEY.None, Keys.F10);
             Hotkey.RegisterHotKey(Handle, 11, Hotkey.MODKEY.None, Keys.F9);
-            if (mainForm == null)
+            This = this;
+        }
+
+        //委托 解决线程间操作问题
+        delegate void SetFormDataDelegate(int sort, int delay, string share);
+
+        //设置编号、延时、共享
+        public static void SetFormData(int sort, int delay, string share)
+        {
+            if (This.InvokeRequired)
             {
-                mainForm = this;
+                SetFormDataDelegate d = new SetFormDataDelegate(SetFormData);
+                This.Invoke(d, new object[] {sort, delay, share});
+            }
+            else
+            {
+                This.textBox1.Text = sort.ToString();
+                This.textBox2.Text = delay.ToString();
+                This.textBox3.Text = share;
             }
         }
 
         //委托 解决线程间操作问题
-        delegate void SetForm(int sort,int delay,string share);
+        delegate void ShowTipDelegate(string content, ToolTipIcon toolTipIcon);
 
-        public void SetFormData(int sort, int delay, string share)
+        //显示通知
+        public static void ShowTip(string content, ToolTipIcon toolTipIcon)
         {
-            if (this.InvokeRequired)
+            if (This.InvokeRequired)
             {
-                SetForm d = new SetForm(SetFormData);
-                this.Invoke(d, new object[] { sort, delay, share });
+                ShowTipDelegate d = new ShowTipDelegate(ShowTip);
+                This.Invoke(d, new object[] {content, toolTipIcon});
             }
             else
             {
-                textBox1.Text = sort.ToString();
-                textBox2.Text = delay.ToString();
-                textBox3.Text = share;
+                This.notifyIcon1.ShowBalloonTip(0, content, DateTime.Now.ToLocalTime().ToString(), toolTipIcon);
             }
         }
 
+        //绑定快捷键
         protected override void WndProc(ref Message m)
         {
             if (m.Msg == 0x0312)
@@ -66,7 +83,10 @@ namespace robot
         //启动程序，检查配置文件，启动主线程
         private void Form1_Load(object sender, EventArgs e)
         {
-            ConfigCore.InitConfig(this);
+            if (ConfigCore.InitConfig())
+            {
+                MainStart();
+            }
         }
 
         //改变编号
@@ -100,48 +120,56 @@ namespace robot
         }
 
         //启动监控线程
-        public void button1_Click(object sender, EventArgs e)
+        private void MainStart()
         {
             notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("running");
             button1.Enabled = false;
             button2.Enabled = true;
             LogCore.Clear(); //清空日志
+            timer1.Enabled = true;
             WindowState = FormWindowState.Minimized;
             MonitorCore.Start();
         }
 
-        
+
         //委托 解决线程间操作问题
-        delegate void MainClose();
-        
+        delegate void MainCloseDelegate();
+
         //终止监控线程
-        public void MainThreadClose()
+        public static void MainClose()
         {
-            if (this.InvokeRequired)
+            if (This.InvokeRequired)
             {
-                MainClose d = new MainClose(MainThreadClose);
-                this.Invoke(d, new object[] {  });
+                MainCloseDelegate d = new MainCloseDelegate(MainClose);
+                This.Invoke(d, new object[] { });
             }
             else
             {
-                notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("stop");
-                button2.Enabled = false;
-                button1.Enabled = true;
+                This.notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("stop");
+                ConfigCore.Cache();
+                This.timer1.Enabled = false;
+                This.button2.Enabled = false;
+                This.button1.Enabled = true;
                 MonitorCore.Stop();
             }
-            
+        }
+
+        //点击启动
+        public void button1_Click(object sender, EventArgs e)
+        {
+            MainStart();
         }
 
         //点击停止
         private void button2_Click(object sender, EventArgs e)
         {
-            MainThreadClose();
+            MainClose();
         }
 
         //关闭程序
         private void form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            MainThreadClose();
+            MainClose();
             Environment.Exit(0);
         }
 
@@ -154,45 +182,11 @@ namespace robot
             }
         }
 
-        //显示通知
-        public static void ShowTip(string content, ToolTipIcon toolTipIcon)
-        {
-            mainForm.notifyIcon1.ShowBalloonTip(0, content, DateTime.Now.ToLocalTime().ToString(), toolTipIcon);
-        }
 
-        //清理托盘
-        public static void RefreshIcon()
-        {
-            mainForm.Refresh();
-        }
-
-        //委托 解决线程间操作问题
-        delegate void DelegateRefresh();
-
-        //清理托盘
-        public void RefreshI()
-        {
-            if (this.InvokeRequired)
-            {
-                DelegateRefresh d = new DelegateRefresh(RefreshI);
-                this.Invoke(d, new object[] {  });
-            }
-            else
-            {
-                Rectangle rect = new Rectangle();
-                rect = Screen.GetWorkingArea(this);
-                int startX = rect.Width - 200; //屏幕高
-                int startY = rect.Height + 20; //屏幕高
-                for (; startX < rect.Width; startX += 3)
-                {
-                    MouseKeyboard.SetCursorPos(startX, startY);
-                }
-            }
-        }
-
+        //timer
         private void timer1_Tick(object sender, EventArgs e)
         {
-            
+            AutoVote.CheckSucc();
         }
     }
 }

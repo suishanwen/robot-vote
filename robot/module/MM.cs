@@ -19,6 +19,7 @@ namespace robot.module
                 {
                     return;
                 }
+
                 hwnd = HwndUtil.FindWindow("WTWindow", null);
                 Thread.Sleep(500);
             } while (hwnd == IntPtr.Zero);
@@ -30,6 +31,12 @@ namespace robot.module
             {
                 hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, IntPtr.Zero, "Edit", "3");
             }
+
+            if (hwndEx == IntPtr.Zero)
+            {
+                hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, IntPtr.Zero, "Edit", "4");
+            }
+
             HwndUtil.setText(hwndEx, (ConfigCore.Delay / 1000).ToString());
             //设置工号
             if (ConfigCore.InputId.Equals("1"))
@@ -42,6 +49,7 @@ namespace robot.module
                 hwndEx = HwndUtil.FindWindowEx(ButtonHwnd, hwndEx, "Edit", null);
                 HwndUtil.setText(hwndEx, ConfigCore.Id);
             }
+
             //开始投票
             hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, null, "自动投票");
             HwndThread.createHwndThread(hwndEx);
@@ -66,6 +74,7 @@ namespace robot.module
             {
                 LogCore.Write("获取mm成功失败！");
             }
+
             return 0;
         }
 
@@ -75,6 +84,27 @@ namespace robot.module
             IntPtr hwnd = HwndUtil.FindWindow(null, "投票软件提示");
             if (hwnd != IntPtr.Zero)
             {
+                if (MonitorCore.GetTaskCore().IsAutoVote)
+                {
+                    AutoVote.AddVoteProjectNameDropedTemp(false);
+                }
+                HwndUtil.closeHwnd(hwnd);
+                ConfigCore.WriteOver();
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool ExcpCheck()
+        {
+            IntPtr hwnd = HwndUtil.FindWindow("#32770", "信息：");
+            if (hwnd != IntPtr.Zero)
+            {
+                if (MonitorCore.GetTaskCore().IsAutoVote)
+                {
+                    AutoVote.AddVoteProjectNameDroped(false);
+                }
                 HwndUtil.closeHwnd(hwnd);
                 return true;
             }
@@ -88,7 +118,7 @@ namespace robot.module
             if (hwnd != IntPtr.Zero)
             {
                 IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, null, "停止投票");
-                while (!Net.isOnline())
+                while (!Net.IsOnline())
                 {
                     Thread.Sleep(500);
                 }

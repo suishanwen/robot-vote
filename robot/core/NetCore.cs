@@ -48,12 +48,18 @@ namespace robot.core
 
         public static void Connect()
         {
-            RasOperate("connect");
+            if (!Net.IsOnline())
+            {
+                RasOperate("connect");
+            }
         }
 
         public static void DisConnect()
         {
-            RasOperate("disconnect");
+            if (!ConfigCore.IsAdsl)
+            {
+                RasOperate("disconnect");
+            }
         }
         
         //ADSL操作
@@ -71,7 +77,7 @@ namespace robot.core
                     int count = 0;
                     do
                     {
-                        online = Net.isOnline();
+                        online = Net.IsOnline();
                         if (!online)
                         {
                             Thread.Sleep(500);
@@ -111,17 +117,17 @@ namespace robot.core
         //网络检测
         public static bool NetCheck()
         {
-            bool online = Net.isOnline();
+            bool online = Net.IsOnline();
             if (!online)
             {
                 RasOperate("connect");
                 Thread.Sleep(1000);
-                online = Net.isOnline();
+                online = Net.IsOnline();
                 if (!online)
                 {
                     RasOperate("connect");
                     Thread.Sleep(1000);
-                    online = Net.isOnline();
+                    online = Net.IsOnline();
                     if (!online)
                     {
                         return false;
@@ -130,6 +136,12 @@ namespace robot.core
             }
 
             return true;
+        }
+        
+        //网络检测
+        public static bool IsRealOnline()
+        {
+            return Net.IsRealOnline();
         }
     }
 }

@@ -34,6 +34,12 @@ namespace robot.module
                 preparedCheck = HwndUtil.FindWindowEx(workCondition, IntPtr.Zero, jiutianCode,"加载成功 可开始投票");
                 if (preparedCheck == IntPtr.Zero)
                 {
+                    //不换
+                    preparedCheck = HwndUtil.FindWindowEx(workCondition, IntPtr.Zero, "_EL_Label", "加载成功 可开始投票");
+                    jiutianCode = "_EL_Label";
+                }
+                if (preparedCheck == IntPtr.Zero)
+                {
                     //WIN7
                     jiutianCode = "Afx:400000:b:10003:1900015:0";
 
@@ -49,7 +55,6 @@ namespace robot.module
                 startButton = HwndUtil.FindWindowEx(startButton, IntPtr.Zero, "Button", "开始投票");
                 Thread.Sleep(500);
             } while (preparedCheck == IntPtr.Zero || startButton == IntPtr.Zero);
-
             //设置拨号延迟
             IntPtr hwndEx = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "拨号设置");
             hwndEx = HwndUtil.FindWindowEx(hwndEx, IntPtr.Zero, "SysTabControl32", "");
@@ -82,6 +87,11 @@ namespace robot.module
 
             if (s > 5)
             {
+                if (MonitorCore.GetTaskCore().IsAutoVote)
+                {
+                    AutoVote.AddVoteProjectNameDropedTemp(false);
+                }
+                ConfigCore.WriteOver();
                 return true;
             }
 
@@ -95,6 +105,10 @@ namespace robot.module
             IntPtr hwnd = HwndUtil.FindWindow("#32770", "信息提示");
             if (hwnd != IntPtr.Zero)
             {
+                if (MonitorCore.GetTaskCore().IsAutoVote)
+                {
+                    AutoVote.AddVoteProjectNameDroped(false);
+                }
                 HwndUtil.closeHwnd(hwnd);
                 return true;
             }
@@ -110,7 +124,11 @@ namespace robot.module
             IntPtr testHwnd = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "输入验证码后回车,看不清直接回车切换");
             if (testHwnd != IntPtr.Zero)
             {
-//                ProgressCore.killProcess(false);
+                if (MonitorCore.GetTaskCore().IsAutoVote)
+                {
+                    AutoVote.AddVoteProjectNameDroped(false);
+                }
+                ProgressCore.KillProcess(false);
                 NetCore.DisConnect();
                 return true;
             }
@@ -136,27 +154,6 @@ namespace robot.module
             return false;
         }
 
-        //获取 是否需要传票关闭
-        private static bool GetStopIndicator()
-        {
-            IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
-            if (hwnd != IntPtr.Zero)
-            {
-                IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
-                IntPtr hwndStat = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "投票统计");
-                IntPtr hwndEx =
-                    HwndUtil.FindWindowEx(hwndStat, IntPtr.Zero, "Afx:400000:b:10011:1900015:0", "运行时间");
-                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
-                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
-                hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, "Afx:400000:b:10011:1900015:0", null);
-                StringBuilder unUpload = new StringBuilder(512);
-                HwndUtil.GetWindowText(hwndEx, unUpload, unUpload.Capacity);
-                return int.Parse(unUpload.ToString()) > 0;
-            }
-
-            return false;
-        }
-
 
         //获取九天成功数
         public static int GetSucc()
@@ -170,9 +167,7 @@ namespace robot.module
             {
                 hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, jiutianCode, null);
                 hwndEx = HwndUtil.FindWindowEx(hwndStat, hwndEx, jiutianCode, null);
-                StringBuilder succ = new StringBuilder(512);
-                HwndUtil.GetWindowText(hwndEx, succ, 512);
-                return int.Parse(succ.ToString());
+                return int.Parse(HwndUtil.GetControlText(hwndEx));
             }
             catch (Exception)
             {

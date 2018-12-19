@@ -10,7 +10,6 @@ namespace robot.module
         //圆球启动
         public static void Start()
         {
-
             TaskCore taskCore = MonitorCore.GetTaskCore();
             taskCore.ProjectName = TaskCore.TASK_VOTE_YUANQIU;
             IntPtr hwnd = IntPtr.Zero;
@@ -20,9 +19,11 @@ namespace robot.module
                 {
                     return;
                 }
+
                 hwnd = HwndUtil.FindWindow("TForm1", null);
                 Thread.Sleep(1000);
             } while (hwnd == IntPtr.Zero);
+
             Thread.Sleep(1000);
             //设置拨号延迟
             IntPtr hwndTGroupBox = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TGroupBox", "设置");
@@ -45,9 +46,23 @@ namespace robot.module
                 hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
                 HwndUtil.setText(hwndEx, ConfigCore.Id);
                 hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+                HwndUtil.setText(hwndEx, ConfigCore.Id);
             }
+
             //开始投票
-            hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TButton", "开始");
+            int count = 0;
+            do
+            {
+                hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TButton", "开始");
+                Thread.Sleep(1000);
+                if (count > 0)
+                {
+                    LogCore.Write($"等待圆球启动{count}秒");
+                }
+
+                count++;
+            } while (hwndEx == IntPtr.Zero && count < 5);
+
             HwndThread.createHwndThread(hwndEx);
             taskCore.FinishStart();
         }
@@ -58,7 +73,13 @@ namespace robot.module
             IntPtr hwnd = HwndUtil.FindWindow("TMessageForm", "register");
             if (hwnd != IntPtr.Zero)
             {
+                if (MonitorCore.GetTaskCore().IsAutoVote)
+                {
+                    AutoVote.AddVoteProjectNameDropedTemp(false);
+                }
+
                 HwndUtil.closeHwnd(hwnd);
+                ConfigCore.WriteOver();
                 return true;
             }
 
@@ -77,10 +98,10 @@ namespace robot.module
             }
             catch (Exception)
             {
-                LogCore.Write( "获取圆球成功失败！");
+                LogCore.Write("获取圆球成功失败！");
             }
-            return 0;
 
+            return 0;
         }
 
         public static void StopAndUpload()
@@ -89,7 +110,7 @@ namespace robot.module
             if (hwnd != IntPtr.Zero)
             {
                 IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TButton", "停止");
-                while (!Net.isOnline())
+                while (!Net.IsOnline())
                 {
                     Thread.Sleep(500);
                 }

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace robot.core
@@ -8,7 +9,7 @@ namespace robot.core
         public static void Write(string content)
         {
             StreamWriter sw = File.AppendText(@"./log.txt");
-            sw.WriteLine(content);
+            sw.WriteLine($"{content} {DateTime.Now.ToLocalTime().ToString()}");
             sw.Close();
         }
 
