@@ -1,3 +1,6 @@
+using Microsoft.Win32;
+using robot.core;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -17,7 +20,7 @@ namespace robot.util
      public int dwFlags;
      [MarshalAs(UnmanagedType.ByValTStr,SizeConst=260+1)]
      public string szPhonebookPath;
-    #endif
+#endif
         }
 
         [DllImport("rasapi32.dll", CharSet = CharSet.Auto)]
@@ -29,6 +32,27 @@ namespace robot.util
             ref int lpcb,                  // size in bytes of buffer
             out int lpcEntries             // number of entries written to buffer
         );
+
+
+        public static string GetDefaultEntry()
+        {
+            string registData;
+            RegistryKey hkml = Registry.LocalMachine;
+            RegistryKey software = hkml.OpenSubKey("SOFTWARE", true);
+            RegistryKey microsoft = software.OpenSubKey("Microsoft", true);
+            RegistryKey rasAutoDail = microsoft.OpenSubKey("RAS AutoDial", true);
+            RegistryKey defaultKey = rasAutoDail.OpenSubKey("Default", true);
+            if (defaultKey != null)
+            {
+                Object value = defaultKey.GetValue("DefaultInternet");
+                if (value != null)
+                {
+                    return value.ToString();
+                }
+            }
+            LogCore.Write("注册表访问失败.");
+            return "";
+        }
 
         public static string GetAdslName()
         {
@@ -62,9 +86,16 @@ namespace robot.util
                 }
             }
 
-            if (list.Count > 0)
+            if (list.Count>0)
             {
-                return list[0];  
+                if (list.Count == 1)
+                {
+                    return list[0];
+                }
+                else
+                {
+                    return GetDefaultEntry();
+                }
             }
             return "";
         }

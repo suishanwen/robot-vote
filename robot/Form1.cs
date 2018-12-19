@@ -2,7 +2,6 @@
 using System.Drawing;
 using System.Windows.Forms;
 using robot.core;
-using robot.module;
 using robot.util;
 using MonitorCore = robot.core.MonitorCore;
 
@@ -19,6 +18,7 @@ namespace robot
             Hotkey.RegisterHotKey(Handle, 10, Hotkey.MODKEY.None, Keys.F10);
             Hotkey.RegisterHotKey(Handle, 11, Hotkey.MODKEY.None, Keys.F9);
             This = this;
+            LogCore.Clear(); //清空日志
         }
 
         //委托 解决线程间操作问题
@@ -125,7 +125,6 @@ namespace robot
             notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("running");
             button1.Enabled = false;
             button2.Enabled = true;
-            LogCore.Clear(); //清空日志
             timer1.Enabled = true;
             WindowState = FormWindowState.Minimized;
             MonitorCore.Start();
@@ -157,7 +156,10 @@ namespace robot
         //点击启动
         public void button1_Click(object sender, EventArgs e)
         {
-            MainStart();
+            if (ConfigCore.InitConfig())
+            {
+                MainStart();
+            }
         }
 
         //点击停止

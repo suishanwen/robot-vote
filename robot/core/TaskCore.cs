@@ -638,7 +638,7 @@ namespace robot.core
                 }
                 else if (TaskName.Equals(TASK_VOTE_MM))
                 {
-                    if (MM.OverCheck() || MM.ExcpCheck())
+                    if (MM.OverCheck() || MM.ExcpCheck()||MM.ErrCheck())
                     {
                         ProgressCore.KillProcess(false);
                         SwitchWaitOrder();

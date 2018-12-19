@@ -16,7 +16,7 @@ namespace robot.core
 
         public static TaskCore GetTaskCore()
         {
-            if(_taskCore == null)
+            if (_taskCore == null)
             {
                 _taskCore = new TaskCore();
             }
@@ -25,7 +25,7 @@ namespace robot.core
 
         public static void Stop()
         {
-            if (_monitorThread.IsAlive)
+            if (_monitorThread != null && _monitorThread.IsAlive)
             {
                 _monitorThread.Abort();
             }

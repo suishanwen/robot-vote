@@ -110,6 +110,21 @@ namespace robot.module
             return false;
         }
 
+        public static bool ErrCheck()
+        {
+            IntPtr hwnd = HwndUtil.FindWindow("#32770", null);
+            if (hwnd != IntPtr.Zero)
+            {
+                string txt = HwndUtil.GetControlText(hwnd);
+                if (txt.IndexOf("应用程序错误") != -1) 
+                {
+                    HwndUtil.closeHwnd(hwnd);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static void StopAndUpload()
         {
             IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);

@@ -29,19 +29,40 @@ namespace robot.core
             if (File.Exists(BaseConfig))
             {
                 string pathShare = InitPathShare();
-                Sort = int.Parse(IniReadWriter.ReadIniKeys("Command", "bianhao", BaseConfig));
-                Delay = int.Parse(IniReadWriter.ReadIniKeys("Command", "yanchi", BaseConfig));
+                if (StringUtil.isEmpty(pathShare))
+                {
+                    MessageBox.Show("共享不能为空！");
+                    return false;
+
+                }
+                string sort = IniReadWriter.ReadIniKeys("Command", "bianhao", BaseConfig);
+                string delay = IniReadWriter.ReadIniKeys("Command", "yanchi", BaseConfig);
+                if (StringUtil.isEmpty(sort))
+                {
+                    MessageBox.Show("编号不能为空！");
+                    return false;
+                }
+                try
+                {
+                    Sort = int.Parse(sort);
+                    Delay = int.Parse(delay);
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("编号及延时只能是数字，请重新设置！");
+                    return false;
+                }
                 Form1.SetFormData(Sort, Delay, pathShare);
+                AdslName = RasName.GetAdslName();
+                IsAdsl = AdslName == "宽带连接";
+                LogCore.Write($"获取默认ADSL拨号名称:{AdslName}");
+                return true;
             }
             else
             {
-                MessageBox.Show(@"请设置handler.ini");
+                MessageBox.Show("请设置后在启动！");
                 return false;
             }
-
-            AdslName = RasName.GetAdslName();
-            IsAdsl = AdslName == "宽带连接";
-            return true;
         }
 
         public static string InitPathShare()
@@ -82,7 +103,7 @@ namespace robot.core
         {
             return int.Parse(IniReadWriter.ReadIniKeys("Command", "maxKb", PathShareConfig));
         }
-        
+
         public static String GetComputerRename()
         {
             return IniReadWriter.ReadIniKeys("Command", "computerRename", PathShareConfig);
@@ -159,7 +180,7 @@ namespace robot.core
         public static void Cache()
         {
             TaskCore taskCore = MonitorCore.GetTaskCore();
-            if (taskCore.IsSysTask())
+            if (taskCore.TaskName == null || taskCore.IsSysTask())
             {
                 return;
             }
