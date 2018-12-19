@@ -100,11 +100,10 @@ namespace robot.core
         //关闭进程
         private void KillProcess(bool stopIndicator)
         {
-            LogCore.Write("KillProcess");
             //传票结束
             if (stopIndicator && IsVoteTask())
             {
-                LogCore.Write("stop vote!");
+                LogCore.Write($"{TaskName}传票结束!");
                 if (TaskName.Equals(TASK_VOTE_JIUTIAN))
                 {
                     IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
@@ -113,7 +112,6 @@ namespace robot.core
                         hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
                         hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "");
                         hwnd = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "结束投票");
-                        LogCore.Write("九天结束 句柄为" + hwnd);
                         HwndUtil.clickHwnd(hwnd);
                         int s = 0;
                         IntPtr hwndEx = IntPtr.Zero;
