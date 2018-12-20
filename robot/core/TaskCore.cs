@@ -202,7 +202,7 @@ namespace robot.core
 
                 if (TaskChange.Equals("1"))
                 {
-                    if (CustomPath.Substring(CustomPath.LastIndexOf("\\") + 1) == "vote.exe")
+                    if (CustomPath.LastIndexOf("\\") + 1 <= CustomPath.Length && CustomPath.Substring(CustomPath.LastIndexOf("\\") + 1) == "vote.exe")
                     {
                         ProgressCore.StartProcess(CustomPath.Substring(0, CustomPath.Length - 9) + @"\启动九天.bat");
                         TaskName = TASK_VOTE_JIUTIAN;
@@ -221,17 +221,16 @@ namespace robot.core
                             hwnd4 = HwndUtil.FindWindow("TMainForm", null);
                             if (hwnd0 != IntPtr.Zero)
                             {
-                                StringBuilder title = new StringBuilder(512);
-                                int i = HwndUtil.GetWindowText(hwnd0, title, 512);
-                                if (title.ToString().Substring(0, 6) == "自动投票工具")
+                                string title = HwndUtil.GetControlText(hwnd0);
+                                if (title.Length >= 6 && title.Substring(0, 6) == "自动投票工具")
                                 {
                                     TaskName = TASK_VOTE_MM;
                                 }
-                                else if (title.ToString().Substring(0, 8) == "VOTE2016")
+                                else if (title.Length >= 8 && title.Substring(0, 8) == "VOTE2016")
                                 {
                                     TaskName = TASK_VOTE_ML;
                                 }
-                                else if (title.ToString().IndexOf("自动投票软件") != -1)
+                                else if (title.IndexOf("自动投票软件") != -1)
                                 {
                                     TaskName = TASK_VOTE_HY;
                                 }
