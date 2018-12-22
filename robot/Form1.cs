@@ -213,7 +213,7 @@ namespace robot
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-
+            DaemonCore.Protect();
         }
     }
 }
