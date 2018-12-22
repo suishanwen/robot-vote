@@ -126,6 +126,7 @@ namespace robot
             button1.Enabled = false;
             button2.Enabled = true;
             timer1.Enabled = true;
+            timer2.Enabled = true;
             WindowState = FormWindowState.Minimized;
             MonitorCore.Start();
         }
@@ -147,9 +148,28 @@ namespace robot
                 This.notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("stop");
                 ConfigCore.Cache();
                 This.timer1.Enabled = false;
+                This.timer2.Enabled = false;
                 This.button2.Enabled = false;
                 This.button1.Enabled = true;
                 MonitorCore.Stop();
+            }
+        }
+
+        //委托 解决线程间操作问题
+        delegate void MainRestartDelegate();
+
+        //终止监控线程
+        public static void MainRestart()
+        {
+            if (This.InvokeRequired)
+            {
+                MainRestartDelegate d = new MainRestartDelegate(MainRestart);
+                This.Invoke(d, new object[] { });
+            }
+            else
+            {
+                Form1.MainClose();
+                This.MainStart();
             }
         }
 
@@ -189,6 +209,11 @@ namespace robot
         private void timer1_Tick(object sender, EventArgs e)
         {
             AutoVote.CheckSucc();
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+
         }
     }
 }

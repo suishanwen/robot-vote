@@ -78,6 +78,7 @@
   <ItemGroup>
     <Compile Include="core\AutoVote.cs" />
     <Compile Include="core\ConfigCore.cs" />
+    <Compile Include="core\DaemonCore.cs" />
     <Compile Include="core\HwndThread.cs" />
     <Compile Include="core\LogCore.cs" />
     <Compile Include="core\MonitorCore.cs" />
