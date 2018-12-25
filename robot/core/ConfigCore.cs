@@ -14,6 +14,8 @@ namespace robot.core
         public static string PathShareTask;
         public static string PathShareTaskPlus;
         public static string PathShareAutoVote;
+        public static string PathShareStatistic;
+
 
         public static int Sort;
         public static int Delay;
@@ -33,8 +35,8 @@ namespace robot.core
                 {
                     MessageBox.Show("共享不能为空！");
                     return false;
-
                 }
+
                 string sort = IniReadWriter.ReadIniKeys("Command", "bianhao", BaseConfig);
                 string delay = IniReadWriter.ReadIniKeys("Command", "yanchi", BaseConfig);
                 if (StringUtil.isEmpty(sort))
@@ -42,6 +44,7 @@ namespace robot.core
                     MessageBox.Show("编号不能为空！");
                     return false;
                 }
+
                 try
                 {
                     Sort = int.Parse(sort);
@@ -52,6 +55,7 @@ namespace robot.core
                     MessageBox.Show("编号及延时只能是数字，请重新设置！");
                     return false;
                 }
+
                 Form1.SetFormData(Sort, Delay, pathShare);
                 AdslName = RasName.GetAdslName();
                 IsAdsl = AdslName == "宽带连接";
@@ -72,6 +76,7 @@ namespace robot.core
             PathShareTask = pathShare + "/Task.ini";
             PathShareTaskPlus = pathShare + "/TaskPlus.ini";
             PathShareAutoVote = pathShare + "/AutoVote.ini";
+            PathShareStatistic = pathShare + "/Statistic.ini";
             return pathShare;
         }
 
@@ -146,7 +151,7 @@ namespace robot.core
             IniReadWriter.WriteIniKeys("Command", "TaskName" + Sort, TaskCore.TASK_SYS_WAIT_ORDER, PathShareTask);
             IniReadWriter.WriteIniKeys("Command", "CustomPath" + Sort, "", PathShareTaskPlus);
         }
-        
+
         public static void SwitchNetTest()
         {
             IniReadWriter.WriteIniKeys("Command", "TaskChange" + Sort, "1", PathShareTask);
@@ -172,6 +177,15 @@ namespace robot.core
             IniReadWriter.WriteIniKeys("Command", name, value, PathShareAutoVote);
         }
 
+        public static string GetStatistic(string name)
+        {
+            return IniReadWriter.ReadIniKeys(Sort.ToString(), name, PathShareStatistic);
+        }
+
+        public static void WriteStatistic(string name, string value)
+        {
+            IniReadWriter.WriteIniKeys(Sort.ToString(), name, value, PathShareStatistic);
+        }
 
         public static void WriteOver()
         {

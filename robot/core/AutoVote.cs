@@ -24,7 +24,7 @@ namespace robot.core
             string taskName = taskCore.TaskName;
             if (taskCore.IsVoteTask())
             {
-                int succ = 0;
+                var succ = 0;
                 if (taskName.Equals(TaskCore.TASK_VOTE_JIUTIAN))
                 {
                     succ = JiuTian.GetSucc();
@@ -38,6 +38,11 @@ namespace robot.core
                     succ = YuanQiu.GetSucc();
                 }
 
+                if (succ == 0)
+                {
+                    succ = succCount;
+                }
+
                 double price = 0;
                 try
                 {
@@ -47,8 +52,10 @@ namespace robot.core
                 {
                 }
 
-                int validCount = price >= 1 ? 1 : 2;
-                if (succ - succCount < validCount)
+                var name = ConfigCore.GetAutoVote("ProjectName");
+                var validCount = price >= 1 ? 1 : 2;
+                var diff = succ - succCount;
+                if (diff < validCount)
                 {
                     timerChecked++;
                     if (timerChecked >= 2)
@@ -61,8 +68,13 @@ namespace robot.core
                     timerChecked = 0;
                 }
 
-                LogCore.Write("成功:" + succ + " 上次成功:" + succCount);
+                if (diff > 0)
+                {
+                    Statistics.Add(name, price, diff);
+                }
+
                 succCount = succ;
+                LogCore.Write("成功:" + succ + " 上次成功:" + succCount);
             }
         }
 
