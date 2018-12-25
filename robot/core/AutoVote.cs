@@ -67,18 +67,13 @@ namespace robot.core
         }
 
         //添加黑名单项目 临
-        public static void AddVoteProjectNameDropedTemp(bool isAllProject)
+        public static void AddVoteProjectNameDropedTemp()
         {
             string projectName = ConfigCore.GetAutoVote("ProjectName");
             TaskInfo taskInfo = TaskInfos.Get();
             if (taskInfo != null && taskInfo.ProjectName != projectName)
             {
                 return;
-            }
-
-            if (isAllProject)
-            {
-                projectName = projectName.Substring(0, projectName.IndexOf("_"));
             }
 
             string voteProjectNameDroped = ConfigCore.GetAutoVote("voteProjectNameDropedTemp");
@@ -130,11 +125,6 @@ namespace robot.core
                 return;
             }
 
-            if (isAllProject)
-            {
-                projectName = projectName.Substring(0, projectName.IndexOf("_"));
-            }
-
             IniReadWriter.WriteIniKeys("Command", "drop", projectName, "./handler.ini");
             string voteProjectNameDroped = ConfigCore.GetAutoVote("voteProjectNameDroped");
             int dropVote = 0;
@@ -148,6 +138,14 @@ namespace robot.core
             finally
             {
                 dropVote++;
+            }
+
+            if (isAllProject)
+            {
+                if (projectName.IndexOf("_") > 0)
+                {
+                    projectName = projectName.Substring(0, projectName.IndexOf("_"));
+                }
             }
 
             ConfigCore.WriteAutoVote("dropVote", dropVote.ToString());

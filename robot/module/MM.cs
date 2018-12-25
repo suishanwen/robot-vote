@@ -84,7 +84,7 @@ namespace robot.module
             {
                 if (MonitorCore.GetTaskCore().IsAutoVote)
                 {
-                    AutoVote.AddVoteProjectNameDropedTemp(false);
+                    AutoVote.AddVoteProjectNameDropedTemp();
                 }
                 HwndUtil.closeHwnd(hwnd);
                 ConfigCore.WriteOver();
