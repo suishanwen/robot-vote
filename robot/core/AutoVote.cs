@@ -72,9 +72,8 @@ namespace robot.core
                 {
                     Statistics.Add(name, price, diff);
                 }
-
-                succCount = succ;
                 LogCore.Write("成功:" + succ + " 上次成功:" + succCount);
+                succCount = succ;
             }
         }
 
