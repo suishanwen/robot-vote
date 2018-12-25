@@ -146,6 +146,13 @@ namespace robot.core
             IniReadWriter.WriteIniKeys("Command", "TaskName" + Sort, TaskCore.TASK_SYS_WAIT_ORDER, PathShareTask);
             IniReadWriter.WriteIniKeys("Command", "CustomPath" + Sort, "", PathShareTaskPlus);
         }
+        
+        public static void SwitchNetTest()
+        {
+            IniReadWriter.WriteIniKeys("Command", "TaskChange" + Sort, "1", PathShareTask);
+            IniReadWriter.WriteIniKeys("Command", "TaskName" + Sort, TaskCore.TASK_SYS_NET_TEST, PathShareTask);
+            IniReadWriter.WriteIniKeys("Command", "CustomPath" + Sort, "", PathShareTaskPlus);
+        }
 
 
         public static void WriteTaskName(String task)

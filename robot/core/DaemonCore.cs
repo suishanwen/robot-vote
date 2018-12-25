@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace robot.core
 {
     class DaemonCore
@@ -16,7 +13,7 @@ namespace robot.core
             {
                 LogCore.Write("【守护线程】发现3分钟无活动，重置监控线程");
                 ProgressCore.KillProcess(false);
-                MonitorCore.GetTaskCore().SwitchWaitOrder();
+                ConfigCore.SwitchNetTest();
                 Form1.MainRestart();
             }
             Alive = false;
