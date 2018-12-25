@@ -61,7 +61,7 @@ namespace robot.module
                 }
 
                 count++;
-            } while (hwndEx == IntPtr.Zero && count < 5);
+            } while (hwndEx == IntPtr.Zero && count < 10);
 
             HwndThread.createHwndThread(hwndEx);
             taskCore.FinishStart();
