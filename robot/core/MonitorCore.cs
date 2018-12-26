@@ -50,7 +50,8 @@ namespace robot.core
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.ToString());
+                LogCore.Write(e.StackTrace);
+                MessageBox.Show(e.StackTrace);
             }
         }
     }
