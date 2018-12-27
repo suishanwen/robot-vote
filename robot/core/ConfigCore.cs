@@ -166,6 +166,25 @@ namespace robot.core
                 PathShareTask);
         }
 
+        public static string GetConfig(string name)
+        {
+            return IniReadWriter.ReadIniKeys("Command", name, PathShareConfig);
+        }
+
+        public static void WriteConfig(string name, string value)
+        {
+            IniReadWriter.WriteIniKeys("Command", name, value, PathShareConfig);
+        }
+
+        public static string GetBaseConfig(string name)
+        {
+            return IniReadWriter.ReadIniKeys("Command", name, BaseConfig);
+        }
+
+        public static void WriteBaseConfig(string name, string value)
+        {
+            IniReadWriter.WriteIniKeys("Command", name, value, BaseConfig);
+        }
 
         public static string GetAutoVote(string name)
         {
@@ -192,10 +211,6 @@ namespace robot.core
             IniReadWriter.WriteIniKeys("Command", "OVER", "1", PathShareConfig);
         }
 
-        public static string GetConfig(string name)
-        {
-            return IniReadWriter.ReadIniKeys("Command", name, PathShareConfig);
-        }
 
         //缓存
         public static void Cache()

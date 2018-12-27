@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using Microsoft.Win32;
 using robot.util;
@@ -25,6 +26,7 @@ namespace robot.core
             {
                 return false;
             }
+
             return mreg.GetValue("Version").ToString().Substring(0, 1) == "8";
         }
 
@@ -39,6 +41,7 @@ namespace robot.core
                     HwndUtil.closeHwnd(adslErr);
                 }
             }
+
             IntPtr adslExcp = HwndUtil.FindWindow("#32770", "网络连接");
             if (adslExcp != IntPtr.Zero)
             {
@@ -47,6 +50,7 @@ namespace robot.core
                 {
                     HwndUtil.clickHwnd(hwndEx);
                 }
+
 //                HwndUtil.closeHwnd(adslExcp);
             }
         }
@@ -63,7 +67,7 @@ namespace robot.core
         {
             RasOperate("disconnect");
         }
-        
+
         //ADSL操作
         private static void RasOperate(string type)
         {
@@ -117,7 +121,7 @@ namespace robot.core
         }
 
         //网络检测
-        public static bool NetCheck()
+        public static void NetCheck()
         {
             bool online = Net.IsOnline();
             if (!online)
@@ -132,14 +136,34 @@ namespace robot.core
                     online = Net.IsOnline();
                     if (!online)
                     {
-                        return false;
+                        string exception = ConfigCore.GetBaseConfig("exception");
+                        if (exception == "1")
+                        {
+                            ConfigCore.NetError("error");
+                        }
+                        else
+                        {
+                            ConfigCore.WriteBaseConfig("exception", "1");
+                            Process.Start("shutdown.exe", "-r -t 0");
+                            Form1.MainClose();
+                        }
                     }
                 }
-            }
 
-            return true;
+                ConfigCore.WriteBaseConfig("exception", "0");
+                string arrDrop = ConfigCore.GetConfig("ArrDrop");
+                if (!StringUtil.isEmpty(arrDrop))
+                {
+                    arrDrop = " " + arrDrop;
+                }
+
+                if (arrDrop.IndexOf(" " + ConfigCore.Sort + " |") != -1)
+                {
+                    ConfigCore.WriteConfig("ArrDrop", arrDrop.Replace(" " + ConfigCore.Sort + " |", ""));
+                }
+            }
         }
-        
+
         //网络检测
         public static bool IsRealOnline()
         {
