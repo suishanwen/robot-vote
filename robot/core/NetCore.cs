@@ -114,7 +114,6 @@ namespace robot.core
         //ras子线程，处理IE8线程阻塞
         private static void RasConnect()
         {
-            LogCore.Write("rasConnect"); //清空日志
             ras = new RASDisplay();
             ras.Disconnect();
             ras.Connect(ConfigCore.AdslName);
