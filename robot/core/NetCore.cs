@@ -61,10 +61,7 @@ namespace robot.core
 
         public static void DisConnect()
         {
-            if (!ConfigCore.IsAdsl)
-            {
-                RasOperate("disconnect");
-            }
+            RasOperate("disconnect");
         }
         
         //ADSL操作
