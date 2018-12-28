@@ -33,31 +33,15 @@ namespace robot.core
 
         public static void CloseException()
         {
-            IntPtr adslExcp = HwndUtil.FindWindow("#32770", "网络连接");
-            if (adslExcp != IntPtr.Zero)
+            IntPtr adslErr = HwndUtil.FindWindow("#32770", "连接到 " + ConfigCore.AdslName + " 时出错");
+            if (adslErr != IntPtr.Zero)
             {
-                IntPtr hwndEx = HwndUtil.FindWindowEx(adslExcp, IntPtr.Zero, "Button", null);
-                if (hwndEx != IntPtr.Zero)
+                IntPtr hwndEx = HwndUtil.FindWindowEx(adslErr, IntPtr.Zero, "Button", null);
+                string title = HwndUtil.GetControlText(hwndEx);
+                if (title.IndexOf("重拨") != -1)
                 {
-                    string title = HwndUtil.GetControlText(hwndEx);
-                    if(title.IndexOf("重拨") != -1)
-                    {
-                        HwndUtil.clickHwnd(hwndEx);
-                    }
-                }
-//                HwndUtil.closeHwnd(adslExcp);
-            }
-            if (ie8)
-            {
-                IntPtr adslErr = HwndUtil.FindWindow("#32770", "连接到 " + ConfigCore.AdslName + " 时出错");
-                if (adslErr != IntPtr.Zero)
-                {
-                    IntPtr hwndEx = HwndUtil.FindWindowEx(adslExcp, IntPtr.Zero, "Button", null);
-                    string title = HwndUtil.GetControlText(hwndEx);
-                    if (title.IndexOf("重拨") != -1)
-                    {
-                        HwndUtil.clickHwnd(hwndEx);
-                    }
+                    LogCore.Write($"{ConfigCore.AdslName}拨号出错，重播");
+                    HwndUtil.clickHwnd(hwndEx);
                 }
             }
         }
