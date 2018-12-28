@@ -148,7 +148,6 @@ namespace robot
                 This.notifyIcon1.Icon = (Icon) Properties.Resources.ResourceManager.GetObject("stop");
                 ConfigCore.Cache();
                 This.timer1.Enabled = false;
-                This.timer2.Enabled = false;
                 This.button2.Enabled = false;
                 This.button1.Enabled = true;
                 MonitorCore.Stop();
