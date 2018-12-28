@@ -25,7 +25,6 @@ namespace robot.module
             {
                 NetCore.Connect();
             }
-
             LogCore.Write("开始下载更新");
             string url = "http://bitcoinrobot.cn/file/handler.exe";
             string dlPath = string.Format("{0}\\handler-new.exe", PathCore.WorkingPath);
