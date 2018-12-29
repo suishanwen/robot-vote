@@ -31,7 +31,7 @@ namespace robot.core
         }
 
 
-        public static void CloseException()
+        private static void ErrReconnect()
         {
             IntPtr adslErr = HwndUtil.FindWindow("#32770", "连接到 " + ConfigCore.AdslName + " 时出错");
             if (adslErr != IntPtr.Zero)
@@ -44,6 +44,21 @@ namespace robot.core
                     HwndUtil.clickHwnd(hwndEx);
                 }
             }
+        }
+        
+        public static void CloseException()
+        {
+            IntPtr adslExcp = HwndUtil.FindWindow("#32770", "网络连接");
+            if (adslExcp != IntPtr.Zero)
+            {
+                IntPtr hwndEx = HwndUtil.FindWindowEx(adslExcp, IntPtr.Zero, "Button", "确定");
+                if (hwndEx != IntPtr.Zero)
+                {
+                    HwndUtil.clickHwnd(hwndEx);
+                }
+            }
+
+            ErrReconnect();
         }
 
         public static void Connect()
@@ -70,8 +85,7 @@ namespace robot.core
                 if (ie8)
                 {
                     Thread.Sleep(200);
-                    Thread rasThread = new Thread(RasConnect);
-                    rasThread.Start();
+                    new Thread(RasConnect).Start();
                     bool online = false;
                     bool err = false;
                     int count = 0;
@@ -81,12 +95,7 @@ namespace robot.core
                         if (!online)
                         {
                             Thread.Sleep(500);
-                            IntPtr hwnd = HwndUtil.FindWindow("#32770", "连接到 " + ConfigCore.AdslName + " 时出错");
-                            if (hwnd != IntPtr.Zero)
-                            {
-                                HwndUtil.closeHwnd(hwnd);
-                                err = true;
-                            }
+                            ErrReconnect();
                         }
 
                         count++;
@@ -149,7 +158,6 @@ namespace robot.core
                 {
                     arrDrop = " " + arrDrop;
                 }
-
                 if (arrDrop.IndexOf(" " + ConfigCore.Sort + " |") != -1)
                 {
                     ConfigCore.WriteConfig("ArrDrop", arrDrop.Replace(" " + ConfigCore.Sort + " |", ""));

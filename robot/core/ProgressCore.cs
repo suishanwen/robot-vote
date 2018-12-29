@@ -155,7 +155,7 @@ namespace robot.core
                     {
                         try
                         {
-                            File.Copy(i.FullName, targetPath + "\\" + i.Name, true); //复制文件，true表示可以覆盖同名文件
+                            File.Copy(i.FullName, targetPath + "\\" + i.Name, !ConfigCore.IsAdsl); //复制文件，true表示可以覆盖同名文件
                         }
                         catch (Exception)
                         {
