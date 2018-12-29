@@ -162,23 +162,22 @@ namespace robot.core
             ConfigCore.WriteAutoVote("dropVote", dropVote.ToString());
             if (StringUtil.isEmpty(voteProjectNameDroped) || voteProjectNameDroped.IndexOf(projectName) == -1)
             {
-                int validDrop;
-                double blackRate;
+                int validDrop = 1;
+                double blackRate = 1;
                 try
                 {
                     validDrop = int.Parse(ConfigCore.GetAutoVote("validDrop"));
-                    blackRate = double.Parse(ConfigCore.GetAutoVote("blackRate"));
                 }
-                catch (Exception)
+                catch { }
+                try
                 {
-                    validDrop = 1;
-                    blackRate = 1;
+                    blackRate = int.Parse(ConfigCore.GetAutoVote("blackRate"));
                 }
-
+                catch { }
                 if (dropVote >= validDrop)
                 {
                     IniReadWriter.WriteIniKeys("Command", "drop", "", "./handler.ini");
-                    LogCore.Write($"{projectName}拉黑{blackRate * 30}分钟");
+                    LogCore.Write($"{projectName}拉黑{blackRate * 20}分钟");
                     voteProjectNameDroped +=
                         StringUtil.isEmpty(voteProjectNameDroped) ? projectName : "|" + projectName;
                     ConfigCore.WriteAutoVote("voteProjectNameDroped", voteProjectNameDroped);
