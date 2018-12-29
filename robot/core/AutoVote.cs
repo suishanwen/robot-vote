@@ -177,6 +177,7 @@ namespace robot.core
 
                 if (dropVote >= validDrop)
                 {
+                    IniReadWriter.WriteIniKeys("Command", "drop", "", "./handler.ini");
                     LogCore.Write($"{projectName}拉黑{blackRate * 30}分钟");
                     voteProjectNameDroped +=
                         StringUtil.isEmpty(voteProjectNameDroped) ? projectName : "|" + projectName;
