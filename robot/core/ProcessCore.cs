@@ -21,7 +21,10 @@ namespace robot.core
             if (!StringUtil.isEmpty(taskPath))
             {
                 string proName = taskPath.Substring(taskPath.LastIndexOf("\\") + 1);
-                ProcessUtil.KillProcA(proName);
+                if (!StringUtil.isEmpty(proName))
+                {
+                    ProcessUtil.KillProcA(proName);
+                }
             }
         }
 
