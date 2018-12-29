@@ -10,47 +10,19 @@ namespace robot.core
 {
     public class ProgressCore
     {
-        //通过进程名获取进程
-        public static Process[] GetProcess(string proName)
+
+        //结束进程
+        private static void Kill()
         {
+            ProcessUtil.KillProcA("AutoUpdate");
+            ProcessUtil.KillProcA("vote");
+            ProcessUtil.KillProcA("register");
             string taskPath = MonitorCore.GetTaskCore().TaskPath;
-            if (StringUtil.isEmpty(proName) && !StringUtil.isEmpty(taskPath))
+            if (!StringUtil.isEmpty(taskPath))
             {
-                proName = taskPath.Substring(taskPath.LastIndexOf("\\") + 1);
-                LogCore.Write("结束进程！");
+                string proName = taskPath.Substring(taskPath.LastIndexOf("\\") + 1);
+                ProcessUtil.KillProcA(proName);
             }
-            proName = proName.Replace(".exe", "");
-            return Process.GetProcessesByName(proName);
-        }
-
-        //获取项目进程
-        private static Process[] ProcessCheck()
-        {
-            Process[] pros = GetProcess("AutoUpdate.dll");
-            if (pros.Length > 0)
-            {
-                foreach (Process p in pros)
-                {
-                    p.Kill();
-                }
-            }
-
-            string process1 = "vote.exe";
-            string process2 = "register.exe";
-            Process[] process = GetProcess(process1);
-            if (process.Length > 0)
-            {
-                LogCore.Write("结束九天进程！");
-                return process;
-            }
-
-            process = GetProcess(process2);
-            if (process.Length > 0)
-            {
-                LogCore.Write("结束圆球进程！");
-                return process;
-            }
-            return GetProcess("");
         }
 
         //关闭进程
@@ -86,32 +58,7 @@ namespace robot.core
                     MM.StopAndUpload();
                 }
             }
-            Process[] process = ProcessCheck();
-            if (process.Length > 0)
-            {
-                if (taskCore.IsVoteTask())
-                {
-                    int counter = 1;
-                    while (!Net.IsOnline() && counter < 60)
-                    {
-                        counter++;
-                        Thread.Sleep(500);
-                    }
-                }
-
-                foreach (Process p in process)
-                {
-                    LogCore.Write("结束进程  :" + p);
-                    try
-                    {
-                        p.Kill();
-                    }
-                    catch (Exception e)
-                    {
-                        LogCore.Write("结束进程失败  :" + e);
-                    }
-                }
-            }
+            Kill();
         }
 
 

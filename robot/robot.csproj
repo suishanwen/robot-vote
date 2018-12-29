@@ -85,7 +85,7 @@
     <Compile Include="core\NetCore.cs" />
     <Compile Include="core\Notification.cs" />
     <Compile Include="core\PathCore.cs" />
-    <Compile Include="core\ProgressCore.cs" />
+    <Compile Include="core\ProcessCore.cs" />
     <Compile Include="core\ProjectAnalyze.cs" />
     <Compile Include="core\Statistics.cs" />
     <Compile Include="core\TaskCore.cs" />
@@ -117,6 +117,7 @@
     <Compile Include="util\IniReadWriter.cs" />
     <Compile Include="util\MouseKeyboard.cs" />
     <Compile Include="util\Net.cs" />
+    <Compile Include="util\ProcessUtil.cs" />
     <Compile Include="util\RasName.cs" />
     <Compile Include="util\StringUtil.cs" />
     <Compile Include="util\Winrar.cs" />

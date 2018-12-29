@@ -529,10 +529,9 @@ namespace robot.core
                 {
                     ConfigCore.InitWorker("");
                 }
-
                 CustomPath = TaskPath;
-                Process[] pros = ProgressCore.GetProcess("");
-                if (pros.Length > 0)
+                if (!StringUtil.isEmpty(TaskPath) &&
+                    ProcessUtil.SearchProcA(TaskPath.Substring(TaskPath.LastIndexOf("\\") + 1)))
                 {
                     Notification.Show(TaskName + "运行中,进入维护状态", ToolTipIcon.Info);
                 }
@@ -542,7 +541,6 @@ namespace robot.core
                     ChangeTask();
                     return;
                 }
-
                 ConfigCore.ClearCacheMemory();
             }
             else
