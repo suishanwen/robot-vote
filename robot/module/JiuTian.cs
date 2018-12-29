@@ -119,6 +119,10 @@ namespace robot.module
         //九天验证码输入检测
         public static bool IsIdentifyCode()
         {
+            if (MonitorCore.GetTaskCore().IsAutoVote && ConfigCore.IsAdsl)
+            {
+                return false;
+            }
             IntPtr hwnd = HwndUtil.FindWindow("WTWindow", null);
             IntPtr hwndSysTabControl32 = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "SysTabControl32", "");
             IntPtr testHwnd = HwndUtil.FindWindowEx(hwndSysTabControl32, IntPtr.Zero, "Button", "输入验证码后回车,看不清直接回车切换");
