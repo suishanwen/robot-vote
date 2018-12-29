@@ -95,7 +95,7 @@ namespace robot.core
                         if (!online)
                         {
                             Thread.Sleep(500);
-                            ErrReconnect();
+                            CloseException();
                         }
 
                         count++;
