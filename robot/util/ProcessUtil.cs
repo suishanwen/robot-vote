@@ -1,5 +1,5 @@
-using System;
 using System.Diagnostics;
+using robot.core;
 
 namespace robot.util
 {
@@ -16,17 +16,14 @@ namespace robot.util
                 //精确进程名  用GetProcessesByName
                 foreach (Process p in Process.GetProcessesByName(strProcName))
                 {
-                    if (!p.CloseMainWindow())
-                    {
                         p.Kill();
-                    }
                 }
             }
             catch
             {
-
             }
         }
+
         /// <summary>
         /// 根据 模糊进程名 结束进程
         /// </summary>
@@ -39,20 +36,15 @@ namespace robot.util
                 //Process[] ps = Process.GetProcesses();  //进程集合
                 foreach (Process p in Process.GetProcesses())
                 {
-                    Console.WriteLine(p.ProcessName + p.Id);
-
-                    if (p.ProcessName.IndexOf(strProcName) > -1)  //第一个字符匹配的话为0，这与VB不同
+                    LogCore.Write($"结束进程:{p.ProcessName}  {p.Id}");
+                    if (p.ProcessName.IndexOf(strProcName) > -1) //第一个字符匹配的话为0，这与VB不同
                     {
-                        if (!p.CloseMainWindow())
-                        {
                             p.Kill();
-                        }
                     }
                 }
             }
             catch
             {
-
             }
         }
 
@@ -70,9 +62,7 @@ namespace robot.util
                 //Process[] ps = Process.GetProcesses();  //进程集合
                 foreach (Process p in Process.GetProcesses())
                 {
-                    Console.WriteLine(p.ProcessName + p.Id);
-
-                    if (p.ProcessName.IndexOf(strProcName) > -1)  //第一个字符匹配的话为0，这与VB不同
+                    if (p.ProcessName.IndexOf(strProcName) > -1) //第一个字符匹配的话为0，这与VB不同
                     {
                         return true;
                     }
