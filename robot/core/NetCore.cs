@@ -51,10 +51,14 @@ namespace robot.core
             IntPtr adslExcp = HwndUtil.FindWindow("#32770", "网络连接");
             if (adslExcp != IntPtr.Zero)
             {
-                IntPtr hwndEx = HwndUtil.FindWindowEx(adslExcp, IntPtr.Zero, "Button", "确定");
+                IntPtr hwndEx = HwndUtil.FindWindowEx(adslExcp, IntPtr.Zero, "Button", null);
                 if (hwndEx != IntPtr.Zero)
                 {
-                    HwndUtil.clickHwnd(hwndEx);
+                    string title = HwndUtil.GetControlText(hwndEx);
+                    if (title.IndexOf("重拨") != -1 || title == "确定")
+                    {
+                        HwndUtil.clickHwnd(hwndEx);
+                    }
                 }
             }
 
