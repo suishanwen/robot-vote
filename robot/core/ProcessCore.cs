@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -14,18 +15,20 @@ namespace robot.core
         //结束进程
         private static void Kill()
         {
-            ProcessUtil.KillProcA("AutoUpdate");
-            ProcessUtil.KillProcA("vote");
-            ProcessUtil.KillProcA("register");
+            List<string> processes = new List<string>();
+            processes.Add("AutoUpdate");
+            processes.Add("vote");
+            processes.Add("register");
             string taskPath = MonitorCore.GetTaskCore().TaskPath;
             if (!StringUtil.isEmpty(taskPath))
             {
                 string proName = taskPath.Substring(taskPath.LastIndexOf("\\") + 1);
                 if (!StringUtil.isEmpty(proName))
                 {
-                    ProcessUtil.KillProcA(proName);
+                    processes.Add(proName.Replace(".exe", ""));
                 }
             }
+            ProcessUtil.KillProcA(processes.ToArray());
         }
 
         //关闭进程

@@ -28,7 +28,7 @@ namespace robot.util
         /// 根据 模糊进程名 结束进程
         /// </summary>
         /// <param name="strProcName">模糊进程名</param>
-        public static void KillProcA(string strProcName)
+        public static void KillProcA(string[] strProcName)
         {
             try
             {
@@ -36,11 +36,16 @@ namespace robot.util
                 //Process[] ps = Process.GetProcesses();  //进程集合
                 foreach (Process p in Process.GetProcesses())
                 {
-                    if (p.ProcessName.IndexOf(strProcName) > -1) //第一个字符匹配的话为0，这与VB不同
+                    foreach (string pro in strProcName)
                     {
-                        LogCore.Write($"结束进程:{p.ProcessName}  {p.Id}");
-                        p.Kill();
+                        if (p.ProcessName.IndexOf(pro) > -1) //第一个字符匹配的话为0，这与VB不同
+                        {
+                            LogCore.Write($"结束进程:{p.ProcessName}  PID:{p.Id}");
+                            p.Kill();
+                            break;
+                        }
                     }
+
                 }
             }
             catch
