@@ -36,10 +36,10 @@ namespace robot.util
                 //Process[] ps = Process.GetProcesses();  //进程集合
                 foreach (Process p in Process.GetProcesses())
                 {
-                    LogCore.Write($"结束进程:{p.ProcessName}  {p.Id}");
                     if (p.ProcessName.IndexOf(strProcName) > -1) //第一个字符匹配的话为0，这与VB不同
                     {
-                            p.Kill();
+                        LogCore.Write($"结束进程:{p.ProcessName}  {p.Id}");
+                        p.Kill();
                     }
                 }
             }
