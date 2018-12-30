@@ -11,7 +11,7 @@ namespace robot.core
         {
             if (!Alive)
             {
-                LogCore.Write("【守护线程】发现3分钟无活动，重置监控线程");
+                LogCore.Write("【守护线程】超过2分钟无活动，重置监控线程");
                 ProgressCore.KillProcess(false);
                 ConfigCore.SwitchNetTest();
                 Form1.MainRestart();
