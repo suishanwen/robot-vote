@@ -101,7 +101,10 @@ namespace robot.core
                             Thread.Sleep(500);
                             CloseException();
                         }
-
+                        if (count > 60)
+                        {
+                            err = true;
+                        }
                         count++;
                     } while (!online && !err);
                 }
