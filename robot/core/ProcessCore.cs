@@ -108,7 +108,16 @@ namespace robot.core
                     {
                         try
                         {
-                            File.Copy(i.FullName, targetPath + "\\" + i.Name, !ConfigCore.IsAdsl); //复制文件，true表示可以覆盖同名文件
+                            bool rewrite = false;
+                            string targetFilePath = targetPath + "\\" + i.Name;
+                            if (File.Exists(targetFilePath))
+                            {
+                                DateTime d_source = i.LastWriteTime;
+                                DateTime d_target = new FileInfo(targetFilePath).LastWriteTime;
+                                rewrite = DateTime.Compare(d_source, d_target) > 0;
+                                LogCore.Write($"{i.FullName}更新覆盖：${targetFilePath}");
+                            }
+                            File.Copy(i.FullName, targetFilePath, rewrite); //复制文件，true表示可以覆盖同名文件
                         }
                         catch (Exception)
                         {
@@ -169,7 +178,7 @@ namespace robot.core
             }
             catch (Exception e)
             {
-                MessageBox.Show("拒绝访问");
+                LogCore.Write("拒绝访问,待命");
                 MonitorCore.GetTaskCore().WaitOrder();
                 //Process.Start("shutdown.exe", "-r -t 0");
             }
