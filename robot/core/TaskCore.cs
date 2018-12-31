@@ -597,7 +597,7 @@ namespace robot.core
                     if (ConfigCore.IsAdsl && !isOnline)
                     {
                         LogCore.Write("ADSL待命断网拨号！");
-                        NetCore.Connect();
+                        NetCore.NetCheck();
                     }
 
                     p = 0;
