@@ -1,4 +1,6 @@
 ﻿
+using robot.util;
+
 namespace robot.core
 {
     class DaemonCore
@@ -14,6 +16,7 @@ namespace robot.core
                 LogCore.Write("【守护线程】超过2分钟无活动，重置监控线程");
                 ProgressCore.KillProcess(false);
                 ConfigCore.SwitchNetTest();
+                TaskInfos.Clear();
                 Form1.MainRestart();
             }
             Alive = false;
