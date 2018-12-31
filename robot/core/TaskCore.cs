@@ -137,28 +137,12 @@ namespace robot.core
             }
             else if (TaskName.Equals(TASK_SYS_NET_TEST)) //网络TEST
             {
-                if (Net.IsOnline())
-                {
-                    NetCore.DisConnect();
-                }
 
-                Thread.Sleep(500);
-                NetCore.Connect();
-                Thread.Sleep(500);
-                if (!Net.IsOnline())
-                {
-                    NetCore.Connect();
-                    Thread.Sleep(1000);
-                }
-
+                NetCore.NetCheck();
                 if (Net.IsOnline())
                 {
                     NetCore.DisConnect();
                     WaitOrder();
-                }
-                else
-                {
-                    ConfigCore.NetError("error");
                 }
             }
             else if (TaskName.Equals(TASK_SYS_SHUTDOWN)) //关机
