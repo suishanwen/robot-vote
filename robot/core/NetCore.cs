@@ -58,7 +58,6 @@ namespace robot.core
                     string title = HwndUtil.GetControlText(hwndEx);
                     if (title.IndexOf("重拨") != -1 || title == "确定")
                     {
-                        Thread.Sleep(1000);
                         HwndUtil.clickHwnd(hwndEx);
                     }
                 }
