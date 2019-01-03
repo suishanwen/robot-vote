@@ -40,7 +40,6 @@ namespace robot.core
                 string title = HwndUtil.GetControlText(hwndEx);
                 if (title.IndexOf("重拨") != -1)
                 {
-                    Thread.Sleep(1000);
                     LogCore.Write($"{ConfigCore.AdslName}拨号出错，重播");
                     HwndUtil.clickHwnd(hwndEx);
                 }
