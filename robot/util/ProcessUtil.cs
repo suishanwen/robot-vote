@@ -41,7 +41,10 @@ namespace robot.util
                         if (p.ProcessName.IndexOf(pro) > -1) //第一个字符匹配的话为0，这与VB不同
                         {
                             LogCore.Write($"结束进程:{p.ProcessName}  PID:{p.Id}");
-                            p.Kill();
+                            if (NetCore.WaitOnline())
+                            {
+                                p.Kill();
+                            }
                             break;
                         }
                     }

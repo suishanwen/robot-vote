@@ -45,7 +45,7 @@ namespace robot.core
                 }
             }
         }
-        
+
         public static void CloseException()
         {
             IntPtr adslExcp = HwndUtil.FindWindow("#32770", "网络连接");
@@ -86,33 +86,19 @@ namespace robot.core
         {
             if (type.Equals("connect"))
             {
-                if (ie8)
+                new Thread(RasConnect).Start();
+                bool online = false;
+                int count = 0;
+                do
                 {
-                    Thread.Sleep(200);
-                    new Thread(RasConnect).Start();
-                    bool online = false;
-                    bool err = false;
-                    int count = 0;
-                    do
+                    online = Net.IsOnline();
+                    if (!online)
                     {
-                        online = Net.IsOnline();
-                        if (!online)
-                        {
-                            Thread.Sleep(500);
-                            CloseException();
-                        }
-                        if (count > 60)
-                        {
-                            err = true;
-                        }
-                        count++;
-                    } while (!online && !err);
-                }
-                else
-                {
-                    ras = new RASDisplay();
-                    ras.Connect(ConfigCore.AdslName);
-                }
+                        Thread.Sleep(500);
+                        CloseException();
+                    }
+                    count++;
+                } while (!online && count < 60);
             }
             else
             {
@@ -125,7 +111,6 @@ namespace robot.core
         private static void RasConnect()
         {
             ras = new RASDisplay();
-            ras.Disconnect();
             ras.Connect(ConfigCore.AdslName);
         }
 
@@ -172,7 +157,29 @@ namespace robot.core
             }
         }
 
+        public static bool WaitOnline()
+        {
+            int count = 0;
+            int maxCount = 60000 / 20;
+            while (!IsOnline())
+            {
+                Thread.Sleep(20);
+                count++;
+                if(count> maxCount)
+                {
+                    LogCore.Write("等待拨号完成超时,强制结束！");
+                    return true;
+                }
+            }
+            return true;
+        }
+
         //网络检测
+        public static bool IsOnline()
+        {
+            return Net.IsOnline();
+        }
+
         public static bool IsRealOnline()
         {
             return Net.IsRealOnline();

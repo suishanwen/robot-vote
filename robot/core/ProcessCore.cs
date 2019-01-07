@@ -115,7 +115,7 @@ namespace robot.core
                                 DateTime d_source = i.LastWriteTime;
                                 DateTime d_target = new FileInfo(targetFilePath).LastWriteTime;
                                 rewrite = DateTime.Compare(d_source, d_target) > 0;
-                                LogCore.Write($"{i.FullName}更新覆盖：{targetFilePath}");
+                                //LogCore.Write($"{i.FullName}更新覆盖：{targetFilePath}");
                             }
                             File.Copy(i.FullName, targetFilePath, rewrite); //复制文件，true表示可以覆盖同名文件
                         }

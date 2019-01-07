@@ -147,6 +147,7 @@ namespace robot.core
 
         public static void SwitchWaitOrder(string taskChange)
         {
+            TaskInfos.Clear();
             IniReadWriter.WriteIniKeys("Command", "TaskChange" + Sort, taskChange, PathShareTask);
             IniReadWriter.WriteIniKeys("Command", "TaskName" + Sort, TaskCore.TASK_SYS_WAIT_ORDER, PathShareTask);
             IniReadWriter.WriteIniKeys("Command", "CustomPath" + Sort, "", PathShareTaskPlus);
