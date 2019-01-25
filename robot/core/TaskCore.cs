@@ -603,9 +603,9 @@ namespace robot.core
                     p = 0;
                 }
 
-                if (IsAutoVote && (overTimeCount >= 2 || AutoVote.FailTooMuch))
+                if (IsAutoVote && AutoVote.FailTooMuch)
                 {
-                    LogCore.Write("超时2次或连续两分钟成功过低,拉黑！");
+                    LogCore.Write("连续两分钟成功过低,拉黑！");
                     AutoVote.AddVoteProjectNameDroped(false);
                     SwitchWaitOrder();
                 }
