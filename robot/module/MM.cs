@@ -116,8 +116,12 @@ namespace robot.module
             if (hwnd != IntPtr.Zero)
             {
                 string txt = HwndUtil.GetControlText(hwnd);
-                if (txt.IndexOf("应用程序错误") != -1) 
+                if (txt.IndexOf("错误") != -1) 
                 {
+                    if (MonitorCore.GetTaskCore().IsAutoVote)
+                    {
+                        AutoVote.AddVoteProjectNameDroped(false);
+                    }
                     HwndUtil.closeHwnd(hwnd);
                     return true;
                 }
