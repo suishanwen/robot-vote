@@ -1,6 +1,7 @@
 ﻿using robot.util;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace robot.core
@@ -14,6 +15,11 @@ namespace robot.core
             {
                 IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "继续(&C)");
                 HwndThread.createHwndThread(hwndEx);
+            }
+            else
+            {
+                Process.Start("shutdown.exe", "-r -t 0");
+                Form1.MainClose();
             }
         }
     }
