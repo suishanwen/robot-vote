@@ -573,7 +573,7 @@ namespace robot.core
             bool isOnline = false;
             do
             {
-                DaemonCore.Alive = true;
+                DaemonCore.KeepAlive();
                 isOnline = Net.IsOnline();
                 NetCore.CloseException();
                 if (isOnline && !ConfigCore.IsAdsl && IsAutoVote)
