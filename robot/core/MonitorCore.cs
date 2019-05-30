@@ -38,6 +38,7 @@ namespace robot.core
             Notification.Show("启动监控程序", ToolTipIcon.Info);
             try
             {
+                ComCore.ReMake();
                 TaskCore taskCore = GetTaskCore();
                 taskCore.InitTask();
                 while (true)

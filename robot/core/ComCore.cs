@@ -10,16 +10,26 @@ namespace robot.core
     {
         public static void ReMake()
         {
+            HanderNat();
+            HanderModem();
+        }
+
+        private static void HanderNat()
+        {
+            IntPtr hwnd = HwndUtil.FindWindow("#32770", "Windows - 系统错误");
+            if (hwnd != IntPtr.Zero)
+            {
+                HwndUtil.closeHwnd(hwnd);
+            }
+        }
+
+        private static void HanderModem()
+        {
             IntPtr hwnd = HwndUtil.FindWindow("#32770", "Windows - 没有软盘");
             if (hwnd != IntPtr.Zero)
             {
                 IntPtr hwndEx = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "Button", "继续(&C)");
                 HwndThread.createHwndThread(hwndEx);
-            }
-            else
-            {
-                Process.Start("shutdown.exe", "-r -t 0");
-                Form1.MainClose();
             }
         }
     }
