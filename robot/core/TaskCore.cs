@@ -193,6 +193,7 @@ namespace robot.core
                     }
                     else
                     {
+                        IniReadWriter.WriteIniKeys("setsoft", "ghid", ConfigCore.Id, "c:\\gonghao.ini");
                         ProgressCore.StartProcess(CustomPath);
                         TaskName = TASK_VOTE_PROJECT;
                         IntPtr hwnd0, hwnd1, hwnd2, hwnd3, hwnd4;
@@ -293,7 +294,6 @@ namespace robot.core
                     }
                     else if (TaskName.Equals(TASK_VOTE_YUANQIU))
                     {
-                        IniReadWriter.WriteIniKeys("setsoft", "ghid", ConfigCore.Id, "c:\\gonghao.ini");
                         YuanQiu.Start();
                     }
                     else if (TaskName.Equals(TASK_VOTE_JT))
