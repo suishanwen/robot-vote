@@ -36,18 +36,18 @@ namespace robot.module
             hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
             HwndUtil.setText(hwndEx, (ConfigCore.Delay / 1000).ToString());
             //设置工号
-            if (ConfigCore.InputId.Equals("1"))
-            {
-                hwndTGroupBox = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TGroupBox", "会员");
-                hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, IntPtr.Zero, "TEdit", null);
-                HwndUtil.setText(hwndEx, ConfigCore.Id);
-                hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
-                HwndUtil.setText(hwndEx, ConfigCore.Id);
-                hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
-                HwndUtil.setText(hwndEx, ConfigCore.Id);
-                hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
-                HwndUtil.setText(hwndEx, ConfigCore.Id);
-            }
+            //if (ConfigCore.InputId.Equals("1"))
+            //{
+            //    hwndTGroupBox = HwndUtil.FindWindowEx(hwnd, IntPtr.Zero, "TGroupBox", "会员");
+            //    hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, IntPtr.Zero, "TEdit", null);
+            //    HwndUtil.setText(hwndEx, ConfigCore.Id);
+            //    hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+            //    HwndUtil.setText(hwndEx, ConfigCore.Id);
+            //    hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+            //    HwndUtil.setText(hwndEx, ConfigCore.Id);
+            //    hwndEx = HwndUtil.FindWindowEx(hwndTGroupBox, hwndEx, "TEdit", null);
+            //    HwndUtil.setText(hwndEx, ConfigCore.Id);
+            //}
 
             //开始投票
             int count = 0;

@@ -293,6 +293,7 @@ namespace robot.core
                     }
                     else if (TaskName.Equals(TASK_VOTE_YUANQIU))
                     {
+                        IniReadWriter.WriteIniKeys("setsoft", "ghid", ConfigCore.Id, "c:\\gonghao.ini");
                         YuanQiu.Start();
                     }
                     else if (TaskName.Equals(TASK_VOTE_JT))
